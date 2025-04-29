@@ -1,0 +1,146 @@
+/* src/components/Reviews.css */
+.reviews-section {
+    background-color: #ffffff;
+    padding: 3rem 1rem;
+  }
+  
+  :where(.dark) .reviews-section {
+    background-color: #111827;
+  }
+  
+  .reviews-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .reviews-content h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #000000;
+    margin-bottom: 2rem;
+  }
+  
+  :where(.dark) .reviews-content h2 {
+    color: #ffffff;
+  }
+  
+  .reviews-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+  }
+  
+  .review-card {
+    flex: 1;
+    min-width: 200px;
+    max-width: 250px;
+    background-color: #f9fafb;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-align: left;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  :where(.dark) .review-card {
+    background-color: #374151;
+  }
+  
+  .review-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .review-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+  
+  .review-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #000000;
+  }
+  
+  :where(.dark) .review-header h4 {
+    color: #ffffff;
+  }
+  
+  .review-role {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+  
+  :where(.dark) .review-role {
+    color: #9ca3af;
+  }
+  
+  .review-stars {
+    font-size: 0.875rem;
+    color: #fbbf24;
+  }
+  
+  .review-text {
+    font-size: 0.875rem;
+    color: #4b5563;
+  }
+  
+  :where(.dark) .review-text {
+    color: #d1d5db;
+  }
+  
+  .reviews-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  .dot {
+    width: 8px;
+    height: 8px;
+    background-color: #d1d5db;
+    border-radius: 50%;
+  }
+  
+  .dot.active {
+    background-color: #6b7280;
+  }
+  
+  :where(.dark) .dot {
+    background-color: #6b7280;
+  }
+  
+  :where(.dark) .dot.active {
+    background-color: #d1d5db;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .reviews-content h2 {
+      font-size: 1.25rem;
+    }
+  
+    .reviews-grid {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .review-card {
+      max-width: 100%;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .review-card {
+      padding: 1rem;
+    }
+  
+    .review-text {
+      font-size: 0.75rem;
+    }
+  }

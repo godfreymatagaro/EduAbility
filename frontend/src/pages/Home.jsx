@@ -1,11 +1,18 @@
 import Hero from '../components/layout/Hero';
-import Search from '../components/features/SearchArea';
+import SearchArea from '../components/features/SearchArea';
+import Stats from '../components/layout/Stats';
+import Reviews from '../components/layout/Reviews';
+import CTA from '../components/layout/CTA';
+
 
 const Home = () => {
   return (
     <div>
       <Hero />
-      <Search />
+      <SearchArea />
+      <Stats />
+      <Reviews />
+      <CTA />
     </div>
   );
 };

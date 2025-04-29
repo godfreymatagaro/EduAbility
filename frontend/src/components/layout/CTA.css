@@ -1,0 +1,64 @@
+/* src/components/CTA.css */
+.cta-section {
+    background-color: #ffffff;
+    padding: 3rem 1rem;
+  }
+  
+  :where(.dark) .cta-section {
+    background-color: #111827;
+  }
+  
+  .cta-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .cta-content h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #000000;
+    margin-bottom: 1rem;
+  }
+  
+  :where(.dark) .cta-content h2 {
+    color: #ffffff;
+  }
+  
+  .cta-content p {
+    font-size: 1rem;
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  :where(.dark) .cta-content p {
+    color: #d1d5db;
+  }
+  
+  .cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .cta-content h2 {
+      font-size: 1.25rem;
+    }
+  
+    .cta-content p {
+      font-size: 0.875rem;
+    }
+  
+    .cta-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .cta-section {
+      padding: 2rem 0.5rem;
+    }
+  }

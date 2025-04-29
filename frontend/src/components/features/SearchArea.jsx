@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, BarChart2, Users, Shield } from 'lucide-react';
-import './Search.css';
+import './SearchArea.css';
 
 // Mock data for live search results
 const mockResults = [
@@ -15,16 +15,14 @@ const mockResults = [
 const SearchArea = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [liveResults, setLiveResults] = useState([]);
-  const [progress, setProgress] = useState(0); // For gamification
+  const [progress, setProgress] = useState(0);
 
-  // Simulate live search
   useEffect(() => {
     if (searchTerm) {
       const filtered = mockResults.filter((result) =>
         result.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setLiveResults(filtered);
-      // Gamification: Increment progress on search
       setProgress((prev) => Math.min(prev + 10, 100));
     } else {
       setLiveResults([]);
@@ -38,7 +36,6 @@ const SearchArea = () => {
     setProgress(0);
   };
 
-  // Animation variants
   const searchBarVariants = {
     hidden: { width: '50%', opacity: 0 },
     visible: { width: '100%', opacity: 1, transition: { duration: 0.5, ease: 'easeOut' } },
@@ -52,7 +49,6 @@ const SearchArea = () => {
   return (
     <section className="search-section">
       <div className="search-container">
-        {/* Search Bar with Animation */}
         <motion.div
           className="search-bar-wrapper"
           initial="hidden"
@@ -74,7 +70,6 @@ const SearchArea = () => {
               </button>
             )}
           </div>
-          {/* Live Search Results Overlay */}
           <AnimatePresence>
             {liveResults.length > 0 && (
               <motion.div
@@ -100,7 +95,6 @@ const SearchArea = () => {
           </AnimatePresence>
         </motion.div>
 
-        {/* Gamification: Progress Bar */}
         {searchTerm && (
           <motion.div
             className="search-progress"
@@ -114,7 +108,6 @@ const SearchArea = () => {
           </motion.div>
         )}
 
-        {/* Cards */}
         <div className="search-cards">
           <div className="search-card">
             <BarChart2 className="card-icon" />

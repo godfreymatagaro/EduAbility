@@ -1,0 +1,262 @@
+/* src/components/SearchArea.css */
+.search-section {
+  background-color: #ffffff;
+  padding: 3rem 1rem;
+}
+
+:where(.dark) .search-section {
+  background-color: #111827;
+}
+
+.search-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.search-bar-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 9999px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%; /* Ensure it doesn't exceed parent */
+  box-sizing: border-box; /* Include padding/border in width */
+}
+
+:where(.dark) .search-bar {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.search-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #6b7280;
+  margin-right: 0.5rem;
+}
+
+:where(.dark) .search-icon {
+  color: #9ca3af;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-family: Helvetica, Arial, sans-serif;
+  color: #000000;
+}
+
+:where(.dark) .search-input {
+  color: #ffffff;
+}
+
+.search-input:focus {
+  outline: none;
+}
+
+.search-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.search-clear svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #6b7280;
+}
+
+:where(.dark) .search-clear svg {
+  color: #9ca3af;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+:where(.dark) .search-results {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.search-result-item {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #000000;
+  cursor: pointer;
+}
+
+:where(.dark) .search-result-item {
+  color: #ffffff;
+}
+
+.search-result-item:hover {
+  background-color: #f3f4f6;
+}
+
+:where(.dark) .search-result-item:hover {
+  background-color: #374151;
+}
+
+.search-progress {
+  margin-top: 0.5rem;
+  height: 4px;
+  background-color: #34c759;
+  border-radius: 2px;
+  position: relative;
+}
+
+.progress-text {
+  position: absolute;
+  top: -1.5rem;
+  right: 0;
+  font-size: 0.75rem;
+  color: #34c759;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+:where(.dark) .progress-text {
+  color: #2eb34f;
+}
+
+.search-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.search-card {
+  flex: 1;
+  min-width: 250px;
+  max-width: 350px;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+:where(.dark) .search-card {
+  background-color: #374151;
+}
+
+.card-icon {
+  width: 2rem;
+  height: 2rem;
+  color: #34c759;
+  margin-bottom: 1rem;
+}
+
+:where(.dark) .card-icon {
+  color: #2eb34f;
+}
+
+.search-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 0.5rem;
+}
+
+:where(.dark) .search-card h3 {
+  color: #ffffff;
+}
+
+.search-card p {
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+:where(.dark) .search-card p {
+  color: #d1d5db;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .search-section {
+    padding: 2rem 0.5rem;
+  }
+
+  .search-bar-wrapper {
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+
+  .search-bar {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .search-input {
+    font-size: 0.875rem;
+  }
+
+  .search-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .search-card {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-section {
+    padding: 1.5rem 0.5rem;
+  }
+
+  .search-bar-wrapper {
+    padding: 0 0.25rem;
+  }
+
+  .search-bar {
+    padding: 0.5rem;
+  }
+
+  .search-input {
+    font-size: 0.75rem;
+  }
+
+  .search-icon,
+  .search-clear svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .search-card h3 {
+    font-size: 1.125rem;
+  }
+
+  .search-card p {
+    font-size: 0.75rem;
+  }
+}

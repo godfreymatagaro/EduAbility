@@ -9,7 +9,7 @@ const Reviews = () => {
         <div className="reviews-grid">
           <div className="review-card">
             <div className="review-header">
-              <img src="/path/to/avatar1.png" alt="Sarah Johnson" className="review-avatar" />
+              <img src="https://i.pinimg.com/736x/71/5e/2b/715e2b633187ddc5d112d222eb61e78d.jpg" alt="Sarah Johnson" className="review-avatar" />
               <div>
                 <h4>Sarah Johnson</h4>
                 <p className="review-role">Special Ed Teacher</p>
@@ -22,7 +22,7 @@ const Reviews = () => {
           </div>
           <div className="review-card">
             <div className="review-header">
-              <img src="/path/to/avatar2.png" alt="Michael Chen" className="review-avatar" />
+              <img src="https://i.pinimg.com/474x/ca/cf/05/cacf056d3112f30f8bac8d390a1ecb10.jpg" alt="Michael Chen" className="review-avatar" />
               <div>
                 <h4>Michael Chen</h4>
                 <p className="review-role">Technology Coordinator</p>
@@ -35,7 +35,7 @@ const Reviews = () => {
           </div>
           <div className="review-card">
             <div className="review-header">
-              <img src="/path/to/avatar3.png" alt="Emma Rodriguez" className="review-avatar" />
+              <img src="https://i.pinimg.com/474x/c1/76/65/c17665ac17cb0f62ecf04084940cfef7.jpg" alt="Emma Rodriguez" className="review-avatar" />
               <div>
                 <h4>Emma Rodriguez</h4>
                 <p className="review-role">School Principal</p>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronRight, Tag, Monitor, User, Plus } from 'lucide-react';
+import { ChevronRight, Tag, Monitor, User, Plus, FileText, Headphones, Facebook, Twitter, Instagram } from 'lucide-react';
+import { motion } from 'framer-motion';
 import './TechDetails.css';
 
 const TechDetails = () => {
@@ -42,6 +43,22 @@ const TechDetails = () => {
       image: 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg',
     },
   ];
+
+  // Framer Motion variants for animations
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
+  };
+
+  const cardVariants = {
+    rest: { scale: 1 },
+    hover: { scale: 1.05, transition: { duration: 0.3 } },
+  };
+
+  const linkVariants = {
+    rest: { x: 0 },
+    hover: { x: 5, transition: { duration: 0.2 } },
+  };
 
   return (
     <section className="tech-details-section">
@@ -155,6 +172,47 @@ const TechDetails = () => {
             ))}
           </div>
         </div>
+
+        {/* Additional Resources */}
+        <motion.div
+          className="additional-resources"
+          initial="hidden"
+          animate="visible"
+          variants={sectionVariants}
+        >
+          <h2>Additional Resources</h2>
+          <div className="resources-grid">
+            <motion.div
+              className="resource-card"
+              variants={cardVariants}
+              initial="rest"
+              whileHover="hover"
+            >
+              <FileText className="resource-icon" />
+              <h3>Documentation</h3>
+              <ul>
+                <li>User Manual (PDF)</li>
+                <li>Video Tutorials</li>
+                <li>Keyboard Shortcuts Guide</li>
+              </ul>
+            </motion.div>
+            <motion.div
+              className="resource-card"
+              variants={cardVariants}
+              initial="rest"
+              whileHover="hover"
+            >
+              <Headphones className="resource-icon" />
+              <h3>Support</h3>
+              <ul>
+                <li>Community Forum</li>
+                <li>Technical Support</li>
+                <li>Training Programs</li>
+              </ul>
+            </motion.div>
+          </div>
+        
+        </motion.div>
       </div>
     </section>
   );

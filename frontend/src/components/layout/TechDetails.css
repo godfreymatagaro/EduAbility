@@ -9,7 +9,7 @@
   }
   
   .tech-details-container {
-    max-width: 1200px;
+    max-width: 960px; /* Updated max-width to 960px */
     margin: 0 auto;
   }
   
@@ -65,8 +65,8 @@
     flex: 1;
     background-color: #ffffff;
     border-radius: 0.5rem;
-    padding: 1.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
   }
   
   :where(.dark) .tech-image-info-card {
@@ -79,20 +79,31 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
+    padding: 0; /* Remove all padding */
   }
   
   .tech-image {
-    margin-bottom: 1rem;
+    width: 100%;
+    margin: 0;
+    padding: 0; /* Remove padding */
   }
   
   .tech-image img {
-    width: 150px;
-    height: 150px;
-    border-radius: 0.5rem;
+    width: 100%;
+    height: 180px; /* Fixed height */
+    object-fit: cover; /* Prioritize top part */
+    object-position: top;
+    border: none;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    display: block;
   }
   
   .tech-info {
     width: 100%;
+    padding: 1rem; /* Add padding below the image */
   }
   
   .tech-title {
@@ -116,7 +127,7 @@
     margin: 0.25rem 0;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start; /* Align to start */
     gap: 0.5rem;
   }
   
@@ -145,6 +156,7 @@
   .tech-actions {
     display: flex;
     justify-content: center;
+    width: 100%;
   }
   
   .add-compare-button {
@@ -158,7 +170,9 @@
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    width: 85%; /* Span 85% of the width */
     transition: background-color 0.2s ease;
   }
   
@@ -246,6 +260,7 @@
   
   .tab-content {
     padding: 0;
+    text-align: left; /* Align content to the left */
   }
   
   .tab-pane {
@@ -278,14 +293,14 @@
   .tech-features ul,
   .tech-requirements ul {
     list-style-type: disc;
-    padding-left: 1.5rem;
+    padding-left: 1rem; /* Reduced padding for alignment */
   }
   
   .tech-features li,
   .tech-requirements li {
     font-size: 0.875rem;
     color: #4b5563;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.1rem; /* Reduced spacing between bullets */
   }
   
   :where(.dark) .tech-features li,
@@ -319,9 +334,8 @@
   .related-tech-card {
     background-color: #ffffff;
     border-radius: 0.5rem;
-    padding: 1rem;
-    text-align: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
     transition: box-shadow 0.3s ease;
   }
   
@@ -339,30 +353,41 @@
   }
   
   .related-tech-image {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 0.5rem;
-    border-radius: 0.5rem;
+    width: 100%;
+    height: 120px; /* Smaller height for related tech cards */
+    object-fit: cover;
+    object-position: top;
+    border: none;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    display: block;
   }
   
-  .related-tech-card h3 {
-    font-size: 1.125rem;
+  .related-tech-content {
+    padding: 0.75rem; /* Reduced padding */
+    text-align: center;
+  }
+  
+  .related-tech-content h3 {
+    font-size: 1rem; /* Smaller font size */
     font-weight: 600;
     color: #000000;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem; /* Reduced margin */
   }
   
-  :where(.dark) .related-tech-card h3 {
+  :where(.dark) .related-tech-content h3 {
     color: #ffffff;
   }
   
-  .related-tech-card p {
-    font-size: 0.875rem;
+  .related-tech-content p {
+    font-size: 0.75rem; /* Smaller font size */
     color: #4b5563;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
   }
   
-  :where(.dark) .related-tech-card p {
+  :where(.dark) .related-tech-content p {
     color: #d1d5db;
   }
   
@@ -370,8 +395,8 @@
     background-color: #0078d4;
     border: none;
     border-radius: 8px;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.875rem;
+    padding: 0.5rem 1rem; /* Smaller padding */
+    font-size: 0.75rem; /* Smaller font size */
     font-weight: 600;
     color: #ffffff;
     cursor: pointer;
@@ -419,12 +444,15 @@
   
   @media (max-width: 768px) {
     .tech-image-info-card {
-      padding: 1rem;
+      padding: 0;
+    }
+  
+    .tech-info {
+      padding: 0.75rem;
     }
   
     .tech-image img {
-      width: 120px;
-      height: 120px;
+      height: 150px; /* Adjusted for smaller screens */
     }
   
     .tech-title {
@@ -473,12 +501,16 @@
       font-size: 1.25rem;
     }
   
-    .related-tech-card h3 {
-      font-size: 1rem;
+    .related-tech-image {
+      height: 100px; /* Even smaller for mobile */
     }
   
-    .related-tech-card p {
-      font-size: 0.75rem;
+    .related-tech-content h3 {
+      font-size: 0.875rem;
+    }
+  
+    .related-tech-content p {
+      font-size: 0.675rem;
     }
   }
   
@@ -488,12 +520,15 @@
     }
   
     .tech-image-info-card {
-      padding: 0.75rem;
+      padding: 0;
+    }
+  
+    .tech-info {
+      padding: 0.5rem;
     }
   
     .tech-image img {
-      width: 100px;
-      height: 100px;
+      height: 120px;
     }
   
     .tech-title {
@@ -512,7 +547,6 @@
     .add-compare-button {
       padding: 0.5rem 1rem;
       font-size: 0.675rem;
-      width: 100%;
     }
   
     .button-icon {
@@ -531,7 +565,6 @@
   
     .learn-more-button {
       padding: 0.5rem;
-      font-size: 0.75rem;
-      width: 100%;
+      font-size: 0.675rem;
     }
   }

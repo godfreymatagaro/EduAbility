@@ -7,7 +7,7 @@ const TechDetails = () => {
 
   const techDetails = {
     name: 'JAWS Screen Reader',
-    logo: 'https://placehold.co/150x150?text=JAWS+Logo',
+    logo: 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg',
     description:
       'JAWS (Job Access With Speech) is a computer screen reader program for Microsoft Windows that allows blind and visually impaired users to read the screen either with a text-to-speech output or by a refreshable Braille display.',
     features: [
@@ -27,19 +27,19 @@ const TechDetails = () => {
       id: 1,
       name: 'NVDA Screen Reader',
       description: 'Free, open-source screen reader for Windows.',
-      image: 'https://placehold.co/100x100?text=NVDA',
+      image: 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg',
     },
     {
       id: 2,
       name: 'VoiceOver',
       description: 'Built-in screen reader for Apple devices.',
-      image: 'https://placehold.co/100x100?text=VoiceOver',
+      image: 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg',
     },
     {
       id: 3,
       name: 'TalkBack',
       description: "Android's built-in screen reader.",
-      image: 'https://placehold.co/100x100?text=TalkBack',
+      image: 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg',
     },
   ];
 
@@ -71,15 +71,15 @@ const TechDetails = () => {
                 <div className="tech-meta">
                   <p>
                     <Tag className="meta-icon" />
-                    <strong>Latest Version:</strong> {techDetails.latestVersion}
+                    <span><strong>Latest Version:</strong> {techDetails.latestVersion}</span>
                   </p>
                   <p>
                     <Monitor className="meta-icon" />
-                    <strong>Platform:</strong> {techDetails.platform}
+                    <span><strong>Platform:</strong> {techDetails.platform}</span>
                   </p>
                   <p>
                     <User className="meta-icon" />
-                    <strong>Developer:</strong> {techDetails.developer}
+                    <span><strong>Developer:</strong> {techDetails.developer}</span>
                   </p>
                 </div>
                 <div className="tech-actions">
@@ -146,9 +146,11 @@ const TechDetails = () => {
             {relatedTechnologies.map((tech) => (
               <div key={tech.id} className="related-tech-card">
                 <img src={tech.image} alt={`${tech.name} logo`} className="related-tech-image" />
-                <h3>{tech.name}</h3>
-                <p>{tech.description}</p>
-                <button className="learn-more-button">Learn More</button>
+                <div className="related-tech-content">
+                  <h3>{tech.name}</h3>
+                  <p>{tech.description}</p>
+                  <button className="learn-more-button">Learn More</button>
+                </div>
               </div>
             ))}
           </div>

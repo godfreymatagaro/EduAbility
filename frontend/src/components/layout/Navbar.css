@@ -3,13 +3,18 @@
 /* Navbar styles */
 .navbar {
     width: 100%;
-    background-color: var(--bg-navbar);
-    border-bottom: 1px solid var(--border-navbar);
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
     transition: background-color 0.3s ease, border-color 0.3s ease;
     position: sticky;
     top: 0;
     z-index: 1000;
     font-family: Helvetica, Arial, sans-serif;
+  }
+  
+  :where(.dark) .navbar {
+    background-color: #111827;
+    border-bottom-color: #374151;
   }
   
   .navbar-container {
@@ -31,7 +36,7 @@
     gap: 1.5rem;
     font-weight: 600;
     font-size: 0.875rem;
-    color: var(--text-default);
+    color: #000000;
   }
   
   @media (min-width: 768px) {
@@ -40,28 +45,44 @@
     }
   }
   
+  :where(.dark) .navbar-links {
+    color: #ffffff;
+  }
+  
   .navbar-links a {
-    color: var(--text-default);
+    color: #000000;
     text-decoration: none;
   }
   
+  :where(.dark) .navbar-links a {
+    color: #ffffff;
+  }
+  
   .navbar-links a.active {
-    color: var(--text-primary);
+    color: #fdba74;
   }
   
   .navbar-theme-toggle {
     position: relative;
     padding: 0.5rem;
     border-radius: 9999px;
-    color: var(--text-button);
+    color: #4b5563;
     background: none;
     border: none;
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
   }
   
+  :where(.dark) .navbar-theme-toggle {
+    color: #9ca3af;
+  }
+  
   .navbar-theme-toggle:hover {
-    background-color: var(--text-hover-bg);
+    background-color: #f3f4f6;
+  }
+  
+  :where(.dark) .navbar-theme-toggle:hover {
+    background-color: #1f2937;
   }
   
   .navbar-theme-toggle svg {
@@ -98,8 +119,12 @@
     border-radius: 9999px;
     background: none;
     border: none;
-    color: var(--text-button);
+    color: #4b5563;
     cursor: pointer;
+  }
+  
+  :where(.dark) .navbar-menu-button {
+    color: #9ca3af;
   }
   
   @media (min-width: 768px) {
@@ -120,7 +145,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--bg-mobile-menu);
+    background-color: #ffffff;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -130,20 +155,28 @@
     transition: transform 0.3s ease-in-out;
   }
   
+  :where(.dark) .navbar-mobile-menu {
+    background-color: #1f2937;
+  }
+  
   .navbar-mobile-menu.open {
     transform: translateX(0);
   }
   
   .navbar-mobile-menu a {
-    color: var(--text-default);
+    color: #000000;
     text-decoration: none;
     font-size: 1.5rem;
     font-weight: 600;
     margin: 1rem 0;
   }
   
+  :where(.dark) .navbar-mobile-menu a {
+    color: #ffffff;
+  }
+  
   .navbar-mobile-menu a.active {
-    color: var(--text-primary);
+    color: #fdba74;
   }
   
   .navbar-mobile-menu-close {
@@ -154,8 +187,12 @@
     border-radius: 9999px;
     background: none;
     border: none;
-    color: var(--text-button);
+    color: #4b5563;
     cursor: pointer;
+  }
+  
+  :where(.dark) .navbar-mobile-menu-close {
+    color: #9ca3af;
   }
   
   .navbar-mobile-menu-close svg {

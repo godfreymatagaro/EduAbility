@@ -1,6 +1,13 @@
 // src/pages/Compare.jsx
+import Footer from '../components/layout/Footer';
+import TechComparison from '../components/layout/TechComparison';
 const Compare = () => {
-    return <h1>Compare Page</h1>;
+    return (
+        <div>
+            <TechComparison />
+          <Footer />
+        </div>
+      );
   };
   
   export default Compare;

@@ -1,0 +1,144 @@
+/* src/components/Newsletter.css */
+.newsletter-section {
+    background-color: #60a5fa; /* Sky blue background from Figma */
+    padding: 2rem 1rem;
+  }
+  
+  :where(.dark) .newsletter-section {
+    background-color: #1e3a8a; /* Darker blue for dark mode */
+  }
+  
+  .newsletter-container {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .newsletter-heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+  }
+  
+  :where(.dark) .newsletter-heading {
+    color: #ffffff;
+  }
+  
+  .newsletter-subheading {
+    font-size: 1rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+  }
+  
+  :where(.dark) .newsletter-subheading {
+    color: #d1d5db;
+  }
+  
+  .newsletter-form {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .newsletter-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #ffffff;
+    color: #000000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  :where(.dark) .newsletter-input {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+  }
+  
+  .newsletter-input::placeholder {
+    color: #6b7280;
+  }
+  
+  :where(.dark) .newsletter-input::placeholder {
+    color: #9ca3af;
+  }
+  
+  .newsletter-input:focus {
+    outline: none;
+    border-color: #0ea5e9;
+  }
+  
+  :where(.dark) .newsletter-input:focus {
+    border-color: #2eb34f;
+  }
+  
+  .newsletter-button {
+    background-color: #0ea5e9;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  :where(.dark) .newsletter-button {
+    background-color: #374151;
+    border: 1px solid #4b5563;
+    color: #ffffff;
+  }
+  
+  .newsletter-button:hover {
+    background-color: #1e40af; /* Dark blue on hover in light mode */
+  }
+  
+  :where(.dark) .newsletter-button:hover {
+    background-color: #4b5563;
+    border-color: #6b7280;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .newsletter-form {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  
+    .newsletter-input,
+    .newsletter-button {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .newsletter-section {
+      padding: 1.5rem 0.5rem;
+    }
+  
+    .newsletter-heading {
+      font-size: 1.25rem;
+    }
+  
+    .newsletter-subheading {
+      font-size: 0.875rem;
+    }
+  
+    .newsletter-input,
+    .newsletter-button {
+      font-size: 0.875rem;
+      padding: 0.5rem;
+    }
+  
+    .newsletter-button {
+      padding: 0.5rem;
+    }
+  }

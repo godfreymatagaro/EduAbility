@@ -1,21 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Moon, Sun, Menu, X } from 'lucide-react';
-import { NavLink, useLocation } from 'react-router-dom';
-import logo from '../../assets/images/logo.png'; // Adjust path as needed
+import { NavLink } from 'react-router-dom';
+import logo from '../../assets/images/logo.png';
 import useDarkMode from '../../hooks/useDarkMode';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isDark, setIsDark] = useDarkMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
 
-  // Close mobile menu when a link is clicked
   const handleMobileLinkClick = () => {
     setIsMobileMenuOpen(false);
   };
 
-  console.log('Navbar rendered, isDark:', isDark);
+  // Debug: Log dark mode state and HTML class
+  useEffect(() => {
+    console.log('Navbar: isDark=', isDark, 'HTML class=', document.documentElement.className);
+  }, [isDark]);
 
   return (
     <>
@@ -50,10 +51,7 @@ const Navbar = () => {
           </div>
           <button
             className="navbar-theme-toggle"
-            onClick={() => {
-              console.log('Toggling theme to:', !isDark);
-              setIsDark(!isDark);
-            }}
+            onClick={() => setIsDark(!isDark)}
             aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
           >
             <Sun className="sun" />

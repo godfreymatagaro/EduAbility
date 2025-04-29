@@ -12,3 +12,7 @@
   min-height: 100vh;
   background-color: #616b62; /* Your custom background */
 }
+
+:where(.dark) .app-container {
+  background-color: #1a202c; /* Dark gray for body */
+}

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, BarChart2, Users, Shield } from 'lucide-react';
 import './SearchArea.css';
 
-// Mock data for live search results
 const mockResults = [
   'Assistive Technology for Reading',
   'Speech-to-Text Tools',
@@ -15,7 +14,6 @@ const mockResults = [
 const SearchArea = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [liveResults, setLiveResults] = useState([]);
-  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     if (searchTerm) {
@@ -23,17 +21,14 @@ const SearchArea = () => {
         result.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setLiveResults(filtered);
-      setProgress((prev) => Math.min(prev + 10, 100));
     } else {
       setLiveResults([]);
-      setProgress(0);
     }
   }, [searchTerm]);
 
   const handleClear = () => {
     setSearchTerm('');
     setLiveResults([]);
-    setProgress(0);
   };
 
   const searchBarVariants = {
@@ -94,19 +89,6 @@ const SearchArea = () => {
             )}
           </AnimatePresence>
         </motion.div>
-
-        {searchTerm && (
-          <motion.div
-            className="search-progress"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
-          >
-            <span className="progress-text">
-              {progress === 100 ? '🎉 Search Master!' : `${progress}% to Search Master`}
-            </span>
-          </motion.div>
-        )}
 
         <div className="search-cards">
           <div className="search-card">

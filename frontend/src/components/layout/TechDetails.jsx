@@ -1,0 +1,161 @@
+import React, { useState } from 'react';
+import { ChevronRight, Tag, Monitor, User, Plus } from 'lucide-react';
+import './TechDetails.css';
+
+const TechDetails = () => {
+  const [activeTab, setActiveTab] = useState('Details');
+
+  const techDetails = {
+    name: 'JAWS Screen Reader',
+    logo: 'https://placehold.co/150x150?text=JAWS+Logo',
+    description:
+      'JAWS (Job Access With Speech) is a computer screen reader program for Microsoft Windows that allows blind and visually impaired users to read the screen either with a text-to-speech output or by a refreshable Braille display.',
+    features: [
+      'Advanced web navigation',
+      'Multiple language support',
+      'Customizable keyboard commands',
+      'Braille display compatibility',
+    ],
+    systemRequirements: ['Windows 10 or later', '4 GB RAM minimum', '1.5 GB hard disk space'],
+    latestVersion: '2025.2',
+    platform: 'Windows',
+    developer: 'Freedom Scientific',
+  };
+
+  const relatedTechnologies = [
+    {
+      id: 1,
+      name: 'NVDA Screen Reader',
+      description: 'Free, open-source screen reader for Windows.',
+      image: 'https://placehold.co/100x100?text=NVDA',
+    },
+    {
+      id: 2,
+      name: 'VoiceOver',
+      description: 'Built-in screen reader for Apple devices.',
+      image: 'https://placehold.co/100x100?text=VoiceOver',
+    },
+    {
+      id: 3,
+      name: 'TalkBack',
+      description: "Android's built-in screen reader.",
+      image: 'https://placehold.co/100x100?text=TalkBack',
+    },
+  ];
+
+  return (
+    <section className="tech-details-section">
+      <div className="tech-details-container">
+        {/* Breadcrumb */}
+        <nav className="breadcrumb">
+          <a href="/technologies" className="breadcrumb-link">
+            Technologies
+          </a>
+          <ChevronRight className="breadcrumb-icon" />
+          <a href="/technologies/jaws" className="breadcrumb-link">
+            JAWS
+          </a>
+          <ChevronRight className="breadcrumb-icon" />
+          <span className="breadcrumb-current">{techDetails.name}</span>
+        </nav>
+
+        {/* Main Tech Display with Tabs */}
+        <div className="tech-main">
+          <div className="tech-image-info-card">
+            <div className="tech-image-info">
+              <div className="tech-image">
+                <img src={techDetails.logo} alt={`${techDetails.name} logo`} />
+              </div>
+              <div className="tech-info">
+                <h1 className="tech-title">{techDetails.name}</h1>
+                <div className="tech-meta">
+                  <p>
+                    <Tag className="meta-icon" />
+                    <strong>Latest Version:</strong> {techDetails.latestVersion}
+                  </p>
+                  <p>
+                    <Monitor className="meta-icon" />
+                    <strong>Platform:</strong> {techDetails.platform}
+                  </p>
+                  <p>
+                    <User className="meta-icon" />
+                    <strong>Developer:</strong> {techDetails.developer}
+                  </p>
+                </div>
+                <div className="tech-actions">
+                  <button className="add-compare-button">
+                    <Plus className="button-icon" />
+                    Add to Compare
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="tech-tabs-card">
+            <div className="tech-tabs">
+              <div className="tab-list">
+                <button
+                  className={`tab ${activeTab === 'Details' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('Details')}
+                >
+                  Details
+                </button>
+                <button
+                  className={`tab ${activeTab === 'Evaluation' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('Evaluation')}
+                >
+                  Evaluation
+                </button>
+              </div>
+              <div className="tab-content">
+                {activeTab === 'Details' && (
+                  <div className="tab-pane">
+                    <p>{techDetails.description}</p>
+                    <div className="tech-features">
+                      <h3>Key Features</h3>
+                      <ul>
+                        {techDetails.features.map((feature, index) => (
+                          <li key={index}>{feature}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="tech-requirements">
+                      <h3>System Requirements</h3>
+                      <ul>
+                        {techDetails.systemRequirements.map((req, index) => (
+                          <li key={index}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+                {activeTab === 'Evaluation' && (
+                  <div className="tab-pane">
+                    <p>No evaluation available yet.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Related Technologies */}
+        <div className="related-tech">
+          <h2>Related Technologies</h2>
+          <div className="related-tech-grid">
+            {relatedTechnologies.map((tech) => (
+              <div key={tech.id} className="related-tech-card">
+                <img src={tech.image} alt={`${tech.name} logo`} className="related-tech-image" />
+                <h3>{tech.name}</h3>
+                <p>{tech.description}</p>
+                <button className="learn-more-button">Learn More</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default TechDetails;

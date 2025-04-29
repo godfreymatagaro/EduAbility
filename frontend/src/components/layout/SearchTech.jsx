@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 import { Search, ChevronDown, Star, X, ChevronLeft, ChevronRight, Eye, Ear, Keyboard, Brain } from 'lucide-react';
 import Button from '../common/Button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,14 +27,13 @@ const SearchTech = () => {
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Expanded technology data to demonstrate pagination
   const technologies = [
     {
       id: 1,
       category: 'Visual',
-      name: 'Screen Reader Pro',
-      description: 'Advanced screen reading software with natural voice output.',
-      link: '/tech/screen-reader-pro',
+      name: 'JAWS Screen Reader',
+      description: 'Screen reader for blind and visually impaired users.',
+      link: '/tech-details',
     },
     {
       id: 2,
@@ -79,7 +79,6 @@ const SearchTech = () => {
     currentPage * itemsPerPage
   );
 
-  // Animation variants for the section
   const sectionVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
@@ -89,7 +88,6 @@ const SearchTech = () => {
     },
   };
 
-  // Animation variants for the cards
   const cardContainerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -113,7 +111,6 @@ const SearchTech = () => {
     },
   };
 
-  // Animation variants for the modals
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.8, y: -50 },
     visible: {
@@ -130,7 +127,6 @@ const SearchTech = () => {
     },
   };
 
-  // Handle filter changes
   const handleCategoryChange = (filter) => {
     setCategoryFilters((prev) => ({
       ...prev,
@@ -314,14 +310,16 @@ const SearchTech = () => {
                 >
                   <h3>{tech.name}</h3>
                   <p>{tech.description}</p>
-                  <Button
-                    variant="filled"
-                    size="md"
-                    className="tech-card-button glow"
-                    ariaLabel={`Learn more about ${tech.name}`}
-                  >
-                    Learn More
-                  </Button>
+                  <Link to={tech.link}>
+                    <Button
+                      variant="filled"
+                      size="md"
+                      className="tech-card-button glow"
+                      ariaLabel={`Learn more about ${tech.name}`}
+                    >
+                      Learn More
+                    </Button>
+                  </Link>
                 </motion.div>
               ))}
             </motion.div>
@@ -413,13 +411,15 @@ const SearchTech = () => {
                     <div key={tech.id} className="modal-result-item">
                       <h3>{tech.name}</h3>
                       <p>{tech.description}</p>
-                      <Button
-                        variant="filled"
-                        size="sm"
-                        ariaLabel={`Learn more about ${tech.name}`}
-                      >
-                        Learn More
-                      </Button>
+                      <Link to={tech.link}>
+                        <Button
+                          variant="filled"
+                          size="sm"
+                          ariaLabel={`Learn more about ${tech.name}`}
+                        >
+                          Learn More
+                        </Button>
+                      </Link>
                     </div>
                   ))}
               </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ChevronDown, Star, X } from 'lucide-react';
+import { Search, ChevronDown, Star, X, ChevronLeft, ChevronRight, Eye, Ear, Keyboard, Brain } from 'lucide-react';
 import Button from '../common/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import './SearchTech.css';
@@ -24,38 +24,60 @@ const SearchTech = () => {
   const [sortOption, setSortOption] = useState('Most Popular');
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Sample technology data (4 cards)
+  // Expanded technology data to demonstrate pagination
   const technologies = [
     {
       id: 1,
       category: 'Visual',
       name: 'Screen Reader Pro',
-      description: 'Advanced screen reading software with natural voice output and customizable reading speeds.',
+      description: 'Advanced screen reading software with natural voice output.',
       link: '/tech/screen-reader-pro',
     },
     {
       id: 2,
       category: 'Auditory',
       name: 'Voice Command Plus',
-      description: 'Voice recognition software designed for educational environments, with 99% accuracy.',
+      description: 'Voice recognition software with 99% accuracy.',
       link: '/tech/voice-command-plus',
     },
     {
       id: 3,
       category: 'Visual',
       name: 'Text Magnifier',
-      description: 'Voice recognition software designed for educational environments, with 99% accuracy.',
+      description: 'Magnifies text for better readability.',
       link: '/tech/text-magnifier',
     },
     {
       id: 4,
       category: 'Physical',
       name: 'Adaptive Keyboard',
-      description: 'Customizable keyboard for physical accessibility with adjustable key sensitivity.',
+      description: 'Customizable keyboard for physical accessibility.',
       link: '/tech/adaptive-keyboard',
     },
+    {
+      id: 5,
+      category: 'Cognitive',
+      name: 'Mind Mapper',
+      description: 'Tool to assist with cognitive organization and memory.',
+      link: '/tech/mind-mapper',
+    },
+    {
+      id: 6,
+      category: 'Visual',
+      name: 'Color Adjuster',
+      description: 'Adjusts screen colors for visual accessibility.',
+      link: '/tech/color-adjuster',
+    },
   ];
+
+  const itemsPerPage = 3;
+  const totalPages = Math.ceil(technologies.length / itemsPerPage);
+  const paginatedTechnologies = technologies.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Animation variants for the section
   const sectionVariants = {
@@ -86,7 +108,7 @@ const SearchTech = () => {
       transition: { duration: 0.5, ease: 'easeOut' },
     },
     hover: {
-      scale: 1.05,
+      scale: 1.02,
       transition: { duration: 0.3, ease: 'easeOut' },
     },
   };
@@ -139,6 +161,10 @@ const SearchTech = () => {
     if (searchQuery.trim()) {
       setIsSearchModalOpen(true);
     }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -202,7 +228,7 @@ const SearchTech = () => {
                   checked={categoryFilters.physical}
                   onChange={() => handleCategoryChange('physical')}
                 />
-                <span>Physical (16)</span>
+                <span>Physical (15)</span>
               </label>
             </div>
             <div className="filter-group">
@@ -271,33 +297,85 @@ const SearchTech = () => {
               </label>
             </div>
           </div>
-          <motion.div
-            className="tech-cards"
-            variants={cardContainerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-          >
-            {technologies.map((tech) => (
-              <motion.div
-                key={tech.id}
-                className="tech-card"
-                variants={cardVariants}
-                whileHover="hover"
-              >
-                <h3>{tech.name}</h3>
-                <p>{tech.description}</p>
-                <Button
-                  variant="outline"
-                  size="md"
-                  className="tech-card-button glow"
-                  ariaLabel={`Learn more about ${tech.name}`}
+          <div className="tech-cards-wrapper">
+            <motion.div
+              className="tech-cards"
+              variants={cardContainerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+            >
+              {paginatedTechnologies.map((tech) => (
+                <motion.div
+                  key={tech.id}
+                  className="tech-card"
+                  variants={cardVariants}
+                  whileHover="hover"
                 >
-                  Learn More
-                </Button>
-              </motion.div>
-            ))}
-          </motion.div>
+                  <h3>{tech.name}</h3>
+                  <p>{tech.description}</p>
+                  <Button
+                    variant="filled"
+                    size="md"
+                    className="tech-card-button glow"
+                    ariaLabel={`Learn more about ${tech.name}`}
+                  >
+                    Learn More
+                  </Button>
+                </motion.div>
+              ))}
+            </motion.div>
+            <div className="pagination">
+              <button
+                className="pagination-arrow"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="pagination-icon" />
+              </button>
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index + 1}
+                  className={`pagination-number ${
+                    currentPage === index + 1 ? 'active' : ''
+                  }`}
+                  onClick={() => handlePageChange(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              ))}
+              <button
+                className="pagination-arrow"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="pagination-icon" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="popular-categories-wrapper">
+          <div className="popular-categories">
+            <h3>Popular Categories</h3>
+            <div className="category-buttons">
+              <button className="category-button">
+                <Eye className="category-icon" />
+                Visual Aid
+              </button>
+              <button className="category-button">
+                <Ear className="category-icon" />
+                Hearing Aid
+              </button>
+              <button className="category-button">
+                <Keyboard className="category-icon" />
+                Physical Keyboard
+              </button>
+              <button className="category-button">
+                <Brain className="category-icon" />
+                Cognitive Aid
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -336,7 +414,7 @@ const SearchTech = () => {
                       <h3>{tech.name}</h3>
                       <p>{tech.description}</p>
                       <Button
-                        variant="outline"
+                        variant="filled"
                         size="sm"
                         ariaLabel={`Learn more about ${tech.name}`}
                       >

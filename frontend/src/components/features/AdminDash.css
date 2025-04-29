@@ -432,7 +432,9 @@
     border-radius: 0.75rem;
     padding: 1.5rem;
     width: 90%;
-    max-width: 400px;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
   
@@ -462,6 +464,31 @@
     color: #e5e7eb;
   }
   
+  .form-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  :where(.dark) .form-section {
+    border-bottom-color: #4b5563;
+  }
+  
+  .form-section:last-child {
+    border-bottom: none;
+  }
+  
+  .form-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1rem;
+  }
+  
+  :where(.dark) .form-section-title {
+    color: #e5e7eb;
+  }
+  
   .form-group {
     margin-bottom: 1rem;
   }
@@ -478,7 +505,8 @@
     color: #9ca3af;
   }
   
-  .form-input {
+  .form-input,
+  .form-textarea {
     width: 100%;
     padding: 0.5rem;
     border: 1px solid #d1d5db;
@@ -487,21 +515,29 @@
     color: #1f2937;
   }
   
-  :where(.dark) .form-input {
+  :where(.dark) .form-input,
+  :where(.dark) .form-textarea {
     border-color: #6b7280;
     color: #e5e7eb;
     background-color: #4b5563;
   }
   
-  .form-input:focus {
+  .form-input:focus,
+  .form-textarea:focus {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
   
-  :where(.dark) .form-input:focus {
+  :where(.dark) .form-input:focus,
+  :where(.dark) .form-textarea:focus {
     border-color: #60a5fa;
     box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+  }
+  
+  .form-textarea {
+    min-height: 80px;
+    resize: vertical;
   }
   
   .error-message {
@@ -662,19 +698,29 @@
   
     .modal-content {
       padding: 1rem;
+      max-width: 400px;
     }
   
     .modal-title {
       font-size: 1.125rem;
     }
   
+    .form-section-title {
+      font-size: 0.875rem;
+    }
+  
     .form-label {
       font-size: 0.75rem;
     }
   
-    .form-input {
+    .form-input,
+    .form-textarea {
       font-size: 0.75rem;
       padding: 0.25rem;
+    }
+  
+    .form-textarea {
+      min-height: 60px;
     }
   
     .cancel-button,
@@ -768,12 +814,21 @@
       font-size: 1rem;
     }
   
+    .form-section-title {
+      font-size: 0.75rem;
+    }
+  
     .form-label {
       font-size: 0.675rem;
     }
   
-    .form-input {
+    .form-input,
+    .form-textarea {
       font-size: 0.675rem;
+    }
+  
+    .form-textarea {
+      min-height: 50px;
     }
   
     .error-message {

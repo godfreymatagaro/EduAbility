@@ -15,32 +15,65 @@ const AdminDash = () => {
   const [filterRating, setFilterRating] = useState(null);
   const [toasts, setToasts] = useState([]);
   const [isAddTechModalOpen, setIsAddTechModalOpen] = useState(false);
-  const [newTech, setNewTech] = useState({ name: '', rating: '', reviews: '' });
+  const [newTech, setNewTech] = useState({
+    name: '',
+    rating: '',
+    reviews: '',
+    keyFeatures: '',
+    systemRequirements: '',
+    category: '',
+    description: '',
+    cost: '',
+    evaluation: '',
+    version: '',
+    platform: '',
+    developer: '',
+    inputs: '',
+    image: null,
+  });
   const [techError, setTechError] = useState('');
   const modalRef = useRef(null);
 
   // Simulate fetching technologies from an API
   useEffect(() => {
     const fetchTechnologies = async () => {
-      // Mock API response
       const mockData = [
-        { id: 1, name: 'Technology 1', rating: 4.5, reviews: 2458 },
-        { id: 2, name: 'Technology 2', rating: 4.8, reviews: 1923 },
-        { id: 3, name: 'Technology 3', rating: 4.3, reviews: 1675 },
+        {
+          id: 1,
+          name: 'Technology 1',
+          rating: 4.5,
+          reviews: 2458,
+          keyFeatures: 'Feature 1\nFeature 2',
+          systemRequirements: 'Windows 10, 8GB RAM',
+          category: 'visual',
+          description: 'A powerful tool for visual assistance.',
+          cost: 'free',
+          evaluation: 'Highly rated for accessibility.',
+          version: '1.2.3',
+          platform: 'Windows, macOS',
+          developer: 'TechCorp',
+          inputs: 'Keyboard, Mouse',
+          image: 'images/tech/etc/tech-1-1698771234567.jpg',
+        },
+        {
+          id: 2,
+          name: 'Technology 2',
+          rating: 4.8,
+          reviews: 1923,
+          keyFeatures: 'Feature A\nFeature B',
+          systemRequirements: 'macOS 12, 16GB RAM',
+          category: 'auditory',
+          description: 'Enhances auditory experiences.',
+          cost: '$1-$50',
+          evaluation: 'Good for hearing-impaired users.',
+          version: '2.0.1',
+          platform: 'macOS, Linux',
+          developer: 'SoundTech',
+          inputs: 'Voice, Keyboard',
+          image: 'images/tech/etc/tech-2-1698771234568.jpg',
+        },
       ];
       setTechnologies(mockData);
-
-      // Real API integration example:
-      /*
-      try {
-        const response = await fetch('https://api.example.com/technologies');
-        const data = await response.json();
-        setTechnologies(data);
-      } catch (error) {
-        console.error('Error fetching technologies:', error);
-        addToast('Failed to fetch technologies.');
-      }
-      */
     };
     fetchTechnologies();
   }, []);
@@ -69,27 +102,47 @@ const AdminDash = () => {
   const handleDeleteTech = (id) => {
     setTechnologies(technologies.filter((tech) => tech.id !== id));
     addToast('Technology deleted successfully!');
-
-    // Real API integration example:
-    /*
-    try {
-      await fetch(`https://api.example.com/technologies/${id}`, { method: 'DELETE' });
-      setTechnologies(technologies.filter((tech) => tech.id !== id));
-      addToast('Technology deleted successfully!');
-    } catch (error) {
-      console.error('Error deleting technology:', error);
-      addToast('Failed to delete technology.');
-    }
-    */
   };
 
   const handleAddTech = (e) => {
     e.preventDefault();
-    const { name, rating, reviews } = newTech;
-    if (!name.trim() || !rating || !reviews) {
-      setTechError('Please fill in all fields.');
+    const {
+      name,
+      rating,
+      reviews,
+      keyFeatures,
+      systemRequirements,
+      category,
+      description,
+      cost,
+      evaluation,
+      version,
+      platform,
+      developer,
+      inputs,
+      image,
+    } = newTech;
+
+    // Validation
+    if (
+      !name.trim() ||
+      !rating ||
+      !reviews ||
+      !keyFeatures.trim() ||
+      !systemRequirements.trim() ||
+      !category ||
+      !description.trim() ||
+      !cost ||
+      !evaluation.trim() ||
+      !version.trim() ||
+      !platform.trim() ||
+      !developer.trim() ||
+      !inputs.trim()
+    ) {
+      setTechError('Please fill in all required fields.');
       return;
     }
+
     const parsedRating = parseFloat(rating);
     const parsedReviews = parseInt(reviews);
     if (isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
@@ -100,38 +153,53 @@ const AdminDash = () => {
       setTechError('Reviews must be a positive number.');
       return;
     }
+    if (image && !['image/jpeg', 'image/png'].includes(image.type)) {
+      setTechError('Please upload a JPEG or PNG image.');
+      return;
+    }
+
+    // Simulate image storage
+    const imagePath = image
+      ? `images/tech/etc/tech-${technologies.length + 1}-${Date.now()}.jpg`
+      : null;
 
     const newTechEntry = {
       id: technologies.length + 1,
       name: name.trim(),
       rating: parsedRating,
       reviews: parsedReviews,
+      keyFeatures: keyFeatures.trim(),
+      systemRequirements: systemRequirements.trim(),
+      category,
+      description: description.trim(),
+      cost,
+      evaluation: evaluation.trim(),
+      version: version.trim(),
+      platform: platform.trim(),
+      developer: developer.trim(),
+      inputs: inputs.trim(),
+      image: imagePath,
     };
     setTechnologies([...technologies, newTechEntry]);
     setIsAddTechModalOpen(false);
-    setNewTech({ name: '', rating: '', reviews: '' });
+    setNewTech({
+      name: '',
+      rating: '',
+      reviews: '',
+      keyFeatures: '',
+      systemRequirements: '',
+      category: '',
+      description: '',
+      cost: '',
+      evaluation: '',
+      version: '',
+      platform: '',
+      developer: '',
+      inputs: '',
+      image: null,
+    });
     setTechError('');
     addToast('Technology added successfully!');
-
-    // Real API integration example:
-    /*
-    try {
-      const response = await fetch('https://api.example.com/technologies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newTechEntry),
-      });
-      const data = await response.json();
-      setTechnologies([...technologies, data]);
-      setIsAddTechModalOpen(false);
-      setNewTech({ name: '', rating: '', reviews: '' });
-      setTechError('');
-      addToast('Technology added successfully!');
-    } catch (error) {
-      console.error('Error adding technology:', error);
-      addToast('Failed to add technology.');
-    }
-    */
   };
 
   const addToast = (message) => {
@@ -327,6 +395,7 @@ const AdminDash = () => {
                       <th scope="col">Name</th>
                       <th scope="col">Rating</th>
                       <th scope="col">Reviews</th>
+                      <th scope="col">Category</th>
                       <th scope="col">Actions</th>
                     </tr>
                   </thead>
@@ -345,6 +414,7 @@ const AdminDash = () => {
                             {tech.rating} <Star className="star-icon" />
                           </td>
                           <td>{tech.reviews}</td>
+                          <td>{tech.category.charAt(0).toUpperCase() + tech.category.slice(1)}</td>
                           <td>
                             <button
                               onClick={() => handleDeleteTech(tech.id)}
@@ -380,58 +450,258 @@ const AdminDash = () => {
                     Add New Technology
                   </h3>
                   <form onSubmit={handleAddTech}>
-                    <div className="form-group">
-                      <label htmlFor="tech-name" className="form-label">
-                        Name
-                      </label>
-                      <input
-                        id="tech-name"
-                        type="text"
-                        value={newTech.name}
-                        onChange={(e) =>
-                          setNewTech({ ...newTech, name: e.target.value })
-                        }
-                        className="form-input"
-                        aria-label="Technology name"
-                        required
-                      />
+                    {/* General Information */}
+                    <div className="form-section">
+                      <h4 className="form-section-title">General Information</h4>
+                      <div className="form-group">
+                        <label htmlFor="tech-name" className="form-label">
+                          Name *
+                        </label>
+                        <input
+                          id="tech-name"
+                          type="text"
+                          value={newTech.name}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, name: e.target.value })
+                          }
+                          className="form-input"
+                          aria-label="Technology name"
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="tech-rating" className="form-label">
+                          Rating (1-5) *
+                        </label>
+                        <input
+                          id="tech-rating"
+                          type="number"
+                          step="0.1"
+                          min="1"
+                          max="5"
+                          value={newTech.rating}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, rating: e.target.value })
+                          }
+                          className="form-input"
+                          aria-label="Technology rating"
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="tech-reviews" className="form-label">
+                          Reviews *
+                        </label>
+                        <input
+                          id="tech-reviews"
+                          type="number"
+                          min="0"
+                          value={newTech.reviews}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, reviews: e.target.value })
+                          }
+                          className="form-input"
+                          aria-label="Number of reviews"
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="tech-category" className="form-label">
+                          Category *
+                        </label>
+                        <select
+                          id="tech-category"
+                          value={newTech.category}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, category: e.target.value })
+                          }
+                          className="form-input"
+                          aria-label="Technology category"
+                          required
+                        >
+                          <option value="">Select Category</option>
+                          <option value="visual">Visual</option>
+                          <option value="auditory">Auditory</option>
+                          <option value="physical">Physical</option>
+                          <option value="cognitive">Cognitive</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="tech-cost" className="form-label">
+                          Cost *
+                        </label>
+                        <select
+                          id="tech-cost"
+                          value={newTech.cost}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, cost: e.target.value })
+                          }
+                          className="form-input"
+                          aria-label="Technology cost"
+                          required
+                        >
+                          <option value="">Select Cost</option>
+                          <option value="free">Free</option>
+                          <option value="$1-$50">$1-$50</option>
+                          <option value="$51-$200">$51-$200</option>
+                          <option value="$200+">$200+</option>
+                        </select>
+                      </div>
                     </div>
-                    <div className="form-group">
-                      <label htmlFor="tech-rating" className="form-label">
-                        Rating (1-5)
-                      </label>
-                      <input
-                        id="tech-rating"
-                        type="number"
-                        step="0.1"
-                        min="1"
-                        max="5"
-                        value={newTech.rating}
-                        onChange={(e) =>
-                          setNewTech({ ...newTech, rating: e.target.value })
-                        }
-                        className="form-input"
-                        aria-label="Technology rating"
-                        required
-                      />
+
+                    {/* Technical Details */}
+                    <div className="form-section">
+                      <h4 className="form-section-title">Technical Details</h4>
+                      <div className="form-group">
+                        <label htmlFor="tech-version" className="form-label">
+                          Version *
+                        </label>
+                        <input
+                          id="tech-version"
+                          type="text"
+                          value={newTech.version}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, version: e.target.value })
+                          }
+                          className="form-input"
+                          aria-label="Technology version"
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="tech-platform" className="form-label">
+                          Platform *
+                        </label>
+                        <input
+                          id="tech-platform"
+                          type="text"
+                          value={newTech.platform}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, platform: e.target.value })
+                          }
+                          className="form-input"
+                          aria-label="Supported platforms"
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="tech-developer" className="form-label">
+                          Developer *
+                        </label>
+                        <input
+                          id="tech-developer"
+                          type="text"
+                          value={newTech.developer}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, developer: e.target.value })
+                          }
+                          className="form-input"
+                          aria-label="Technology developer"
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="tech-system-requirements" className="form-label">
+                          System Requirements *
+                        </label>
+                        <textarea
+                          id="tech-system-requirements"
+                          value={newTech.systemRequirements}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, systemRequirements: e.target.value })
+                          }
+                          className="form-textarea"
+                          aria-label="System requirements"
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="tech-inputs" className="form-label">
+                          Inputs *
+                        </label>
+                        <textarea
+                          id="tech-inputs"
+                          value={newTech.inputs}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, inputs: e.target.value })
+                          }
+                          className="form-textarea"
+                          aria-label="Input methods"
+                          required
+                        />
+                      </div>
                     </div>
-                    <div className="form-group">
-                      <label htmlFor="tech-reviews" className="form-label">
-                        Reviews
-                      </label>
-                      <input
-                        id="tech-reviews"
-                        type="number"
-                        min="0"
-                        value={newTech.reviews}
-                        onChange={(e) =>
-                          setNewTech({ ...newTech, reviews: e.target.value })
-                        }
-                        className="form-input"
-                        aria-label="Number of reviews"
-                        required
-                      />
+
+                    {/* Description and Evaluation */}
+                    <div className="form-section">
+                      <h4 className="form-section-title">Description and Evaluation</h4>
+                      <div className="form-group">
+                        <label htmlFor="tech-description" className="form-label">
+                          Description *
+                        </label>
+                        <textarea
+                          id="tech-description"
+                          value={newTech.description}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, description: e.target.value })
+                          }
+                          className="form-textarea"
+                          aria-label="Technology description"
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="tech-evaluation" className="form-label">
+                          Evaluation *
+                        </label>
+                        <textarea
+                          id="tech-evaluation"
+                          value={newTech.evaluation}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, evaluation: e.target.value })
+                          }
+                          className="form-textarea"
+                          aria-label="Technology evaluation"
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="tech-key-features" className="form-label">
+                          Key Features *
+                        </label>
+                        <textarea
+                          id="tech-key-features"
+                          value={newTech.keyFeatures}
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, keyFeatures: e.target.value })
+                          }
+                          className="form-textarea"
+                          aria-label="Key features"
+                          required
+                        />
+                      </div>
                     </div>
+
+                    {/* Image Upload */}
+                    <div className="form-section">
+                      <h4 className="form-section-title">Image</h4>
+                      <div className="form-group">
+                        <label htmlFor="tech-image" className="form-label">
+                          Upload Image (JPEG/PNG)
+                        </label>
+                        <input
+                          id="tech-image"
+                          type="file"
+                          accept="image/jpeg,image/png"
+                          onChange={(e) =>
+                            setNewTech({ ...newTech, image: e.target.files[0] })
+                          }
+                          className="form-input"
+                          aria-label="Upload technology image"
+                        />
+                      </div>
+                    </div>
+
                     {techError && (
                       <p className="error-message" aria-live="assertive">
                         {techError}

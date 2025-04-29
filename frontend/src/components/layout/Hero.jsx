@@ -1,3 +1,4 @@
+// src/components/Hero.js
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -8,52 +9,61 @@ import './Hero.css';
 const Hero = () => {
   const navigate = useNavigate();
 
-  // Container animation for staggered children
+  // Container animation with stagger
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.3, // Stagger each child by 0.3s
-        delayChildren: 0.2,
+        staggerChildren: 0.4, // Dreamy pacing
+        delayChildren: 0.3,
       },
     },
   };
 
-  // Text and button animation
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+  // Text animation with scale and glow
+  const textVariants = {
+    hidden: { opacity: 0, y: 30, scale: 0.9 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: 'easeOut' },
+      scale: 1,
+      transition: { duration: 0.8, ease: 'easeOut', type: 'spring', stiffness: 80 },
     },
   };
 
-  // Image animation with subtle scale and opacity
+  // Button animation (simple fade-in, no hover/tap effects)
+  const buttonVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, ease: 'easeOut' },
+    },
+  };
+
+  // Image animation with floating effect
   const imageVariants = {
-    hidden: { opacity: 0, scale: 0.95 },
+    hidden: { opacity: 0, scale: 0.9, y: 50 },
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.8, ease: 'easeOut', delay: 0.4 },
+      y: 0,
+      transition: { duration: 1, ease: 'easeOut', type: 'spring', stiffness: 60 },
     },
-    hover: {
-      y: -10, // Subtle parallax-like lift on hover
-      transition: { duration: 0.3, ease: 'easeOut' },
+    float: {
+      y: [-10, 10], // Gentle floating
+      transition: { duration: 3, ease: 'easeInOut', repeat: Infinity, repeatType: 'reverse' },
     },
   };
 
-  // Button hover and tap animation
-  const buttonVariants = {
-    hidden: { opacity: 0, y: 20 },
+  // Overlay animation for gradient and sparkle
+  const overlayVariants = {
+    hidden: { opacity: 0 },
     visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: 'easeOut' },
+      opacity: 0.6, // Soft gradient overlay
+      transition: { duration: 1.5, ease: 'easeOut' },
     },
-    hover: { scale: 1.05, boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)' },
-    tap: { scale: 0.95 },
   };
 
   return (
@@ -67,10 +77,17 @@ const Hero = () => {
         ? { transition: { duration: 0 } }
         : {})}
     >
+      <motion.div
+        className="hero-overlay"
+        variants={overlayVariants}
+        // Subtle sparkle animation
+        animate={{ backgroundPosition: ['0% 0%', '100% 100%'] }}
+        transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+      />
       <div className="hero-container">
         <motion.div className="hero-text" variants={containerVariants}>
-          <motion.h1 variants={itemVariants}>Empower Inclusive Education</motion.h1>
-          <motion.p variants={itemVariants}>
+          <motion.h1 variants={textVariants}>Empower Inclusive Education</motion.h1>
+          <motion.p variants={textVariants}>
             Accessible tool for evaluating educational assistive technology.
             Helping educators make informed decisions for inclusive learning
             environments.
@@ -89,11 +106,11 @@ const Hero = () => {
         <motion.div
           className="hero-image"
           variants={imageVariants}
-          whileHover="hover"
-          // Subtle drag for playful interaction
+          animate="float"
+          // Subtle drag for dreamy interaction
           drag
-          dragConstraints={{ left: -10, right: 10, top: -10, bottom: 10 }}
-          dragElastic={0.1}
+          dragConstraints={{ left: -15, right: 15, top: -15, bottom: 15 }}
+          dragElastic={0.2}
         >
           <img src={heroImage} alt="Inclusive education illustration" />
         </motion.div>

@@ -3,6 +3,7 @@ import SearchArea from '../components/features/SearchArea';
 import Stats from '../components/layout/Stats';
 import Reviews from '../components/layout/Reviews';
 import CTA from '../components/layout/CTA';
+import Footer from '../components/layout/Footer';
 
 
 const Home = () => {
@@ -13,6 +14,7 @@ const Home = () => {
       <Stats />
       <Reviews />
       <CTA />
+      <Footer />
     </div>
   );
 };

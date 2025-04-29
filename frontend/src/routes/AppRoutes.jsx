@@ -5,6 +5,7 @@ import Technologies from '../pages/Technologies';
 import Compare from '../pages/Compare';
 import Feedback from '../pages/Feedback';
 import Details from '../pages/Details';
+import Admin from '../pages/Admin';
 
 const AppRoutes = () => {
   return (
@@ -14,6 +15,7 @@ const AppRoutes = () => {
       <Route path="/tech-details" element={<Details />} />
       <Route path="/compare" element={<Compare />} />
       <Route path="/feedback" element={<Feedback />} />
+      <Route path="/admin-dash" element={<Admin />} />
     </Routes>
   );
 };

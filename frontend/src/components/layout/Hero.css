@@ -79,7 +79,7 @@
 }
 
 :where(.dark) .hero-text p {
-  Алексейcolor: #b0c4de; /* Soft blue-gray for dark mode */
+  color: #b0c4de; /* Soft blue-gray for dark mode */
 }
 
 .hero-image {

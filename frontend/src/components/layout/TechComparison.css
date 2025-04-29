@@ -144,9 +144,14 @@
     flex: 1;
     background-color: #ffffff;
     border-radius: 0.5rem;
-    padding: 1rem;
+    padding: 0.75rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center;
+    height: 150px; /* Slimmer height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 200px; /* Ensure cards don't shrink too much */
   }
   
   :where(.dark) .summary-card {
@@ -155,10 +160,10 @@
   }
   
   .summary-card h3 {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #000000;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
   }
   
   :where(.dark) .summary-card h3 {
@@ -166,9 +171,13 @@
   }
   
   .summary-details p {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: #4b5563;
-    margin: 0.25rem 0;
+    margin: 0.125rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
   }
   
   :where(.dark) .summary-details p {
@@ -186,15 +195,20 @@
   .rating {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 0.25rem;
     color: #f59e0b;
   }
   
   .star-icon {
-    width: 1rem;
-    height: 1rem;
+    width: 0.875rem;
+    height: 0.875rem;
     fill: #f59e0b;
+  }
+  
+  /* Table Wrapper for Responsiveness */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   /* Detailed Comparison */
@@ -219,6 +233,7 @@
     border-collapse: collapse;
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 600px; /* Ensure table is wide enough to require scrolling on small devices */
   }
   
   :where(.dark) .comparison-table {
@@ -237,6 +252,9 @@
     font-weight: 600;
     color: #000000;
     background-color: #f3f4f6;
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
   
   :where(.dark) .comparison-table th {
@@ -255,6 +273,14 @@
   
   .comparison-table td:first-child {
     text-align: left;
+    position: sticky;
+    left: 0;
+    background-color: #ffffff;
+    z-index: 1;
+  }
+  
+  :where(.dark) .comparison-table td:first-child {
+    background-color: #374151;
   }
   
   /* Detailed Table Specific */
@@ -606,6 +632,23 @@
       font-size: 0.75rem;
       padding: 0.5rem;
     }
+  
+    .summary-card {
+      height: 130px; /* Slightly smaller on medium devices */
+    }
+  
+    .summary-card h3 {
+      font-size: 0.875rem;
+    }
+  
+    .summary-details p {
+      font-size: 0.675rem;
+    }
+  
+    .star-icon {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
   }
   
   @media (max-width: 480px) {
@@ -617,13 +660,32 @@
       font-size: 1.5rem;
     }
   
-    .comparison-table {
+    .comparison-table th,
+    .comparison-table td {
       font-size: 0.675rem;
+      padding: 0.25rem;
+    }
+  
+    .summary-card {
+      height: 120px; /* Even slimmer on small devices */
+    }
+  
+    .summary-card h3 {
+      font-size: 0.75rem;
+    }
+  
+    .summary-details p {
+      font-size: 0.625rem;
+    }
+  
+    .star-icon {
+      width: 0.625rem;
+      height: 0.625rem;
     }
   
     .modal-content {
       width: 95%;
-      max-width: 300px; /* Max-width for small devices */
+      max-width: 300px;
       padding: 1rem;
     }
   

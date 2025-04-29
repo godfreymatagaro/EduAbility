@@ -122,18 +122,13 @@ const TechComparison = () => {
               <h3>{tech.name}</h3>
               <div className="summary-details">
                 <p>
-                  <strong>Average Rating</strong>
-                  <span className="rating">
-                    {tech.rating} <Star className="star-icon" />
-                  </span>
+                  <strong>Average Rating:</strong> {tech.rating} <Star className="star-icon" />
                 </p>
                 <p>
-                  <strong>Price Range</strong>
-                  <span>{tech.price}</span>
+                  <strong>Price Range:</strong> {tech.price}
                 </p>
                 <p>
-                  <strong>Total Reviews</strong>
-                  <span>{tech.reviews}</span>
+                  <strong>Total Reviews:</strong> {tech.reviews}
                 </p>
               </div>
             </motion.div>
@@ -148,36 +143,38 @@ const TechComparison = () => {
           variants={sectionVariants}
         >
           <h2>Detailed Comparison</h2>
-          <table className="comparison-table detailed-table">
-            <thead>
-              <tr>
-                <th>Criteria</th>
-                {selectedTechs.map((tech) => (
-                  <th key={tech.id}>{tech.name}</th>
-                ))}
-                <th>Average</th>
-              </tr>
-            </thead>
-            <tbody>
-              {techCriteria.map((criteria, index) => (
-                <tr key={index}>
-                  <td>{criteria.criterion}</td>
-                  {criteria.ratings.map((rating, i) => (
-                    <td key={i}>
-                      {rating} <Star className="star-icon" />
-                    </td>
+          <div className="table-wrapper">
+            <table className="comparison-table detailed-table">
+              <thead>
+                <tr>
+                  <th>Criteria</th>
+                  {selectedTechs.map((tech) => (
+                    <th key={tech.id}>{tech.name}</th>
                   ))}
-                  <td>
-                    {(
-                      criteria.ratings.reduce((a, b) => a + b, 0) /
-                      criteria.ratings.length
-                    ).toFixed(1)}{' '}
-                    <Star className="star-icon" />
-                  </td>
+                  <th>Average</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {techCriteria.map((criteria, index) => (
+                  <tr key={index}>
+                    <td>{criteria.criterion}</td>
+                    {criteria.ratings.map((rating, i) => (
+                      <td key={i}>
+                        {rating} <Star className="star-icon" />
+                      </td>
+                    ))}
+                    <td>
+                      {(
+                        criteria.ratings.reduce((a, b) => a + b, 0) /
+                        criteria.ratings.length
+                      ).toFixed(1)}{' '}
+                      <Star className="star-icon" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </motion.div>
 
         {/* Feature Comparison Table */}
@@ -188,28 +185,30 @@ const TechComparison = () => {
           variants={sectionVariants}
         >
           <h2>Feature Comparison</h2>
-          <table className="comparison-table feature-table">
-            <thead>
-              <tr>
-                <th>Feature</th>
-                {selectedTechs.map((tech) => (
-                  <th key={tech.id}>{tech.name}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {featureComparison.map((feature, index) => (
-                <tr key={index}>
-                  <td>{feature.feature}</td>
-                  {feature.available.map((avail, i) => (
-                    <td key={i}>
-                      <span className={`dot ${avail ? 'available' : 'unavailable'}`} />
-                    </td>
+          <div className="table-wrapper">
+            <table className="comparison-table feature-table">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  {selectedTechs.map((tech) => (
+                    <th key={tech.id}>{tech.name}</th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {featureComparison.map((feature, index) => (
+                  <tr key={index}>
+                    <td>{feature.feature}</td>
+                    {feature.available.map((avail, i) => (
+                      <td key={i}>
+                        <span className={`dot ${avail ? 'available' : 'unavailable'}`} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </motion.div>
 
         {/* User Reviews Section */}

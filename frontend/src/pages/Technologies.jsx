@@ -1,6 +1,15 @@
 // src/pages/Technologies.jsx
+import Footer from '../components/layout/Footer';
+import AD from '../components/layout/AD';
+
+
 const Technologies = () => {
-    return <h1>Technologies Page</h1>;
+    return (
+        <div>
+            <AD />
+          <Footer />
+        </div>
+      );
   };
   
   export default Technologies;

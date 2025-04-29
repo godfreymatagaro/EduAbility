@@ -1,28 +1,7 @@
 /* src/components/Navbar.css */
 
-/* Root variables for light and dark modes */
-:root {
-    --bg-navbar: #ffffff; /* White for light mode */
-    --border-navbar: #e5e7eb; /* Gray-200 for border */
-    --text-primary: #fdba74; /* Orange for active links */
-    --text-default: #000000; /* Black for links */
-    --text-hover-bg: #f3f4f6; /* Light gray for hover */
-    --text-button: #4b5563; /* Gray-600 for button */
-    --bg-mobile-menu: #ffffff; /* White for mobile menu */
-  }
-  
-  :where(.dark) {
-    --bg-navbar: #111827; /* Gray-900 for dark mode */
-    --border-navbar: #374151; /* Gray-700 for border */
-    --text-primary: #fdba74; /* Same orange */
-    --text-default: #ffffff; /* White for links */
-    --text-hover-bg: #1f2937; /* Dark gray for hover */
-    --text-button: #9ca3af; /* Gray-300 for button */
-    --bg-mobile-menu: #1f2937; /* Dark gray for mobile menu */
-  }
-  
-  /* Navbar styles */
-  .navbar {
+/* Navbar styles */
+.navbar {
     width: 100%;
     background-color: var(--bg-navbar);
     border-bottom: 1px solid var(--border-navbar);

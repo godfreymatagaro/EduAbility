@@ -1,3 +1,4 @@
+/* src/App.css */
 #root {
   max-width: 1440px;
   margin: 0 auto;
@@ -5,14 +6,15 @@
   text-align: center;
 }
 
-
-
-/* src/App.css */
 .app-container {
   min-height: 100vh;
+}
+
+/* Apply background at the root level */
+:root {
   background-color: #616b62; /* Your custom background */
 }
 
-:where(.dark) .app-container {
+:where(.dark) {
   background-color: #1a202c; /* Dark gray for body */
 }

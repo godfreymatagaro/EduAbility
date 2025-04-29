@@ -1,0 +1,90 @@
+/* src/components/AD.css */
+.ad-section {
+    background-color: var(--bg-search);
+    padding: 3rem 1rem;
+  }
+  
+  .ad-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .ad-content h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--title-card);
+    margin-bottom: 2rem;
+  }
+  
+  .ad-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+  
+  .ad-card {
+    flex: 1;
+    min-width: 200px;
+    max-width: 250px;
+    background-color: var(--bg-card);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 4px var(--shadow);
+  }
+  
+  .ad-icon {
+    width: 2rem;
+    height: 2rem;
+    color: var(--icon-card);
+    margin-bottom: 1rem;
+  }
+  
+  .ad-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--title-card);
+    margin-bottom: 0.5rem;
+  }
+  
+  .ad-card p {
+    font-size: 0.875rem;
+    color: var(--text-card);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .ad-content h2 {
+      font-size: 1.5rem;
+    }
+  
+    .ad-cards {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .ad-card {
+      max-width: 100%;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .ad-section {
+      padding: 2rem 0.5rem;
+    }
+  
+    .ad-content h2 {
+      font-size: 1.25rem;
+    }
+  
+    .ad-card h3 {
+      font-size: 1.125rem;
+    }
+  
+    .ad-card p {
+      font-size: 0.75rem;
+    }
+  }

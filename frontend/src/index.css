@@ -2,27 +2,201 @@
 body {
   font-family: Helvetica, Arial, sans-serif;
   margin: 0;
+  background-color: var(--background-body);
 }
 
 :root {
-  --primary: #fdba74; /* From your navbar */
-  --primary-dark: #e6a664;
-  --secondary: #616b62; /* Page background */
-  --secondary-dark: #4b524a;
-  --highlight: #34c759; /* Green for "Explore Technologies" button */
-  --highlight-dark: #2eb34f;
-  --special: #ffcc00;
-  --special-dark: #e6b800;
-  --outline: #e5e7eb;
-  --outline-dark: #374151;
+  /* General */
+  --background-body: #616b62;
+  --background-body-dark: #1a202c;
+  --background: #ffffff;
+  --background-dark: #111827;
   --text: #333333;
   --text-dark: #d1d5db;
-  --card: #ffffff;
-  --card-dark: #1f2937;
-  --cardText: #000000;
-  --cardText-dark: #ffffff;
+  --text-secondary: #4b5563;
+  --text-secondary-dark: #9ca3af;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow-dark: rgba(255, 255, 255, 0.1);
+
+  /* Navbar */
+  --bg-navbar: #ffffff;
+  --border-navbar: #e5e7eb;
+  --text-primary: #fdba74;
+  --text-primary-dark: #e6a664;
+  --text-default: #000000;
+  --text-hover-bg: #f3f4f6;
+  --text-button: #4b5563;
+  --bg-mobile-menu: #ffffff;
+
+  /* Hero */
+  --bg-hero: #ffffff;
+  --text-hero: #333333;
+  --title-hero: #000000;
+
+  /* SearchArea */
+  --bg-search: #ffffff;
+  --bg-search-bar: #f9fafb;
+  --border-search: #e5e7eb;
+  --icon-search: #6b7280;
+  --text-search: #000000;
+  --bg-results: #ffffff;
+  --border-results: #e5e7eb;
+  --text-results: #000000;
+  --hover-results: #f3f4f6;
+  --bg-card: #f9fafb;
+  --icon-card: #34c759;
+  --title-card: #000000;
+  --text-card: #4b5563;
+
+  /* Stats */
+  --bg-stats: #e6f0fa;
+  --text-stats: #1e40af;
+
+  /* Reviews */
+  --bg-reviews: #ffffff;
+  --title-reviews: #000000;
+  --bg-card-reviews: #f9fafb;
+  --title-card-reviews: #000000;
+  --role-card-reviews: #6b7280;
+  --text-card-reviews: #4b5563;
+  --stars-card-reviews: #fbbf24;
+  --dot: #d1d5db;
+  --dot-active: #6b7280;
+
+  /* CTA */
+  --bg-cta: #ffffff;
+  --title-cta: #000000;
+  --text-cta: #4b5563;
+
+  /* Footer */
+  --bg-footer: #ffffff;
+  --border-footer: #e5e7eb;
+  --title-footer: #000000;
+  --text-footer: #4b5563;
+  --link-footer: #4b5563;
+  --link-hover: #1e40af;
+
+  /* Button */
+  --bg-primary: #fdba74;
+  --bg-primary-hover: #e6a664;
+  --text-primary: #ffffff;
+  --bg-secondary: #616b62;
+  --bg-secondary-hover: #555c53;
+  --text-secondary: #ffffff;
+  --bg-filter: transparent;
+  --text-filter: #333333;
+  --border-filter: #e5e7eb;
+  --bg-filter-hover: rgba(255, 204, 0, 0.1);
+  --bg-filter-selected: #ffcc00;
+  --text-filter-selected: #ffffff;
+  --border-filter-selected: #ffcc00;
+  --bg-filter-selected-hover: #e6b800;
+  --bg-compare: #34c759;
+  --bg-compare-hover: #2eb34f;
+  --text-compare: #ffffff;
+  --bg-outline: transparent;
+  --text-outline: #333333;
+  --border-outline: #e5e7eb;
+  --bg-outline-hover: rgba(229, 231, 235, 0.1);
+  --bg-feedback: #ffffff;
+  --text-feedback: #000000;
+  --bg-feedback-hover: #f0f0f0;
 }
 
 :where(.dark) {
-  /* Define dark mode variables if needed */
+  /* General */
+  --background-body: #1a202c;
+  --background-body-dark: #616b62;
+  --background: #111827;
+  --background-dark: #ffffff;
+  --text: #d1d5db;
+  --text-dark: #333333;
+  --text-secondary: #9ca3af;
+  --text-secondary-dark: #4b5563;
+  --shadow: rgba(255, 255, 255, 0.1);
+  --shadow-dark: rgba(0, 0, 0, 0.1);
+
+  /* Navbar */
+  --bg-navbar: #111827;
+  --border-navbar: #374151;
+  --text-primary: #fdba74;
+  --text-primary-dark: #d09654;
+  --text-default: #ffffff;
+  --text-hover-bg: #1f2937;
+  --text-button: #9ca3af;
+  --bg-mobile-menu: #1f2937;
+
+  /* Hero */
+  --bg-hero: #111827;
+  --text-hero: #d1d5db;
+  --title-hero: #ffffff;
+
+  /* SearchArea */
+  --bg-search: #111827;
+  --bg-search-bar: #374151;
+  --border-search: #4b5563;
+  --icon-search: #9ca3af;
+  --text-search: #ffffff;
+  --bg-results: #1f2937;
+  --border-results: #374151;
+  --text-results: #ffffff;
+  --hover-results: #374151;
+  --bg-card: #374151;
+  --icon-card: #2eb34f;
+  --title-card: #ffffff;
+  --text-card: #d1d5db;
+
+  /* Stats */
+  --bg-stats: #2b4368;
+  --text-stats: #93c5fd;
+
+  /* Reviews */
+  --bg-reviews: #111827;
+  --title-reviews: #ffffff;
+  --bg-card-reviews: #374151;
+  --title-card-reviews: #ffffff;
+  --role-card-reviews: #9ca3af;
+  --text-card-reviews: #d1d5db;
+  --stars-card-reviews: #fbbf24;
+  --dot: #6b7280;
+  --dot-active: #d1d5db;
+
+  /* CTA */
+  --bg-cta: #111827;
+  --title-cta: #ffffff;
+  --text-cta: #d1d5db;
+
+  /* Footer */
+  --bg-footer: #111827;
+  --border-footer: #374151;
+  --title-footer: #ffffff;
+  --text-footer: #d1d5db;
+  --link-footer: #d1d5db;
+  --link-hover: #93c5fd;
+
+  /* Button */
+  --bg-primary: #e6a664;
+  --bg-primary-hover: #d09654;
+  --text-primary: #000000;
+  --bg-secondary: #4b524a;
+  --bg-secondary-hover: #3f453e;
+  --text-secondary: #ffffff;
+  --bg-filter: transparent;
+  --text-filter: #d1d5db;
+  --border-filter: #374151;
+  --bg-filter-hover: rgba(230, 184, 0, 0.1);
+  --bg-filter-selected: #e6b800;
+  --text-filter-selected: #ffffff;
+  --border-filter-selected: #e6b800;
+  --bg-filter-selected-hover: #cc9e00;
+  --bg-compare: #2eb34f;
+  --bg-compare-hover: #29a446;
+  --text-compare: #ffffff;
+  --bg-outline: transparent;
+  --text-outline: #d1d5db;
+  --border-outline: #374151;
+  --bg-outline-hover: rgba(55, 65, 81, 0.1);
+  --bg-feedback: #1f2937;
+  --text-feedback: #ffffff;
+  --bg-feedback-hover: #1a2230;
 }

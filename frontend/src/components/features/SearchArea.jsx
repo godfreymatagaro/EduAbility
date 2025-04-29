@@ -1,3 +1,4 @@
+// src/components/SearchArea.js
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, BarChart2, Users, Shield } from 'lucide-react';
@@ -31,14 +32,43 @@ const SearchArea = () => {
     setLiveResults([]);
   };
 
+  // Search bar animation
   const searchBarVariants = {
     hidden: { width: '50%', opacity: 0 },
     visible: { width: '100%', opacity: 1, transition: { duration: 0.5, ease: 'easeOut' } },
   };
 
+  // Search results animation
   const resultVariants = {
     hidden: { opacity: 0, y: -10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+  };
+
+  // Card container animation for staggering children
+  const cardContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2, // Stagger each card
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  // Individual card animation
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: 'easeOut', type: 'spring', stiffness: 100 },
+    },
+    hover: {
+      scale: 1.05,
+      boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.15)',
+      transition: { duration: 0.3, ease: 'easeOut' },
+    },
   };
 
   return (
@@ -90,23 +120,40 @@ const SearchArea = () => {
           </AnimatePresence>
         </motion.div>
 
-        <div className="search-cards">
-          <div className="search-card">
+        <motion.div
+          className="search-cards"
+          initial="hidden"
+          animate="visible"
+          variants={cardContainerVariants}
+        >
+          <motion.div
+            className="search-card"
+            variants={cardVariants}
+            whileHover="hover"
+          >
             <BarChart2 className="card-icon" />
             <h3>Data-Driven Insights</h3>
             <p>Make informed decisions with comprehensive analytics and evaluation metrics.</p>
-          </div>
-          <div className="search-card">
+          </motion.div>
+          <motion.div
+            className="search-card"
+            variants={cardVariants}
+            whileHover="hover"
+          >
             <Users className="card-icon" />
             <h3>Inclusive Community</h3>
             <p>Join a network of educators committed to accessible education for all students.</p>
-          </div>
-          <div className="search-card">
+          </motion.div>
+          <motion.div
+            className="search-card"
+            variants={cardVariants}
+            whileHover="hover"
+          >
             <Shield className="card-icon" />
             <h3>Trusted Reviews</h3>
             <p>Access verified reviews from educational professionals and institutions.</p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,0 +1,185 @@
+/* src/components/Navbar.css */
+
+/* Root variables for light and dark modes */
+:root {
+    --bg-navbar: #ffffff; /* White for light mode */
+    --border-navbar: #e5e7eb; /* Gray-200 for border */
+    --text-primary: #fdba74; /* Orange for active links */
+    --text-default: #000000; /* Black for links */
+    --text-hover-bg: #f3f4f6; /* Light gray for hover */
+    --text-button: #4b5563; /* Gray-600 for button */
+    --bg-mobile-menu: #ffffff; /* White for mobile menu */
+  }
+  
+  :where(.dark) {
+    --bg-navbar: #111827; /* Gray-900 for dark mode */
+    --border-navbar: #374151; /* Gray-700 for border */
+    --text-primary: #fdba74; /* Same orange */
+    --text-default: #ffffff; /* White for links */
+    --text-hover-bg: #1f2937; /* Dark gray for hover */
+    --text-button: #ffffff; /* White for button */
+    --bg-mobile-menu: #1f2937; /* Dark gray for mobile menu */
+  }
+  
+  /* Navbar styles */
+  .navbar {
+    width: 100%;
+    background-color: var(--bg-navbar);
+    border-bottom: 1px solid var(--border-navbar);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* Ensure navbar stays above content */
+    font-family: Helvetica, Arial, sans-serif;
+  }
+  
+  .navbar-container {
+    max-width: 1280px; /* Equivalent to max-w-7xl */
+    margin: 0 auto;
+    padding: 0.75rem 1rem; /* py-3 px-4 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .navbar-logo {
+    max-height: 90px;
+    width: auto;
+  }
+  
+  .navbar-links {
+    display: none;
+    gap: 1.5rem; /* space-x-6 */
+    font-weight: 600;
+    font-size: 0.875rem; /* text-sm */
+    color: var(--text-default);
+  }
+  
+  @media (min-width: 768px) {
+    .navbar-links {
+      display: flex;
+    }
+  }
+  
+  .navbar-links a {
+    color: var(--text-default);
+    text-decoration: none;
+  }
+  
+  .navbar-links a.active {
+    color: var(--text-primary);
+  }
+  
+  .navbar-theme-toggle {
+    position: relative;
+    padding: 0.5rem; /* p-2 */
+    border-radius: 9999px; /* rounded-full */
+    color: var(--text-button);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  
+  .navbar-theme-toggle:hover {
+    background-color: var(--text-hover-bg);
+  }
+  
+  .navbar-theme-toggle svg {
+    width: 1.25rem; /* w-5 */
+    height: 1.25rem; /* h-5 */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .navbar-theme-toggle .sun {
+    transform: translate(-50%, -50%) scale(0) rotate(90deg);
+  }
+  
+  :where(.dark) .navbar-theme-toggle .sun {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  
+  .navbar-theme-toggle .moon {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  
+  :where(.dark) .navbar-theme-toggle .moon {
+    transform: translate(-50%, -50%) scale(0) rotate(90deg);
+  }
+  
+  /* Mobile menu button */
+  .navbar-menu-button {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 9999px;
+    background: none;
+    border: none;
+    color: var(--text-button);
+    cursor: pointer;
+  }
+  
+  @media (min-width: 768px) {
+    .navbar-menu-button {
+      display: none; /* Hide on medium+ screens */
+    }
+  }
+  
+  .navbar-menu-button svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  /* Mobile menu modal */
+  .navbar-mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-mobile-menu);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000; /* Above navbar */
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .navbar-mobile-menu.open {
+    transform: translateX(0);
+  }
+  
+  .navbar-mobile-menu a {
+    color: var(--text-default);
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 1rem 0;
+  }
+  
+  .navbar-mobile-menu a.active {
+    color: var(--text-primary);
+  }
+  
+  .navbar-mobile-menu-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem;
+    border-radius: 9999px;
+    background: none;
+    border: none;
+    color: var(--text-button);
+    cursor: pointer;
+  }
+  
+  .navbar-mobile-menu-close svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }

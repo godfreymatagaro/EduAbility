@@ -1,0 +1,29 @@
+EA/frontend/
+├── src/
+│   ├── assets/
+│   │   └── images/
+│   │       └── logo.png
+│   │       └── hero-image.png  
+│   ├── hooks/
+│   │   └── useDarkMode.js
+│   ├── components/
+│   │   └── Navbar.jsx
+│   │   └── Navbar.css
+│   │   └── Hero.jsx
+│   │   └── Hero.css
+│   │   └── Button.jsx
+│   ├── pages/
+│   │   └── Home.jsx
+│   │   └── Technologies.jsx
+│   │   └── Compare.jsx
+│   │   └── Feedback.jsx
+│   ├── routes/
+│   │   └── AppRoutes.jsx
+│   ├── App.jsx
+│   ├── App.css
+│   ├── index.css
+│   ├── main.jsx
+├── index.html
+├── package.json
+├── yarn.lock
+├── vite.config.js

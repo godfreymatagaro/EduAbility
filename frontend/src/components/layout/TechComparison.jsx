@@ -122,13 +122,13 @@ const TechComparison = () => {
               <h3>{tech.name}</h3>
               <div className="summary-details">
                 <p>
-                  <strong>Average Rating:</strong> {tech.rating} <Star className="star-icon" />
+                  <strong>Rating:</strong> {tech.rating} <Star className="star-icon" />
                 </p>
                 <p>
-                  <strong>Price Range:</strong> {tech.price}
+                  <strong>Price:</strong> {tech.price}
                 </p>
                 <p>
-                  <strong>Total Reviews:</strong> {tech.reviews}
+                  <strong>Reviews:</strong> {tech.reviews}
                 </p>
               </div>
             </motion.div>

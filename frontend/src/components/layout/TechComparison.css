@@ -144,14 +144,14 @@
     flex: 1;
     background-color: #ffffff;
     border-radius: 0.5rem;
-    padding: 0.75rem;
+    padding: 0.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center;
-    height: 150px; /* Slimmer height */
+    height: 120px; /* Fixed height of 120px */
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-width: 200px; /* Ensure cards don't shrink too much */
+    min-width: 200px; /* Prevent cards from shrinking too much on larger screens */
   }
   
   :where(.dark) .summary-card {
@@ -160,10 +160,10 @@
   }
   
   .summary-card h3 {
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: #000000;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.125rem;
   }
   
   :where(.dark) .summary-card h3 {
@@ -171,9 +171,9 @@
   }
   
   .summary-details p {
-    font-size: 0.75rem;
+    font-size: 0.675rem;
     color: #4b5563;
-    margin: 0.125rem 0;
+    margin: 0.1rem 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -200,8 +200,8 @@
   }
   
   .star-icon {
-    width: 0.875rem;
-    height: 0.875rem;
+    width: 0.75rem;
+    height: 0.75rem;
     fill: #f59e0b;
   }
   
@@ -634,20 +634,21 @@
     }
   
     .summary-card {
-      height: 130px; /* Slightly smaller on medium devices */
+      width: 100%;
+      padding: 0.5rem;
     }
   
     .summary-card h3 {
-      font-size: 0.875rem;
+      font-size: 0.75rem;
     }
   
     .summary-details p {
-      font-size: 0.675rem;
+      font-size: 0.625rem;
     }
   
     .star-icon {
-      width: 0.75rem;
-      height: 0.75rem;
+      width: 0.625rem;
+      height: 0.625rem;
     }
   }
   
@@ -667,20 +668,21 @@
     }
   
     .summary-card {
-      height: 120px; /* Even slimmer on small devices */
+      width: 100%;
+      padding: 0.5rem;
     }
   
     .summary-card h3 {
-      font-size: 0.75rem;
+      font-size: 0.675rem;
     }
   
     .summary-details p {
-      font-size: 0.625rem;
+      font-size: 0.5625rem;
     }
   
     .star-icon {
-      width: 0.625rem;
-      height: 0.625rem;
+      width: 0.5625rem;
+      height: 0.5625rem;
     }
   
     .modal-content {

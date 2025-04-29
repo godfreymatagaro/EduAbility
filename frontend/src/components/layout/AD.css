@@ -1,7 +1,11 @@
 /* src/components/AD.css */
 .ad-section {
-    background-color: var(--bg-search);
+    background-color: #ffffff;
     padding: 3rem 1rem;
+  }
+  
+  :where(.dark) .ad-section {
+    background-color: #111827;
   }
   
   .ad-content {
@@ -13,8 +17,12 @@
   .ad-content h2 {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--title-card);
+    color: #000000;
     margin-bottom: 2rem;
+  }
+  
+  :where(.dark) .ad-content h2 {
+    color: #ffffff;
   }
   
   .ad-cards {
@@ -29,30 +37,47 @@
     flex: 1;
     min-width: 200px;
     max-width: 250px;
-    background-color: var(--bg-card);
+    background-color: #f9fafb;
     border-radius: 0.5rem;
     padding: 1.5rem;
     text-align: center;
-    box-shadow: 0 2px 4px var(--shadow);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  :where(.dark) .ad-card {
+    background-color: #374151;
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
   }
   
   .ad-icon {
     width: 2rem;
     height: 2rem;
-    color: var(--icon-card);
+    color: #34c759;
     margin-bottom: 1rem;
+  }
+  
+  :where(.dark) .ad-icon {
+    color: #2eb34f;
   }
   
   .ad-card h3 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--title-card);
+    color: #000000;
     margin-bottom: 0.5rem;
+  }
+  
+  :where(.dark) .ad-card h3 {
+    color: #ffffff;
   }
   
   .ad-card p {
     font-size: 0.875rem;
-    color: var(--text-card);
+    color: #4b5563;
+  }
+  
+  :where(.dark) .ad-card p {
+    color: #d1d5db;
   }
   
   /* Responsive adjustments */

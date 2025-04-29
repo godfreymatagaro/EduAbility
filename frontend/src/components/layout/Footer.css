@@ -3,6 +3,7 @@
     background-color: #ffffff;
     padding: 3rem 1rem;
     border-top: 1px solid #e5e7eb;
+    
   }
   
   :where(.dark) .footer-section {
@@ -17,6 +18,8 @@
     flex-wrap: wrap;
     gap: 2rem;
     justify-content: space-between;
+    max-width: 800px;
+    margin: 0 auto;
   }
   
   .footer-column {

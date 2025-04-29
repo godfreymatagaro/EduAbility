@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronRight, Tag, Monitor, User, Plus, FileText, Headphones, Facebook, Twitter, Instagram } from 'lucide-react';
+import { ChevronRight, Tag, Monitor, User, Plus, FileText, Headphones } from 'lucide-react';
 import { motion } from 'framer-motion';
 import './TechDetails.css';
 
@@ -53,11 +53,6 @@ const TechDetails = () => {
   const cardVariants = {
     rest: { scale: 1 },
     hover: { scale: 1.05, transition: { duration: 0.3 } },
-  };
-
-  const linkVariants = {
-    rest: { x: 0 },
-    hover: { x: 5, transition: { duration: 0.2 } },
   };
 
   return (
@@ -188,12 +183,14 @@ const TechDetails = () => {
               initial="rest"
               whileHover="hover"
             >
-              <FileText className="resource-icon" />
+              <div className="resource-icon-wrapper blue-bg">
+                <FileText className="resource-icon" />
+              </div>
               <h3>Documentation</h3>
               <ul>
-                <li>User Manual (PDF)</li>
-                <li>Video Tutorials</li>
-                <li>Keyboard Shortcuts Guide</li>
+                <li><span className="emoji">📘</span> User Manual (PDF)</li>
+                <li><span className="emoji">🎥</span> Video Tutorials</li>
+                <li><span className="emoji">⌨️</span> Keyboard Shortcuts Guide</li>
               </ul>
             </motion.div>
             <motion.div
@@ -202,16 +199,17 @@ const TechDetails = () => {
               initial="rest"
               whileHover="hover"
             >
-              <Headphones className="resource-icon" />
+              <div className="resource-icon-wrapper green-bg">
+                <Headphones className="resource-icon" />
+              </div>
               <h3>Support</h3>
               <ul>
-                <li>Community Forum</li>
-                <li>Technical Support</li>
-                <li>Training Programs</li>
+                <li><span className="emoji">💬</span> Community Forum</li>
+                <li><span className="emoji">🛠️</span> Technical Support</li>
+                <li><span className="emoji">📚</span> Training Programs</li>
               </ul>
             </motion.div>
           </div>
-        
         </motion.div>
       </div>
     </section>

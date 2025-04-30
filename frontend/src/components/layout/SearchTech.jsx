@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, ChevronDown, Star, X, ChevronLeft, ChevronRight, Eye, Ear, Keyboard, Brain } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, ChevronDown, Star, X, ChevronLeft, ChevronRight, Eye, Ear, Keyboard, Brain, History } from 'lucide-react';
 import Button from '../common/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import './SearchTech.css';
@@ -14,10 +14,10 @@ const API_URL =
 // Fallback if environment variables are not set
 const finalAPI_URL = API_URL || (import.meta.env.MODE === "production" ? "https://eduability.onrender.com" : "http://localhost:3000");
 
-console.log('MODE:', import.meta.env.MODE); // Debug log
-console.log('VITE_API_PROD_BACKEND_URL:', import.meta.env.VITE_API_PROD_BACKEND_URL); // Debug log
-console.log('VITE_API_DEV_BACKEND_URL:', import.meta.env.VITE_API_DEV_BACKEND_URL); // Debug log
-console.log('Final API_URL:', finalAPI_URL); // Debug log
+console.log('MODE:', import.meta.env.MODE);
+console.log('VITE_API_PROD_BACKEND_URL:', import.meta.env.VITE_API_PROD_BACKEND_URL);
+console.log('VITE_API_DEV_BACKEND_URL:', import.meta.env.VITE_API_DEV_BACKEND_URL);
+console.log('Final API_URL:', finalAPI_URL);
 
 const SearchTech = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,8 +43,18 @@ const SearchTech = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [technologies, setTechnologies] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
+  const [searchHistory, setSearchHistory] = useState([]); // Added for recent searches
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const searchInputRef = useRef(null);
+  const modalRef = useRef(null);
+  const navigate = useNavigate();
+
+  // Load search history from localStorage on mount
+  useEffect(() => {
+    const storedHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
+    setSearchHistory(storedHistory);
+  }, []);
 
   // Fetch technologies on component mount
   useEffect(() => {
@@ -80,9 +90,52 @@ const SearchTech = () => {
     fetchTechnologies();
   }, []);
 
+  // Fetch search results (with client-side fallback)
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      try {
+        console.log('Fetching search results from:', `${finalAPI_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
+        const response = await fetch(`${finalAPI_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
+        if (!response.ok) {
+          console.log('Search endpoint failed with status:', response.status, 'Falling back to client-side filtering');
+          const filteredResults = technologies.filter(tech =>
+            tech.name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+          setSearchResults(filteredResults);
+          return;
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const errorText = await response.text();
+          console.log('Non-JSON response:', errorText);
+          throw new Error('Response is not JSON');
+        }
+        const data = await response.json();
+        setSearchResults(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Search error:', err);
+        setError(err.message);
+        const filteredResults = technologies.filter(tech =>
+          tech.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setSearchResults(filteredResults);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSearchResults();
+  }, [searchQuery, technologies]);
+
   // Apply filters and sorting to technologies
   const filteredTechnologies = technologies.filter((tech) => {
-    // Category filter
     const categoryMatch = Object.keys(categoryFilters).some(
       (key) => categoryFilters[key] && tech.category && tech.category.toLowerCase() === key
     );
@@ -90,7 +143,6 @@ const SearchTech = () => {
       return false;
     }
 
-    // Cost filter
     let costMatch = true;
     if (Object.values(costFilters).some(Boolean)) {
       costMatch = false;
@@ -101,7 +153,6 @@ const SearchTech = () => {
     }
     if (!costMatch) return false;
 
-    // Rating filter
     const avgRating = tech.coreVitals?.featuresRating || 0;
     const ratingMatch = Object.keys(ratingFilters).every((key) => {
       if (ratingFilters[key]) {
@@ -127,7 +178,6 @@ const SearchTech = () => {
       const ratingB = b.coreVitals?.featuresRating || 0;
       return ratingB - ratingA;
     }
-    // Default: Most Popular (sort by name for simplicity)
     return a.name.localeCompare(b.name);
   });
 
@@ -139,43 +189,43 @@ const SearchTech = () => {
     currentPage * itemsPerPage
   );
 
-  // Fetch search results (fallback to client-side filtering due to 404)
-  const handleSearch = async () => {
-    if (searchQuery.trim()) {
-      setIsSearchModalOpen(true);
-      setLoading(true);
-      setError(null);
-      try {
-        console.log('Fetching search results from:', `${finalAPI_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
-        const response = await fetch(`${finalAPI_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
-        if (!response.ok) {
-          // Fallback to client-side filtering if the search endpoint fails
-          console.log('Search endpoint failed with status:', response.status, 'Falling back to client-side filtering');
-          const filteredResults = technologies.filter(tech =>
-            tech.name.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-          setSearchResults(filteredResults);
-          return;
-        }
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          const errorText = await response.text();
-          console.log('Non-JSON response:', errorText);
-          throw new Error('Response is not JSON');
-        }
-        const data = await response.json();
-        setSearchResults(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error('Search error:', err);
-        setError(err.message);
-        // Fallback to client-side filtering on error
-        const filteredResults = technologies.filter(tech =>
-          tech.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setSearchResults(filteredResults);
-      } finally {
-        setLoading(false);
-      }
+  // Handle search history and navigation
+  const handleSelectItem = (item) => {
+    if (typeof item === 'string') {
+      setSearchQuery(item);
+      const updatedHistory = [item, ...searchHistory.filter((term) => term !== item)].slice(0, 5);
+      setSearchHistory(updatedHistory);
+      localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+      setIsSearchModalOpen(false);
+    } else {
+      setSearchQuery(item.name);
+      const updatedHistory = [item.name, ...searchHistory.filter((term) => term !== item.name)].slice(0, 5);
+      setSearchHistory(updatedHistory);
+      localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+      setIsSearchModalOpen(false);
+      navigate(`/tech-details/${item._id}`);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setIsSearchModalOpen(false);
+  };
+
+  // Focus management for accessibility
+  useEffect(() => {
+    if (isSearchModalOpen) {
+      modalRef.current?.focus();
+    } else {
+      searchInputRef.current?.focus();
+    }
+  }, [isSearchModalOpen]);
+
+  // Handle keyboard navigation for modal
+  const handleModalKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      setIsSearchModalOpen(false);
     }
   };
 
@@ -212,19 +262,9 @@ const SearchTech = () => {
   };
 
   const modalVariants = {
-    hidden: { opacity: 0, scale: 0.8, y: -50 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: 'easeOut' },
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.8,
-      y: 50,
-      transition: { duration: 0.3, ease: 'easeIn' },
-    },
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+    exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: 'easeOut' } },
   };
 
   const handleCategoryChange = (filter) => {
@@ -273,16 +313,96 @@ const SearchTech = () => {
         <div className="search-tech-header">
           <div className="search-bar-wrapper">
             <div className="search-bar">
-              <Search className="search-icon" />
+              <Search className="search-icon" aria-hidden="true" />
               <input
+                ref={searchInputRef}
                 type="text"
                 className="search-input"
                 placeholder="Search technologies..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                onClick={() => setIsSearchModalOpen(true)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim()) {
+                    const updatedHistory = [searchQuery, ...searchHistory.filter((term) => term !== searchQuery)].slice(0, 5);
+                    setSearchHistory(updatedHistory);
+                    localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+                  }
+                }}
+                aria-label="Search technologies"
               />
+              {searchQuery && (
+                <button onClick={handleClearSearch} className="search-clear" aria-label="Clear search">
+                  <X />
+                </button>
+              )}
             </div>
+            {/* YouTube-style Search Results Dropdown */}
+            <AnimatePresence>
+              {isSearchModalOpen && (
+                <motion.div
+                  className="search-modal"
+                  ref={modalRef}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  variants={modalVariants}
+                  onKeyDown={handleModalKeyDown}
+                  role="dialog"
+                  aria-labelledby="search-modal-title"
+                  tabIndex={0}
+                >
+                  <div className="search-modal-content">
+                    {/* Real-Time Results */}
+                    {searchQuery && (
+                      <div className="search-results-section">
+                        <h3>Results</h3>
+                        {loading && <p>Loading...</p>}
+                        {error && <p className="error-message">Error: {error}</p>}
+                        {!loading && !error && searchResults.length === 0 && (
+                          <p>No results found.</p>
+                        )}
+                        {searchResults.map((result, index) => (
+                          <div
+                            key={index}
+                            className="search-result-item"
+                            onClick={() => handleSelectItem(result)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSelectItem(result)}
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`Select ${result.name}`}
+                          >
+                            <span>{result.name}</span>
+                            <span className="result-category">({result.category})</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Search History */}
+                    <div className="search-history-section">
+                      <h3>
+                        <History className="history-icon" aria-hidden="true" /> Recent Searches
+                      </h3>
+                      {searchHistory.length === 0 && <p>No recent searches.</p>}
+                      {searchHistory.map((term, index) => (
+                        <div
+                          key={index}
+                          className="search-history-item"
+                          onClick={() => handleSelectItem(term)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSelectItem(term)}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`Select recent search: ${term}`}
+                        >
+                          {term}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           <div className="sort-by">
             <label>Sort by:</label>
@@ -489,60 +609,6 @@ const SearchTech = () => {
           </div>
         </div>
       </div>
-
-      {/* Search Results Modal */}
-      <AnimatePresence>
-        {isSearchModalOpen && (
-          <motion.div
-            className="modal-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsSearchModalOpen(false)}
-          >
-            <motion.div
-              className="modal-content"
-              variants={modalVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                className="modal-close"
-                onClick={() => setIsSearchModalOpen(false)}
-              >
-                <X className="modal-close-icon" />
-              </button>
-              <h2>Search Results for "{searchQuery}"</h2>
-              <div className="modal-results">
-                {loading && <p>Loading search results...</p>}
-                {error && <p className="error-message">Error: {error}</p>}
-                {!loading && !error && searchResults.length === 0 && (
-                  <p>No results found for "{searchQuery}".</p>
-                )}
-                {searchResults.map((tech) => (
-                  <div key={tech._id} className="modal-result-item">
-                    <h3>{tech.name}</h3>
-                    <p>{tech.description}</p>
-                    <div className="modal-result-actions">
-                      <Link to={`/tech-details/${tech._id}`}>
-                        <Button
-                          variant="filled"
-                          size="sm"
-                          ariaLabel={`Learn more about ${tech.name}`}
-                        >
-                          Learn More
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Sort Options Modal */}
       <AnimatePresence>

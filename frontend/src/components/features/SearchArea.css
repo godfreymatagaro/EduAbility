@@ -222,6 +222,8 @@
   flex-wrap: wrap;
   gap: 1.5rem;
   justify-content: center;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .search-card {
@@ -234,6 +236,7 @@
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+ 
 }
 
 :where(.dark) .search-card {

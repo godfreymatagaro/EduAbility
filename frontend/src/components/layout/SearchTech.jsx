@@ -6,9 +6,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import './SearchTech.css';
 
 // Determine the API URL based on the environment
-const API_URL = import.meta.env.NODE_ENV === 'production'
-  ? import.meta.env.VITE_API_PROD_BACKEND_URL
-  : import.meta.env.VITE_API_DEV_BACKEND_URL;
+const API_URL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_API_PROD_BACKEND_URL
+    : import.meta.env.VITE_API_DEV_BACKEND_URL;
+
+// Fallback if environment variables are not set
+const finalAPI_URL = API_URL || (import.meta.env.MODE === "production" ? "https://eduability.onrender.com" : "http://localhost:3000");
+
+console.log('MODE:', import.meta.env.MODE); // Debug log
+console.log('VITE_API_PROD_BACKEND_URL:', import.meta.env.VITE_API_PROD_BACKEND_URL); // Debug log
+console.log('VITE_API_DEV_BACKEND_URL:', import.meta.env.VITE_API_DEV_BACKEND_URL); // Debug log
+console.log('Final API_URL:', finalAPI_URL); // Debug log
 
 const SearchTech = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,8 +52,8 @@ const SearchTech = () => {
       setLoading(true);
       setError(null);
       try {
-        console.log('Fetching technologies from:', `${API_URL}/api/technologies`);
-        const response = await fetch(`${API_URL}/api/technologies`);
+        console.log('Fetching technologies from:', `${finalAPI_URL}/api/technologies`);
+        const response = await fetch(`${finalAPI_URL}/api/technologies`);
         if (!response.ok) {
           const errorText = await response.text();
           console.log('Non-OK response:', response.status, errorText);
@@ -137,8 +146,8 @@ const SearchTech = () => {
       setLoading(true);
       setError(null);
       try {
-        console.log('Fetching search results from:', `${API_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
-        const response = await fetch(`${API_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
+        console.log('Fetching search results from:', `${finalAPI_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
+        const response = await fetch(`${finalAPI_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
         if (!response.ok) {
           // Fallback to client-side filtering if the search endpoint fails
           console.log('Search endpoint failed with status:', response.status, 'Falling back to client-side filtering');

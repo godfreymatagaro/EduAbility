@@ -1,48 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { ChevronRight, Tag, Monitor, User, Plus, FileText, Headphones } from 'lucide-react';
 import { motion } from 'framer-motion';
 import './TechDetails.css';
 
+// Determine the API URL based on the environment
+const API_URL = import.meta.env.NODE_ENV === 'production'
+  ? import.meta.env.VITE_API_PROD_BACKEND_URL
+  : import.meta.env.VITE_API_DEV_BACKEND_URL;
+
 const TechDetails = () => {
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState('Details');
+  const [techDetails, setTechDetails] = useState(null);
+  const [relatedTechnologies, setRelatedTechnologies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const techDetails = {
-    name: 'JAWS Screen Reader',
-    logo: 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg',
-    description:
-      'JAWS (Job Access With Speech) is a computer screen reader program for Microsoft Windows that allows blind and visually impaired users to read the screen either with a text-to-speech output or by a refreshable Braille display.',
-    features: [
-      'Advanced web navigation',
-      'Multiple language support',
-      'Customizable keyboard commands',
-      'Braille display compatibility',
-    ],
-    systemRequirements: ['Windows 10 or later', '4 GB RAM minimum', '1.5 GB hard disk space'],
-    latestVersion: '2025.2',
-    platform: 'Windows',
-    developer: 'Freedom Scientific',
-  };
+  // Hardcoded JWT token
+  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNzU1N2U4Yi0wMmYzLTQyYmQtYTkwNi1jZmU2NDk5NzdkMGYiLCJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDU5OTEzNTcsImV4cCI6MTc0NjA3Nzc1N30.EFnagJsRqlnab0znRF1b6E6UladFwjubZCCKIm0Vtxo';
 
-  const relatedTechnologies = [
-    {
-      id: 1,
-      name: 'NVDA Screen Reader',
-      description: 'Free, open-source screen reader for Windows.',
-      image: 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg',
-    },
-    {
-      id: 2,
-      name: 'VoiceOver',
-      description: 'Built-in screen reader for Apple devices.',
-      image: 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg',
-    },
-    {
-      id: 3,
-      name: 'TalkBack',
-      description: "Android's built-in screen reader.",
-      image: 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg',
-    },
-  ];
+  // Fetch technology details and related technologies
+  useEffect(() => {
+    const fetchTechDetails = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        console.log(`Fetching tech details for ID: ${id}`); // Debug log
+        console.log(`API URL: ${API_URL}/api/technologies/${id}`); // Debug log
+
+        // Fetch the specific technology
+        const techResponse = await fetch(`${API_URL}/api/technologies/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!techResponse.ok) {
+          throw new Error(`Failed to fetch technology details: ${techResponse.status} ${techResponse.statusText}`);
+        }
+        const techData = await techResponse.json();
+        console.log('Tech Details Response:', techData); // Debug log
+        setTechDetails(techData);
+
+        // Fetch related technologies (same category, excluding current tech)
+        if (techData?.category) {
+          console.log(`Fetching related technologies for category: ${techData.category}`); // Debug log
+          const relatedResponse = await fetch(
+            `${API_URL}/api/technologies?category=${techData.category}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
+            }
+          );
+          if (!relatedResponse.ok) {
+            throw new Error(`Failed to fetch related technologies: ${relatedResponse.status} ${relatedResponse.statusText}`);
+          }
+          const relatedData = await relatedResponse.json();
+          console.log('Related Technologies Response:', relatedData); // Debug log
+          // Exclude the current technology and limit to 3
+          const filteredRelated = relatedData
+            .filter((tech) => tech._id !== id)
+            .slice(0, 3);
+          setRelatedTechnologies(filteredRelated);
+        } else {
+          setRelatedTechnologies([]);
+        }
+      } catch (err) {
+        console.error('Error fetching tech details:', err); // Debug log
+        setError(err.message);
+        setTechDetails(null);
+        setRelatedTechnologies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTechDetails();
+  }, [id]);
 
   // Framer Motion variants for animations
   const sectionVariants = {
@@ -55,6 +90,10 @@ const TechDetails = () => {
     hover: { scale: 1.05, transition: { duration: 0.3 } },
   };
 
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p className="error-message">Error: {error}</p>;
+  if (!techDetails) return <p>Technology not found.</p>;
+
   return (
     <section className="tech-details-section">
       <div className="tech-details-container">
@@ -64,8 +103,8 @@ const TechDetails = () => {
             Technologies
           </a>
           <ChevronRight className="breadcrumb-icon" />
-          <a href="/technologies/jaws" className="breadcrumb-link">
-            JAWS
+          <a href={`/tech-details/${techDetails._id}`} className="breadcrumb-link">
+            {techDetails.name}
           </a>
           <ChevronRight className="breadcrumb-icon" />
           <span className="breadcrumb-current">{techDetails.name}</span>
@@ -76,22 +115,22 @@ const TechDetails = () => {
           <div className="tech-image-info-card">
             <div className="tech-image-info">
               <div className="tech-image">
-                <img src={techDetails.logo} alt={`${techDetails.name} logo`} />
+                <img src={techDetails.logo || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'} alt={`${techDetails.name} logo`} />
               </div>
               <div className="tech-info">
                 <h1 className="tech-title">{techDetails.name}</h1>
                 <div className="tech-meta">
                   <p>
                     <Tag className="meta-icon" />
-                    <span><strong>Latest Version:</strong> {techDetails.latestVersion}</span>
+                    <span><strong>Latest Version:</strong> {techDetails.version || 'N/A'}</span>
                   </p>
                   <p>
                     <Monitor className="meta-icon" />
-                    <span><strong>Platform:</strong> {techDetails.platform}</span>
+                    <span><strong>Platform:</strong> {techDetails.platform || 'N/A'}</span>
                   </p>
                   <p>
                     <User className="meta-icon" />
-                    <span><strong>Developer:</strong> {techDetails.developer}</span>
+                    <span><strong>Developer:</strong> {techDetails.developer || 'N/A'}</span>
                   </p>
                 </div>
                 <div className="tech-actions">
@@ -122,11 +161,11 @@ const TechDetails = () => {
               <div className="tab-content">
                 {activeTab === 'Details' && (
                   <div className="tab-pane">
-                    <p>{techDetails.description}</p>
+                    <p>{techDetails.description || 'No description available.'}</p>
                     <div className="tech-features">
                       <h3>Key Features</h3>
                       <ul>
-                        {techDetails.features.map((feature, index) => (
+                        {(techDetails.keyFeatures ? techDetails.keyFeatures.split(', ') : []).map((feature, index) => (
                           <li key={index}>{feature}</li>
                         ))}
                       </ul>
@@ -134,7 +173,7 @@ const TechDetails = () => {
                     <div className="tech-requirements">
                       <h3>System Requirements</h3>
                       <ul>
-                        {techDetails.systemRequirements.map((req, index) => (
+                        {(techDetails.systemRequirements ? techDetails.systemRequirements.split(', ') : []).map((req, index) => (
                           <li key={index}>{req}</li>
                         ))}
                       </ul>
@@ -143,7 +182,20 @@ const TechDetails = () => {
                 )}
                 {activeTab === 'Evaluation' && (
                   <div className="tab-pane">
-                    <p>No evaluation available yet.</p>
+                    <h3>Core Vitals</h3>
+                    <ul>
+                      <li>Features Rating: {techDetails.coreVitals?.featuresRating || 'N/A'}</li>
+                      <li>Ease of Use: {techDetails.coreVitals?.easeOfUse || 'N/A'}</li>
+                      <li>Customer Support: {techDetails.coreVitals?.customerSupport || 'N/A'}</li>
+                      <li>Value for Money: {techDetails.coreVitals?.valueForMoney || 'N/A'}</li>
+                    </ul>
+                    <h3>Feature Comparison</h3>
+                    <ul>
+                      <li>Security: {techDetails.featureComparison?.security ? 'Yes' : 'No'}</li>
+                      <li>Integration: {techDetails.featureComparison?.integration ? 'Yes' : 'No'}</li>
+                      <li>Support: {techDetails.featureComparison?.support ? 'Yes' : 'No'}</li>
+                    </ul>
+                    <p>{techDetails.evaluation || 'No additional evaluation available.'}</p>
                   </div>
                 )}
               </div>
@@ -156,12 +208,12 @@ const TechDetails = () => {
           <h2>Related Technologies</h2>
           <div className="related-tech-grid">
             {relatedTechnologies.map((tech) => (
-              <div key={tech.id} className="related-tech-card">
-                <img src={tech.image} alt={`${tech.name} logo`} className="related-tech-image" />
+              <div key={tech._id} className="related-tech-card">
+                <img src={tech.logo || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'} alt={`${tech.name} logo`} className="related-tech-image" />
                 <div className="related-tech-content">
                   <h3>{tech.name}</h3>
                   <p>{tech.description}</p>
-                  <button className="learn-more-button">Learn More</button>
+                  <a href={`/tech-details/${tech._id}`} className="learn-more-button">Learn More</a>
                 </div>
               </div>
             ))}

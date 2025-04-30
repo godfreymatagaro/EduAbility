@@ -16,7 +16,7 @@ const SearchTech = () => {
     visual: false,
     auditory: false,
     physical: false,
-    cognitive: false, // Added cognitive to match backend categories
+    cognitive: false,
   });
   const [costFilters, setCostFilters] = useState({
     free: false,
@@ -72,7 +72,7 @@ const SearchTech = () => {
   const filteredTechnologies = technologies.filter((tech) => {
     // Category filter
     const categoryMatch = Object.keys(categoryFilters).some(
-      (key) => categoryFilters[key] && tech.category.toLowerCase() === key
+      (key) => categoryFilters[key] && tech.category && tech.category.toLowerCase() === key
     );
     if (Object.values(categoryFilters).some(Boolean) && !categoryMatch) {
       return false;
@@ -83,9 +83,9 @@ const SearchTech = () => {
     if (Object.values(costFilters).some(Boolean)) {
       costMatch = false;
       if (costFilters.free && tech.cost === 'free') costMatch = true;
-      if (costFilters.low && tech.cost === 'paid' && parseFloat(tech.price) <= 50) costMatch = true;
-      if (costFilters.medium && tech.cost === 'paid' && parseFloat(tech.price) > 50 && parseFloat(tech.price) <= 200) costMatch = true;
-      if (costFilters.high && tech.cost === 'paid' && parseFloat(tech.price) > 200) costMatch = true;
+      if (costFilters.low && tech.cost === 'paid' && parseFloat(tech.price || 0) <= 50) costMatch = true;
+      if (costFilters.medium && tech.cost === 'paid' && parseFloat(tech.price || 0) > 50 && parseFloat(tech.price || 0) <= 200) costMatch = true;
+      if (costFilters.high && tech.cost === 'paid' && parseFloat(tech.price || 0) > 200) costMatch = true;
     }
     if (!costMatch) return false;
 
@@ -113,7 +113,7 @@ const SearchTech = () => {
       const ratingB = b.coreVitals?.featuresRating || 0;
       return ratingB - ratingA;
     }
-    // Default: Most Popular (for now, sort by ID or name)
+    // Default: Most Popular (for now, sort by name)
     return a.name.localeCompare(b.name);
   });
 
@@ -204,7 +204,7 @@ const SearchTech = () => {
       ...prev,
       [filter]: !prev[filter],
     }));
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const handleCostChange = (filter) => {
@@ -393,7 +393,7 @@ const SearchTech = () => {
                 >
                   <h3>{tech.name}</h3>
                   <p>{tech.description}</p>
-                  <Link to={`/tech/${tech._id}`}>
+                  <Link to={`/tech-details/${tech._id}`}>
                     <Button
                       variant="filled"
                       size="md"
@@ -495,7 +495,7 @@ const SearchTech = () => {
                   <div key={tech._id} className="modal-result-item">
                     <h3>{tech.name}</h3>
                     <p>{tech.description}</p>
-                    <Link to={`/tech/${tech._id}`}>
+                    <Link to={`/tech-details/${tech._id}`}>
                       <Button
                         variant="filled"
                         size="sm"

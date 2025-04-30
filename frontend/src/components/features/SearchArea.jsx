@@ -18,15 +18,22 @@ const SearchArea = () => {
   const [error, setError] = useState(null);
   const searchInputRef = useRef(null);
   const modalRef = useRef(null);
+  const firstFocusableRef = useRef(null);
+  const lastFocusableRef = useRef(null);
   const navigate = useNavigate();
 
-  // Load search history from localStorage on mount
+  // Auto-focus input on mount
+  useEffect(() => {
+    searchInputRef.current?.focus();
+  }, []);
+
+  // Load search history from localStorage
   useEffect(() => {
     const storedHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
     setSearchHistory(storedHistory);
   }, []);
 
-  // Fetch real-time search results from API
+  // Fetch real-time search results
   useEffect(() => {
     const fetchResults = async () => {
       if (!searchTerm.trim()) {
@@ -73,7 +80,27 @@ const SearchArea = () => {
     };
   }, []);
 
-  // Handle search submission (e.g., Enter key)
+  // Focus trap for modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isModalOpen) return;
+
+      if (e.key === 'Tab') {
+        if (e.shiftKey && document.activeElement === firstFocusableRef.current) {
+          e.preventDefault();
+          lastFocusableRef.current?.focus();
+        } else if (!e.shiftKey && document.activeElement === lastFocusableRef.current) {
+          e.preventDefault();
+          firstFocusableRef.current?.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
+
+  // Handle search submission
   const handleSearch = () => {
     if (searchTerm.trim()) {
       const updatedHistory = [searchTerm, ...searchHistory.filter((term) => term !== searchTerm)].slice(0, 5);
@@ -86,16 +113,10 @@ const SearchArea = () => {
     setSearchTerm('');
     setLiveResults([]);
     setIsModalOpen(false);
+    searchInputRef.current?.focus();
   };
 
-  // Focus management for accessibility
-  useEffect(() => {
-    if (isModalOpen && modalRef.current) {
-      modalRef.current.focus();
-    }
-  }, [isModalOpen]);
-
-  // Handle keyboard navigation for modal
+  // Handle modal keyboard interactions
   const handleModalKeyDown = (e) => {
     if (e.key === 'Escape') {
       setIsModalOpen(false);
@@ -103,7 +124,7 @@ const SearchArea = () => {
     }
   };
 
-  // Select a history item or result and redirect if it's a result
+  // Select a history item or result
   const handleSelectItem = (item) => {
     if (typeof item === 'string') {
       setSearchTerm(item);
@@ -122,32 +143,26 @@ const SearchArea = () => {
     searchInputRef.current?.focus();
   };
 
-  // Search bar animation
+  // Animation variants
   const searchBarVariants = {
     hidden: { width: '50%', opacity: 0 },
     visible: { width: '100%', opacity: 1, transition: { duration: 0.5, ease: 'easeOut' } },
   };
 
-  // Modal animation
   const modalVariants = {
     hidden: { opacity: 0, y: -20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
     exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: 'easeOut' } },
   };
 
-  // Card container animation for staggering children
   const cardContainerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3,
-      },
+      transition: { staggerChildren: 0.2, delayChildren: 0.3 },
     },
   };
 
-  // Individual card animation
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -171,11 +186,12 @@ const SearchArea = () => {
           animate="visible"
           variants={searchBarVariants}
         >
-          <div className="search-bar">
+          <div className="search-bar" role="search">
             <Search className="search-icon" aria-hidden="true" />
             <input
               ref={searchInputRef}
               type="text"
+              id="search-input"
               placeholder="Search assistive technologies"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -184,15 +200,25 @@ const SearchArea = () => {
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               className="search-input"
               aria-label="Search assistive technologies"
+              aria-describedby="search-instructions"
+              aria-expanded={isModalOpen}
+              aria-controls="search-modal"
             />
+            <span id="search-instructions" className="visually-hidden">
+              Type to search assistive technologies. Press Enter to submit. Use arrow keys to navigate results.
+            </span>
             {searchTerm && (
-              <button onClick={handleClear} className="search-clear" aria-label="Clear search">
+              <button
+                ref={firstFocusableRef}
+                onClick={handleClear}
+                className="search-clear"
+                aria-label="Clear search input"
+              >
                 <X />
               </button>
             )}
           </div>
 
-          {/* Modal for Results and History */}
           <AnimatePresence>
             {isModalOpen && (
               <motion.div
@@ -205,15 +231,21 @@ const SearchArea = () => {
                 onKeyDown={handleModalKeyDown}
                 role="dialog"
                 aria-labelledby="search-modal-title"
-                tabIndex={0}
+                tabIndex={-1}
               >
-                <div className="search-modal-content">
-                  {/* Real-Time Results */}
+                <h2 id="search-modal-title" className="visually-hidden">
+                  Search Results and History
+                </h2>
+                <div className="search-modal-content" aria-live="polite">
                   {searchTerm && (
                     <div className="search-results-section">
                       <h3>Results</h3>
                       {loading && <p>Loading...</p>}
-                      {error && <p className="error-message">Error: {error}</p>}
+                      {error && (
+                        <p className="error-message" aria-live="assertive">
+                          Error: {error}. Please try again.
+                        </p>
+                      )}
                       {!loading && !error && liveResults.length === 0 && (
                         <p>No results found.</p>
                       )}
@@ -224,8 +256,9 @@ const SearchArea = () => {
                           onClick={() => handleSelectItem(result)}
                           onKeyPress={(e) => e.key === 'Enter' && handleSelectItem(result)}
                           tabIndex={0}
-                          role="button"
-                          aria-label={`Select ${result.name}`}
+                          role="option"
+                          aria-selected={false}
+                          ref={index === liveResults.length - 1 && !searchHistory.length ? lastFocusableRef : null}
                         >
                           <span>{result.name}</span>
                           <span className="result-category">({result.category})</span>
@@ -234,7 +267,6 @@ const SearchArea = () => {
                     </div>
                   )}
 
-                  {/* Search History */}
                   <div className="search-history-section">
                     <h3>
                       <History className="history-icon" aria-hidden="true" /> Recent Searches
@@ -247,8 +279,9 @@ const SearchArea = () => {
                         onClick={() => handleSelectItem(term)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSelectItem(term)}
                         tabIndex={0}
-                        role="button"
-                        aria-label={`Select recent search: ${term}`}
+                        role="option"
+                        aria-selected={false}
+                        ref={index === searchHistory.length - 1 ? lastFocusableRef : null}
                       >
                         {term}
                       </div>

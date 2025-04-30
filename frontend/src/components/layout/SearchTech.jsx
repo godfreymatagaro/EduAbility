@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ChevronDown, Star, ChevronLeft, ChevronRight, Eye, Ear, Keyboard, Brain } from 'lucide-react';
+import { Search, ChevronDown, Star, X, ChevronLeft, ChevronRight, Eye, Ear, Keyboard, Brain } from 'lucide-react';
 import Button from '../common/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import './SearchTech.css';
@@ -43,17 +43,24 @@ const SearchTech = () => {
       setLoading(true);
       setError(null);
       try {
+        console.log('Fetching technologies from:', `${API_URL}/api/technologies`);
         const response = await fetch(`${API_URL}/api/technologies`);
         if (!response.ok) {
+          const errorText = await response.text();
+          console.log('Non-OK response:', response.status, errorText);
           throw new Error(`Failed to fetch technologies: ${response.status} ${response.statusText}`);
         }
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
+          const errorText = await response.text();
+          console.log('Non-JSON response:', errorText);
           throw new Error('Response is not JSON');
         }
         const data = await response.json();
+        console.log('Technologies received:', data);
         setTechnologies(Array.isArray(data) ? data : []);
       } catch (err) {
+        console.error('Fetch error:', err);
         setError(err.message);
         setTechnologies([]);
       } finally {
@@ -123,26 +130,40 @@ const SearchTech = () => {
     currentPage * itemsPerPage
   );
 
-  // Fetch search results using /api/technology/search
+  // Fetch search results (fallback to client-side filtering due to 404)
   const handleSearch = async () => {
     if (searchQuery.trim()) {
       setIsSearchModalOpen(true);
       setLoading(true);
       setError(null);
       try {
+        console.log('Fetching search results from:', `${API_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
         const response = await fetch(`${API_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
         if (!response.ok) {
-          throw new Error(`Failed to fetch search results: ${response.status} ${response.statusText}`);
+          // Fallback to client-side filtering if the search endpoint fails
+          console.log('Search endpoint failed with status:', response.status, 'Falling back to client-side filtering');
+          const filteredResults = technologies.filter(tech =>
+            tech.name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+          setSearchResults(filteredResults);
+          return;
         }
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
+          const errorText = await response.text();
+          console.log('Non-JSON response:', errorText);
           throw new Error('Response is not JSON');
         }
         const data = await response.json();
         setSearchResults(Array.isArray(data) ? data : []);
       } catch (err) {
+        console.error('Search error:', err);
         setError(err.message);
-        setSearchResults([]);
+        // Fallback to client-side filtering on error
+        const filteredResults = technologies.filter(tech =>
+          tech.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setSearchResults(filteredResults);
       } finally {
         setLoading(false);
       }
@@ -391,16 +412,18 @@ const SearchTech = () => {
                 >
                   <h3>{tech.name}</h3>
                   <p>{tech.description}</p>
-                  <Link to={`/tech-details/${tech._id}`}>
-                    <Button
-                      variant="filled"
-                      size="md"
-                      className="tech-card-button glow"
-                      ariaLabel={`Learn more about ${tech.name}`}
-                    >
-                      Learn More
-                    </Button>
-                  </Link>
+                  <div className="tech-card-actions">
+                    <Link to={`/tech-details/${tech._id}`}>
+                      <Button
+                        variant="filled"
+                        size="md"
+                        className="tech-card-button glow"
+                        ariaLabel={`Learn more about ${tech.name}`}
+                      >
+                        Learn More
+                      </Button>
+                    </Link>
+                  </div>
                 </motion.div>
               ))}
             </motion.div>
@@ -493,15 +516,17 @@ const SearchTech = () => {
                   <div key={tech._id} className="modal-result-item">
                     <h3>{tech.name}</h3>
                     <p>{tech.description}</p>
-                    <Link to={`/tech-details/${tech._id}`}>
-                      <Button
-                        variant="filled"
-                        size="sm"
-                        ariaLabel={`Learn more about ${tech.name}`}
-                      >
-                        Learn More
-                      </Button>
-                    </Link>
+                    <div className="modal-result-actions">
+                      <Link to={`/tech-details/${tech._id}`}>
+                        <Button
+                          variant="filled"
+                          size="sm"
+                          ariaLabel={`Learn more about ${tech.name}`}
+                        >
+                          Learn More
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 ))}
               </div>

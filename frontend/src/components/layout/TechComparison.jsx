@@ -447,18 +447,7 @@ const TechComparison = () => {
           </motion.div>
         )}
 
-        {/* User Reviews Section */}
-        {selectedTechs.length > 0 && (
-          <motion.div
-            className="reviews-section"
-            initial="hidden"
-            animate="visible"
-            variants={sectionVariants}
-          >
-            <h2>User Reviews</h2>
-            <Reviews techs={selectedTechs} />
-          </motion.div>
-        )}
+      
 
         {/* Add Technology Modal */}
         {isModalOpen && (

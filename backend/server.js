@@ -14,7 +14,7 @@ const searchRoutes = require('./routes/search.routes');
 // dotenv.config();
 
 // Hardcode environment variables
-process.env.MONGO_URI = 'mongodb+srv://godyracks:2nVVtC60SwhDhDHB@cluster01.pt7zzoi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster01';
+process.env.MONGO_URI = 'mongodb+srv://eduability_admin:HuBp2i0qOID8QWI1@edu-db.kx3z8va.mongodb.net/?retryWrites=true&w=majority&appName=edu-db';
 process.env.REDIS_URL = 'redis://127.0.0.1:6379';
 process.env.JWT_SECRET = '8I4P4GMHl8/vFubeqLupgbtO9/8i16GJZp5PzSBJjIY=';
 process.env.RESEND_API_KEY = 're_BEco3M4D_Bnhuw3d7WcdZAz9rfK2k289y';

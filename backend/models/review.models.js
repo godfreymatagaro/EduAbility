@@ -7,7 +7,7 @@ const reviewSchema = new mongoose.Schema({
     required: true,
   },
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String, // Changed to String to match User's _id (UUID)
     ref: 'User',
     required: true,
   },
@@ -17,7 +17,7 @@ const reviewSchema = new mongoose.Schema({
     min: 1,
     max: 5,
   },
-  comment: {  // Renamed from 'feedback' to 'comment'
+  comment: {
     type: String,
     required: true,
   },

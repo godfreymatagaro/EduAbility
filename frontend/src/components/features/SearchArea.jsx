@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, BarChart2, Users, Shield, History } from 'lucide-react';
 import './SearchArea.css';
@@ -17,6 +18,7 @@ const SearchArea = () => {
   const [error, setError] = useState(null);
   const searchInputRef = useRef(null);
   const modalRef = useRef(null);
+  const navigate = useNavigate();
 
   // Load search history from localStorage on mount
   useEffect(() => {
@@ -83,10 +85,24 @@ const SearchArea = () => {
     }
   };
 
-  // Select a history item or result
+  // Select a history item or result and redirect if it's a result
   const handleSelectItem = (item) => {
-    setSearchTerm(typeof item === 'string' ? item : item.name);
-    setIsModalOpen(false);
+    if (typeof item === 'string') {
+      // If the item is a history term (string), set the search term and re-trigger search
+      setSearchTerm(item);
+      const updatedHistory = [item, ...searchHistory.filter((term) => term !== item)].slice(0, 5);
+      setSearchHistory(updatedHistory);
+      localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+      setIsModalOpen(false);
+    } else {
+      // If the item is a search result (object), redirect to tech details
+      setSearchTerm(item.name);
+      const updatedHistory = [item.name, ...searchHistory.filter((term) => term !== item.name)].slice(0, 5);
+      setSearchHistory(updatedHistory);
+      localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+      setIsModalOpen(false);
+      navigate(`/tech-details/${item._id}`);
+    }
   };
 
   // Search bar animation

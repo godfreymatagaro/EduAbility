@@ -344,7 +344,8 @@
   }
 
   .search-bar-wrapper {
-    padding: 0 0.25rem;
+    max-width: 100%;
+    margin: 0 4px; /* 4px margin left and right */
   }
 
   .search-bar {

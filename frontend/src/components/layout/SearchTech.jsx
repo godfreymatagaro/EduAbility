@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ChevronDown, Star, X, ChevronLeft, ChevronRight, Eye, Ear, Keyboard, Brain } from 'lucide-react';
+import { Search, ChevronDown, Star, X, ChevronLeft, ChevronRight, Eye, Ear, Keyboard, Brain, Compare } from 'lucide-react';
 import Button from '../common/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import './SearchTech.css';
@@ -34,11 +34,9 @@ const SearchTech = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [technologies, setTechnologies] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
+  const [selectedTechs, setSelectedTechs] = useState([]); // For comparison
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Hardcoded JWT token (same as AdminDash.jsx)
-  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNzU1N2U4Yi0wMmYzLTQyYmQtYTkwNi1jZmU2NDk5NzdkMGYiLCJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDU5OTEzNTcsImV4cCI6MTc0NjA3Nzc1N30.EFnagJsRqlnab0znRF1b6E6UladFwjubZCCKIm0Vtxo';
 
   // Fetch technologies on component mount
   useEffect(() => {
@@ -46,16 +44,15 @@ const SearchTech = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${API_URL}/api/technologies`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(`${API_URL}/api/technologies`);
         if (!response.ok) {
-          throw new Error('Failed to fetch technologies');
+          throw new Error(`Failed to fetch technologies: ${response.status} ${response.statusText}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Response is not JSON');
         }
         const data = await response.json();
-        // Handle null response
         setTechnologies(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err.message);
@@ -106,14 +103,16 @@ const SearchTech = () => {
   // Sort technologies
   const sortedTechnologies = [...filteredTechnologies].sort((a, b) => {
     if (sortOption === 'Newest') {
-      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+      const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+      return dateB - dateA;
     }
     if (sortOption === 'Highest Rated') {
       const ratingA = a.coreVitals?.featuresRating || 0;
       const ratingB = b.coreVitals?.featuresRating || 0;
       return ratingB - ratingA;
     }
-    // Default: Most Popular (for now, sort by name)
+    // Default: Most Popular (sort by name for simplicity)
     return a.name.localeCompare(b.name);
   });
 
@@ -125,20 +124,20 @@ const SearchTech = () => {
     currentPage * itemsPerPage
   );
 
-  // Fetch search results when search modal opens
+  // Fetch search results using /api/technology/search
   const handleSearch = async () => {
     if (searchQuery.trim()) {
       setIsSearchModalOpen(true);
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${API_URL}/api/search?q=${encodeURIComponent(searchQuery)}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(`${API_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch search results');
+          throw new Error(`Failed to fetch search results: ${response.status} ${response.statusText}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Response is not JSON');
         }
         const data = await response.json();
         setSearchResults(Array.isArray(data) ? data : []);
@@ -149,6 +148,22 @@ const SearchTech = () => {
         setLoading(false);
       }
     }
+  };
+
+  // Handle technology selection for comparison
+  const handleSelectTech = (tech) => {
+    if (selectedTechs.length >= 5) {
+      alert('Maximum 5 technologies can be compared!');
+      return;
+    }
+    if (!selectedTechs.some(t => t._id === tech._id)) {
+      setSelectedTechs([...selectedTechs, tech]);
+    }
+  };
+
+  // Remove technology from comparison
+  const handleRemoveTech = (id) => {
+    setSelectedTechs(selectedTechs.filter(tech => tech._id !== id));
   };
 
   const sectionVariants = {
@@ -242,6 +257,32 @@ const SearchTech = () => {
       viewport={{ once: true, amount: 0.2 }}
     >
       <div className="search-tech-container">
+        {/* Selected Technologies for Comparison */}
+        {selectedTechs.length > 0 && (
+          <div className="selected-techs">
+            <h3>Selected for Comparison</h3>
+            <div className="selected-tech-list">
+              {selectedTechs.map(tech => (
+                <div key={tech._id} className="selected-tech-item">
+                  <span>{tech.name}</span>
+                  <button
+                    onClick={() => handleRemoveTech(tech._id)}
+                    className="remove-tech-button"
+                    aria-label={`Remove ${tech.name} from comparison`}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+              <Link to="/tech-comparison" state={{ selectedTechs }}>
+                <Button variant="filled" size="md" className="compare-button">
+                  Compare Now ({selectedTechs.length})
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+
         <div className="search-tech-header">
           <div className="search-bar-wrapper">
             <div className="search-bar">
@@ -393,16 +434,28 @@ const SearchTech = () => {
                 >
                   <h3>{tech.name}</h3>
                   <p>{tech.description}</p>
-                  <Link to={`/tech-details/${tech._id}`}>
+                  <div className="tech-card-actions">
+                    <Link to={`/tech-details/${tech._id}`}>
+                      <Button
+                        variant="filled"
+                        size="md"
+                        className="tech-card-button glow"
+                        ariaLabel={`Learn more about ${tech.name}`}
+                      >
+                        Learn More
+                      </Button>
+                    </Link>
                     <Button
-                      variant="filled"
+                      variant="outline"
                       size="md"
-                      className="tech-card-button glow"
-                      ariaLabel={`Learn more about ${tech.name}`}
+                      onClick={() => handleSelectTech(tech)}
+                      className="compare-button"
+                      ariaLabel={`Add ${tech.name} to comparison`}
+                      disabled={selectedTechs.some(t => t._id === tech._id)}
                     >
-                      Learn More
+                      <Compare size={16} /> Compare
                     </Button>
-                  </Link>
+                  </div>
                 </motion.div>
               ))}
             </motion.div>
@@ -495,15 +548,26 @@ const SearchTech = () => {
                   <div key={tech._id} className="modal-result-item">
                     <h3>{tech.name}</h3>
                     <p>{tech.description}</p>
-                    <Link to={`/tech-details/${tech._id}`}>
+                    <div className="modal-result-actions">
+                      <Link to={`/tech-details/${tech._id}`}>
+                        <Button
+                          variant="filled"
+                          size="sm"
+                          ariaLabel={`Learn more about ${tech.name}`}
+                        >
+                          Learn More
+                        </Button>
+                      </Link>
                       <Button
-                        variant="filled"
+                        variant="outline"
                         size="sm"
-                        ariaLabel={`Learn more about ${tech.name}`}
+                        onClick={() => handleSelectTech(tech)}
+                        ariaLabel={`Add ${tech.name} to comparison`}
+                        disabled={selectedTechs.some(t => t._id === tech._id)}
                       >
-                        Learn More
+                        <Compare size={16} /> Compare
                       </Button>
-                    </Link>
+                    </div>
                   </div>
                 ))}
               </div>

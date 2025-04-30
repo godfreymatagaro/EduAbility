@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ChevronLeft, Star, X, Search, Award } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Reviews from './Reviews';
@@ -10,27 +11,19 @@ const API_URL = import.meta.env.NODE_ENV === 'production'
   : import.meta.env.VITE_API_DEV_BACKEND_URL;
 
 const TechComparison = () => {
+  const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [technologies, setTechnologies] = useState([]);
-  const [selectedTechs, setSelectedTechs] = useState([]);
+  const [selectedTechs, setSelectedTechs] = useState(location.state?.selectedTechs || []);
   const [availableTechs, setAvailableTechs] = useState([]);
   const [toasts, setToasts] = useState([]);
   const [badges, setBadges] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [sortCriterion, setSortCriterion] = useState(''); // For sorting comparison table
   const addMoreButtonRef = useRef(null);
   const modalRef = useRef(null);
-
-  // Hardcoded JWT token (you may need to update this)
-  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNzU1N2U4Yi0wMmYzLTQyYmQtYTkwNi1jZmU2NDk5NzdkMGYiLCJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDU5OTEzNTcsImV4cCI6MTc0NjA3Nzc1N30.EFnagJsRqlnab0znRF1b6E6UladFwjubZCCKIm0Vtxo';
-
-  // Hardcoded initial selected tech IDs (replace with user selection in the future)
-  const initialSelectedTechIds = [
-    '6811b367f5b1a1d4988f30be',
-    '6811b85c3d617c1450cbb912',
-    // Add a third ID if available after testing
-  ];
 
   // Fetch technologies on component mount
   useEffect(() => {
@@ -38,33 +31,25 @@ const TechComparison = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${API_URL}/api/technologies`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(`${API_URL}/api/technologies`);
         if (!response.ok) {
           throw new Error(`Failed to fetch technologies: ${response.status} ${response.statusText}`);
         }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Response is not JSON');
+        }
         const data = await response.json();
-        console.log('Fetched Technologies:', data); // Debug log
-
-        // Ensure data is an array
         const techs = Array.isArray(data) ? data : [];
         setTechnologies(techs);
 
-        // Set selected technologies based on initialSelectedTechIds
-        const selected = techs.filter((tech) => initialSelectedTechIds.includes(tech._id));
-        setSelectedTechs(selected);
-
-        // Set available technologies (exclude selected ones)
-        const available = techs.filter((tech) => !initialSelectedTechIds.includes(tech._id));
+        // Update available technologies (exclude selected ones)
+        const available = techs.filter((tech) => !selectedTechs.some(t => t._id === tech._id));
         setAvailableTechs(available);
       } catch (err) {
         console.error('Error fetching technologies:', err);
         setError(err.message);
         setTechnologies([]);
-        setSelectedTechs([]);
         setAvailableTechs([]);
       } finally {
         setLoading(false);
@@ -72,15 +57,60 @@ const TechComparison = () => {
     };
 
     fetchTechnologies();
-  }, []);
+  }, [selectedTechs]);
+
+  // Fetch search results using /api/technology/search
+  const handleSearch = async () => {
+    if (searchQuery.trim()) {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`${API_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch search results: ${response.status} ${response.statusText}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Response is not JSON');
+        }
+        const data = await response.json();
+        const searchResults = Array.isArray(data) ? data : [];
+        // Filter out already selected technologies
+        const filteredResults = searchResults.filter(
+          tech => !selectedTechs.some(t => t._id === tech._id)
+        );
+        setAvailableTechs(filteredResults);
+      } catch (err) {
+        setError(err.message);
+        setAvailableTechs([]);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Reset to all available techs if search query is empty
+      const available = technologies.filter(
+        tech => !selectedTechs.some(t => t._id === tech._id)
+      );
+      setAvailableTechs(available);
+    }
+  };
 
   // Criteria for comparison based on coreVitals
-  const techCriteria = [
+  const techCriteriaBase = [
     { criterion: 'Ease of Use', ratings: selectedTechs.map((tech) => tech.coreVitals?.easeOfUse || 0) },
     { criterion: 'Features', ratings: selectedTechs.map((tech) => tech.coreVitals?.featuresRating || 0) },
     { criterion: 'Value for Money', ratings: selectedTechs.map((tech) => tech.coreVitals?.valueForMoney || 0) },
     { criterion: 'Customer Support', ratings: selectedTechs.map((tech) => tech.coreVitals?.customerSupport || 0) },
   ];
+
+  // Sort criteria if a sort option is selected
+  const techCriteria = sortCriterion
+    ? [...techCriteriaBase].sort((a, b) => {
+        const avgA = a.ratings.every(r => r) ? a.ratings.reduce((sum, r) => sum + r, 0) / a.ratings.length : 0;
+        const avgB = b.ratings.every(r => r) ? b.ratings.reduce((sum, r) => sum + r, 0) / b.ratings.length : 0;
+        return avgB - avgA; // Sort descending by average
+      })
+    : techCriteriaBase;
 
   // Feature comparison based on featureComparison
   const featureComparison = [
@@ -315,6 +345,21 @@ const TechComparison = () => {
           variants={sectionVariants}
         >
           <h2>Detailed Comparison</h2>
+          <div className="sort-controls">
+            <label>Sort by: </label>
+            <select
+              value={sortCriterion}
+              onChange={(e) => setSortCriterion(e.target.value)}
+              aria-label="Sort comparison criteria"
+            >
+              <option value="">None</option>
+              {techCriteriaBase.map((criteria) => (
+                <option key={criteria.criterion} value={criteria.criterion}>
+                  {criteria.criterion} (Highest)
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="table-wrapper">
             <table className="comparison-table detailed-table">
               <thead>
@@ -415,46 +460,48 @@ const TechComparison = () => {
                   placeholder="Search technologies..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   aria-label="Search technologies"
                 />
               </div>
               <div className="tech-options">
-                {availableTechs
-                  .filter((tech) =>
-                    tech.name.toLowerCase().includes(searchQuery.toLowerCase())
-                  )
-                  .map((tech) => (
-                    <motion.div
-                      key={tech._id}
-                      className={`tech-option ${
-                        selectedTechs.some((t) => t._id === tech._id) ? 'selected' : ''
-                      }`}
-                      variants={cardVariants}
-                      initial="rest"
-                      whileHover="hover"
-                      tabIndex={0}
-                      onKeyDown={(e) =>
-                        e.key === 'Enter' && !selectedTechs.some((t) => t._id === tech._id) && handleAddTech(tech)
-                      }
+                {availableTechs.length === 0 && !loading && !error && (
+                  <p>No available technologies to add.</p>
+                )}
+                {loading && <p>Loading...</p>}
+                {error && <p className="error-message">Error: {error}</p>}
+                {availableTechs.map((tech) => (
+                  <motion.div
+                    key={tech._id}
+                    className={`tech-option ${
+                      selectedTechs.some((t) => t._id === tech._id) ? 'selected' : ''
+                    }`}
+                    variants={cardVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    tabIndex={0}
+                    onKeyDown={(e) =>
+                      e.key === 'Enter' && !selectedTechs.some((t) => t._id === tech._id) && handleAddTech(tech)
+                    }
+                  >
+                    <div className="tech-info">
+                      <h4>{tech.name}</h4>
+                      <p>
+                        {tech.coreVitals?.featuresRating || 'N/A'} <Star className="star-icon" /> •{' '}
+                        {tech.category || 'N/A'}
+                      </p>
+                    </div>
+                    <button
+                      className="add-tech-button"
+                      onClick={() => handleAddTech(tech)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddTech(tech)}
+                      disabled={selectedTechs.some((t) => t._id === tech._id)}
+                      aria-label={`Add ${tech.name}`}
                     >
-                      <div className="tech-info">
-                        <h4>{tech.name}</h4>
-                        <p>
-                          {tech.coreVitals?.featuresRating || 'N/A'} <Star className="star-icon" /> •{' '}
-                          {tech.category || 'N/A'}
-                        </p>
-                      </div>
-                      <button
-                        className="add-tech-button"
-                        onClick={() => handleAddTech(tech)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddTech(tech)}
-                        disabled={selectedTechs.some((t) => t._id === tech._id)}
-                        aria-label={`Add ${tech.name}`}
-                      >
-                        Add
-                      </button>
-                    </motion.div>
-                  ))}
+                      Add
+                    </button>
+                  </motion.div>
+                ))}
               </div>
               <div className="modal-footer">
                 <p>Selected: {selectedTechs.length} technologies</p>

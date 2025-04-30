@@ -292,7 +292,8 @@
   }
 
   .search-bar-wrapper {
-    max-width: 100%;
+    max-width: 90%;
+    
     padding: 0 0.5rem;
   }
 
@@ -320,6 +321,7 @@
   .search-history-item {
     font-size: 0.875rem;
     padding: 0.5rem 0.75rem;
+    max-width: 90%;
   }
 
   .search-cards {

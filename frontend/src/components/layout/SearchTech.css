@@ -34,7 +34,7 @@
     border-radius: 9999px;
     padding: 0.75rem 1rem;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    width: 100%;
+    width: 80%;
     box-sizing: border-box;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
@@ -772,7 +772,7 @@
     }
   
     .search-bar-wrapper {
-      max-width: 100%;
+      max-width: 70%;
       margin: 0 4px; /* 4px margin left and right */
     }
   
@@ -800,6 +800,7 @@
     .search-history-item {
       font-size: 0.75rem;
       padding: 0.5rem;
+      max-width: 90%;
     }
   
     .sort-by label,

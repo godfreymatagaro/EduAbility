@@ -5,19 +5,12 @@ import Button from '../common/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import './SearchTech.css';
 
-// Determine the API URL based on the environment
 const API_URL =
   import.meta.env.MODE === "production"
     ? import.meta.env.VITE_API_PROD_BACKEND_URL
     : import.meta.env.VITE_API_DEV_BACKEND_URL;
 
-// Fallback if environment variables are not set
 const finalAPI_URL = API_URL || (import.meta.env.MODE === "production" ? "https://eduability.onrender.com" : "http://localhost:3000");
-
-console.log('MODE:', import.meta.env.MODE);
-console.log('VITE_API_PROD_BACKEND_URL:', import.meta.env.VITE_API_PROD_BACKEND_URL);
-console.log('VITE_API_DEV_BACKEND_URL:', import.meta.env.VITE_API_DEV_BACKEND_URL);
-console.log('Final API_URL:', finalAPI_URL);
 
 const SearchTech = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,84 +36,72 @@ const SearchTech = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [technologies, setTechnologies] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
-  const [searchHistory, setSearchHistory] = useState([]); // Added for recent searches
+  const [searchHistory, setSearchHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const searchInputRef = useRef(null);
-  const modalRef = useRef(null);
+  const searchModalRef = useRef(null);
+  const sortModalRef = useRef(null);
+  const firstSearchFocusableRef = useRef(null);
+  const lastSearchFocusableRef = useRef(null);
+  const firstSortFocusableRef = useRef(null);
+  const lastSortFocusableRef = useRef(null);
   const navigate = useNavigate();
 
-  // Load search history from localStorage on mount
+  // Auto-focus input on mount
+  useEffect(() => {
+    searchInputRef.current?.focus();
+  }, []);
+
+  // Load search history
   useEffect(() => {
     const storedHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
     setSearchHistory(storedHistory);
   }, []);
 
-  // Fetch technologies on component mount
+  // Fetch technologies
   useEffect(() => {
     const fetchTechnologies = async () => {
       setLoading(true);
       setError(null);
       try {
-        console.log('Fetching technologies from:', `${finalAPI_URL}/api/technologies`);
         const response = await fetch(`${finalAPI_URL}/api/technologies`);
         if (!response.ok) {
-          const errorText = await response.text();
-          console.log('Non-OK response:', response.status, errorText);
           throw new Error(`Failed to fetch technologies: ${response.status} ${response.statusText}`);
         }
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          const errorText = await response.text();
-          console.log('Non-JSON response:', errorText);
-          throw new Error('Response is not JSON');
-        }
         const data = await response.json();
-        console.log('Technologies received:', data);
         setTechnologies(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error('Fetch error:', err);
         setError(err.message);
         setTechnologies([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchTechnologies();
   }, []);
 
-  // Fetch search results (with client-side fallback)
+  // Fetch search results
   useEffect(() => {
     const fetchSearchResults = async () => {
       if (!searchQuery.trim()) {
         setSearchResults([]);
         return;
       }
-
       setLoading(true);
       setError(null);
       try {
-        console.log('Fetching search results from:', `${finalAPI_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
         const response = await fetch(`${finalAPI_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
         if (!response.ok) {
-          console.log('Search endpoint failed with status:', response.status, 'Falling back to client-side filtering');
           const filteredResults = technologies.filter(tech =>
             tech.name.toLowerCase().includes(searchQuery.toLowerCase())
           );
           setSearchResults(filteredResults);
           return;
         }
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          const errorText = await response.text();
-          console.log('Non-JSON response:', errorText);
-          throw new Error('Response is not JSON');
-        }
         const data = await response.json();
         setSearchResults(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error('Search error:', err);
         setError(err.message);
         const filteredResults = technologies.filter(tech =>
           tech.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -130,18 +111,92 @@ const SearchTech = () => {
         setLoading(false);
       }
     };
-
     fetchSearchResults();
   }, [searchQuery, technologies]);
 
-  // Apply filters and sorting to technologies
+  // Focus trap for modals
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Tab') {
+        if (isSearchModalOpen) {
+          if (e.shiftKey && document.activeElement === firstSearchFocusableRef.current) {
+            e.preventDefault();
+            lastSearchFocusableRef.current?.focus();
+          } else if (!e.shiftKey && document.activeElement === lastSearchFocusableRef.current) {
+            e.preventDefault();
+            firstSearchFocusableRef.current?.focus();
+          }
+        } else if (isSortModalOpen) {
+          if (e.shiftKey && document.activeElement === firstSortFocusableRef.current) {
+            e.preventDefault();
+            lastSortFocusableRef.current?.focus();
+          } else if (!e.shiftKey && document.activeElement === lastSortFocusableRef.current) {
+            e.preventDefault();
+            firstSortFocusableRef.current?.focus();
+          }
+        }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isSearchModalOpen, isSortModalOpen]);
+
+  // Arrow key navigation for search modal
+  const handleSearchModalKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      setIsSearchModalOpen(false);
+      searchInputRef.current?.focus();
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const items = searchModalRef.current?.querySelectorAll('.search-result-item, .search-history-item');
+      if (!items) return;
+      const currentIndex = Array.from(items).indexOf(document.activeElement);
+      let nextIndex = e.key === 'ArrowDown' ? currentIndex + 1 : currentIndex - 1;
+      if (nextIndex >= items.length) nextIndex = 0;
+      if (nextIndex < 0) nextIndex = items.length - 1;
+      items[nextIndex]?.focus();
+    }
+  };
+
+  // Handle search selection
+  const handleSelectItem = (item) => {
+    if (typeof item === 'string') {
+      setSearchQuery(item);
+      const updatedHistory = [item, ...searchHistory.filter((term) => term !== item)].slice(0, 5);
+      setSearchHistory(updatedHistory);
+      localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+      setIsSearchModalOpen(false);
+    } else {
+      setSearchQuery(item.name);
+      const updatedHistory = [item.name, ...searchHistory.filter((term) => term !== item.name)].slice(0, 5);
+      setSearchHistory(updatedHistory);
+      localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+      setIsSearchModalOpen(false);
+      navigate(`/tech-details/${item._id}`);
+    }
+    searchInputRef.current?.focus();
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setIsSearchModalOpen(false);
+    searchInputRef.current?.focus();
+  };
+
+  const handleClearFilters = () => {
+    setCategoryFilters({ visual: false, auditory: false, physical: false, cognitive: false });
+    setCostFilters({ free: false, low: false, medium: false, high: false });
+    setRatingFilters({ fourPlus: false, threePlus: false });
+    setCurrentPage(1);
+  };
+
+  // Filter and sort logic
   const filteredTechnologies = technologies.filter((tech) => {
     const categoryMatch = Object.keys(categoryFilters).some(
       (key) => categoryFilters[key] && tech.category && tech.category.toLowerCase() === key
     );
-    if (Object.values(categoryFilters).some(Boolean) && !categoryMatch) {
-      return false;
-    }
+    if (Object.values(categoryFilters).some(Boolean) && !categoryMatch) return false;
 
     let costMatch = true;
     if (Object.values(costFilters).some(Boolean)) {
@@ -166,7 +221,6 @@ const SearchTech = () => {
     return true;
   });
 
-  // Sort technologies
   const sortedTechnologies = [...filteredTechnologies].sort((a, b) => {
     if (sortOption === 'Newest') {
       const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
@@ -189,116 +243,27 @@ const SearchTech = () => {
     currentPage * itemsPerPage
   );
 
-  // Handle search history and navigation
-  const handleSelectItem = (item) => {
-    if (typeof item === 'string') {
-      setSearchQuery(item);
-      const updatedHistory = [item, ...searchHistory.filter((term) => term !== item)].slice(0, 5);
-      setSearchHistory(updatedHistory);
-      localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
-      setIsSearchModalOpen(false);
-    } else {
-      setSearchQuery(item.name);
-      const updatedHistory = [item.name, ...searchHistory.filter((term) => term !== item.name)].slice(0, 5);
-      setSearchHistory(updatedHistory);
-      localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
-      setIsSearchModalOpen(false);
-      navigate(`/tech-details/${item._id}`);
-    }
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery('');
-    setSearchResults([]);
-    setIsSearchModalOpen(false);
-  };
-
-  // Focus management for accessibility
-  useEffect(() => {
-    if (isSearchModalOpen) {
-      modalRef.current?.focus();
-    } else {
-      searchInputRef.current?.focus();
-    }
-  }, [isSearchModalOpen]);
-
-  // Handle keyboard navigation for modal
-  const handleModalKeyDown = (e) => {
-    if (e.key === 'Escape') {
-      setIsSearchModalOpen(false);
-    }
-  };
-
+  // Animation variants
   const sectionVariants = {
     hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.8, ease: 'easeOut' },
-    },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } },
   };
 
   const cardContainerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.3,
-      },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.3 } },
   };
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: 'easeOut' },
-    },
-    hover: {
-      scale: 1.02,
-      transition: { duration: 0.3, ease: 'easeOut' },
-    },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+    hover: { scale: 1.02, transition: { duration: 0.3, ease: 'easeOut' } },
   };
 
   const modalVariants = {
     hidden: { opacity: 0, y: -20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
     exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: 'easeOut' } },
-  };
-
-  const handleCategoryChange = (filter) => {
-    setCategoryFilters((prev) => ({
-      ...prev,
-      [filter]: !prev[filter],
-    }));
-    setCurrentPage(1);
-  };
-
-  const handleCostChange = (filter) => {
-    setCostFilters((prev) => ({
-      ...prev,
-      [filter]: !prev[filter],
-    }));
-    setCurrentPage(1);
-  };
-
-  const handleRatingChange = (filter) => {
-    setRatingFilters((prev) => ({
-      ...prev,
-      [filter]: !prev[filter],
-    }));
-    setCurrentPage(1);
-  };
-
-  const handleSortOptionSelect = (option) => {
-    setSortOption(option);
-    setIsSortModalOpen(false);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
   };
 
   return (
@@ -310,12 +275,13 @@ const SearchTech = () => {
       viewport={{ once: true, amount: 0.2 }}
     >
       <div className="search-tech-container">
-        <div className="search-tech-header">
+        <div className="search-tech-header" role="search">
           <div className="search-bar-wrapper">
             <div className="search-bar">
               <Search className="search-icon" aria-hidden="true" />
               <input
                 ref={searchInputRef}
+                id="search-input"
                 type="text"
                 className="search-input"
                 placeholder="Search technologies..."
@@ -330,35 +296,51 @@ const SearchTech = () => {
                   }
                 }}
                 aria-label="Search technologies"
+                aria-describedby="search-instructions"
+                aria-expanded={isSearchModalOpen}
+                aria-controls="search-modal"
               />
+              <span id="search-instructions" className="visually-hidden">
+                Type to search assistive technologies. Press Enter to submit or use arrow keys to navigate results.
+              </span>
               {searchQuery && (
-                <button onClick={handleClearSearch} className="search-clear" aria-label="Clear search">
+                <button
+                  ref={firstSearchFocusableRef}
+                  onClick={handleClearSearch}
+                  className="search-clear"
+                  aria-label="Clear search input"
+                >
                   <X />
                 </button>
               )}
             </div>
-            {/* YouTube-style Search Results Dropdown */}
             <AnimatePresence>
               {isSearchModalOpen && (
                 <motion.div
                   className="search-modal"
-                  ref={modalRef}
+                  ref={searchModalRef}
                   initial="hidden"
                   animate="visible"
                   exit="exit"
                   variants={modalVariants}
-                  onKeyDown={handleModalKeyDown}
+                  onKeyDown={handleSearchModalKeyDown}
                   role="dialog"
                   aria-labelledby="search-modal-title"
-                  tabIndex={0}
+                  tabIndex={-1}
                 >
-                  <div className="search-modal-content">
-                    {/* Real-Time Results */}
+                  <h2 id="search-modal-title" className="visually-hidden">
+                    Search Results and History
+                  </h2>
+                  <div className="search-modal-content" aria-live="polite">
                     {searchQuery && (
                       <div className="search-results-section">
                         <h3>Results</h3>
                         {loading && <p>Loading...</p>}
-                        {error && <p className="error-message">Error: {error}</p>}
+                        {error && (
+                          <p className="error-message" aria-live="assertive">
+                            Error: {error}. Please try again.
+                          </p>
+                        )}
                         {!loading && !error && searchResults.length === 0 && (
                           <p>No results found.</p>
                         )}
@@ -369,8 +351,9 @@ const SearchTech = () => {
                             onClick={() => handleSelectItem(result)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSelectItem(result)}
                             tabIndex={0}
-                            role="button"
-                            aria-label={`Select ${result.name}`}
+                            role="option"
+                            aria-selected={false}
+                            ref={index === searchResults.length - 1 && !searchHistory.length ? lastSearchFocusableRef : null}
                           >
                             <span>{result.name}</span>
                             <span className="result-category">({result.category})</span>
@@ -378,8 +361,6 @@ const SearchTech = () => {
                         ))}
                       </div>
                     )}
-
-                    {/* Search History */}
                     <div className="search-history-section">
                       <h3>
                         <History className="history-icon" aria-hidden="true" /> Recent Searches
@@ -392,8 +373,9 @@ const SearchTech = () => {
                           onClick={() => handleSelectItem(term)}
                           onKeyPress={(e) => e.key === 'Enter' && handleSelectItem(term)}
                           tabIndex={0}
-                          role="button"
-                          aria-label={`Select recent search: ${term}`}
+                          role="option"
+                          aria-selected={false}
+                          ref={index === searchHistory.length - 1 ? lastSearchFocusableRef : null}
                         >
                           {term}
                         </div>
@@ -405,10 +387,13 @@ const SearchTech = () => {
             </AnimatePresence>
           </div>
           <div className="sort-by">
-            <label>Sort by:</label>
+            <label id="sort-label" className="visually-hidden">Sort technologies by</label>
             <button
               className="sort-button"
               onClick={() => setIsSortModalOpen(true)}
+              aria-labelledby="sort-label"
+              aria-expanded={isSortModalOpen}
+              aria-controls="sort-modal"
             >
               {sortOption}
               <ChevronDown className="dropdown-icon" />
@@ -416,15 +401,28 @@ const SearchTech = () => {
           </div>
         </div>
         <div className="search-tech-content">
-          <div className="filters">
+          <div className="filters" aria-live="polite">
             <h3>Filters</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              className="clear-filters-button"
+              onClick={handleClearFilters}
+              aria-label="Clear all filters"
+            >
+              Clear All Filters
+            </Button>
             <div className="filter-group">
-              <h4>Category</h4>
+              <h4 id="category-filter">Category</h4>
+              <span id="category-desc" className="visually-hidden">
+                Select categories to filter technologies by disability type.
+              </span>
               <label>
                 <input
                   type="checkbox"
                   checked={categoryFilters.visual}
-                  onChange={() => handleCategoryChange('visual')}
+                  onChange={() => setCategoryFilters(prev => ({ ...prev, visual: !prev.visual }))}
+                  aria-describedby="category-desc"
                 />
                 <span>Visual</span>
               </label>
@@ -432,7 +430,8 @@ const SearchTech = () => {
                 <input
                   type="checkbox"
                   checked={categoryFilters.auditory}
-                  onChange={() => handleCategoryChange('auditory')}
+                  onChange={() => setCategoryFilters(prev => ({ ...prev, auditory: !prev.auditory }))}
+                  aria-describedby="category-desc"
                 />
                 <span>Auditory</span>
               </label>
@@ -440,7 +439,8 @@ const SearchTech = () => {
                 <input
                   type="checkbox"
                   checked={categoryFilters.physical}
-                  onChange={() => handleCategoryChange('physical')}
+                  onChange={() => setCategoryFilters(prev => ({ ...prev, physical: !prev.physical }))}
+                  aria-describedby="category-desc"
                 />
                 <span>Physical</span>
               </label>
@@ -448,18 +448,23 @@ const SearchTech = () => {
                 <input
                   type="checkbox"
                   checked={categoryFilters.cognitive}
-                  onChange={() => handleCategoryChange('cognitive')}
+                  onChange={() => setCategoryFilters(prev => ({ ...prev, cognitive: !prev.cognitive }))}
+                  aria-describedby="category-desc"
                 />
                 <span>Cognitive</span>
               </label>
             </div>
             <div className="filter-group">
-              <h4>Cost</h4>
+              <h4 id="cost-filter">Cost</h4>
+              <span id="cost-desc" className="visually-hidden">
+                Select cost ranges to filter technologies by price.
+              </span>
               <label>
                 <input
                   type="checkbox"
                   checked={costFilters.free}
-                  onChange={() => handleCostChange('free')}
+                  onChange={() => setCostFilters(prev => ({ ...prev, free: !prev.free }))}
+                  aria-describedby="cost-desc"
                 />
                 <span>Free</span>
               </label>
@@ -467,7 +472,8 @@ const SearchTech = () => {
                 <input
                   type="checkbox"
                   checked={costFilters.low}
-                  onChange={() => handleCostChange('low')}
+                  onChange={() => setCostFilters(prev => ({ ...prev, low: !prev.low }))}
+                  aria-describedby="cost-desc"
                 />
                 <span>$1-$50</span>
               </label>
@@ -475,7 +481,8 @@ const SearchTech = () => {
                 <input
                   type="checkbox"
                   checked={costFilters.medium}
-                  onChange={() => handleCostChange('medium')}
+                  onChange={() => setCostFilters(prev => ({ ...prev, medium: !prev.medium }))}
+                  aria-describedby="cost-desc"
                 />
                 <span>$51-$200</span>
               </label>
@@ -483,18 +490,23 @@ const SearchTech = () => {
                 <input
                   type="checkbox"
                   checked={costFilters.high}
-                  onChange={() => handleCostChange('high')}
+                  onChange={() => setCostFilters(prev => ({ ...prev, high: !prev.high }))}
+                  aria-describedby="cost-desc"
                 />
                 <span>$200+</span>
               </label>
             </div>
             <div className="filter-group">
-              <h4>Rating</h4>
+              <h4 id="rating-filter">Rating</h4>
+              <span id="rating-desc" className="visually-hidden">
+                Select minimum ratings to filter technologies by user reviews.
+              </span>
               <label>
                 <input
                   type="checkbox"
                   checked={ratingFilters.fourPlus}
-                  onChange={() => handleRatingChange('fourPlus')}
+                  onChange={() => setRatingFilters(prev => ({ ...prev, fourPlus: !prev.fourPlus }))}
+                  aria-describedby="rating-desc"
                 />
                 <span>
                   <Star className="rating-star" />
@@ -508,7 +520,8 @@ const SearchTech = () => {
                 <input
                   type="checkbox"
                   checked={ratingFilters.threePlus}
-                  onChange={() => handleRatingChange('threePlus')}
+                  onChange={() => setRatingFilters(prev => ({ ...prev, threePlus: !prev.threePlus }))}
+                  aria-describedby="rating-desc"
                 />
                 <span>
                   <Star className="rating-star" />
@@ -519,11 +532,15 @@ const SearchTech = () => {
               </label>
             </div>
           </div>
-          <div className="tech-cards-wrapper">
+          <div className="tech-cards-wrapper" aria-live="polite">
             {loading && <p>Loading technologies...</p>}
-            {error && <p className="error-message">Error: {error}</p>}
+            {error && (
+              <p className="error-message" aria-live="assertive">
+                Error: {error}. Please try again or contact support.
+              </p>
+            )}
             {!loading && !error && sortedTechnologies.length === 0 && (
-              <p>No technologies found.</p>
+              <p>No technologies found. Try adjusting your filters.</p>
             )}
             <motion.div
               className="tech-cards"
@@ -538,6 +555,9 @@ const SearchTech = () => {
                   className="tech-card"
                   variants={cardVariants}
                   whileHover="hover"
+                  tabIndex={0}
+                  onKeyPress={(e) => e.key === 'Enter' && navigate(`/tech-details/${tech._id}`)}
+                  aria-label={`Technology: ${tech.name}, ${tech.description}`}
                 >
                   <h3>{tech.name}</h3>
                   <p>{tech.description}</p>
@@ -547,7 +567,7 @@ const SearchTech = () => {
                         variant="filled"
                         size="md"
                         className="tech-card-button glow"
-                        ariaLabel={`Learn more about ${tech.name}`}
+                        aria-label={`Learn more about ${tech.name}`}
                       >
                         Learn More
                       </Button>
@@ -559,26 +579,28 @@ const SearchTech = () => {
             <div className="pagination">
               <button
                 className="pagination-arrow"
-                onClick={() => handlePageChange(currentPage - 1)}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
+                aria-label="Previous page"
               >
                 <ChevronLeft className="pagination-icon" />
               </button>
               {[...Array(totalPages)].map((_, index) => (
                 <button
                   key={index + 1}
-                  className={`pagination-number ${
-                    currentPage === index + 1 ? 'active' : ''
-                  }`}
-                  onClick={() => handlePageChange(index + 1)}
+                  className={`pagination-number ${currentPage === index + 1 ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(index + 1)}
+                  aria-label={`Page ${index + 1}`}
+                  aria-current={currentPage === index + 1 ? 'page' : undefined}
                 >
                   {index + 1}
                 </button>
               ))}
               <button
                 className="pagination-arrow"
-                onClick={() => handlePageChange(currentPage + 1)}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
+                aria-label="Next page"
               >
                 <ChevronRight className="pagination-icon" />
               </button>
@@ -589,19 +611,35 @@ const SearchTech = () => {
           <div className="popular-categories">
             <h3>Popular Categories</h3>
             <div className="category-buttons">
-              <button className="category-button">
+              <button
+                className="category-button"
+                onClick={() => setCategoryFilters({ ...categoryFilters, visual: true })}
+                aria-label="Filter by Visual Aid category"
+              >
                 <Eye className="category-icon" />
                 Visual Aid
               </button>
-              <button className="category-button">
+              <button
+                className="category-button"
+                onClick={() => setCategoryFilters({ ...categoryFilters, auditory: true })}
+                aria-label="Filter by Hearing Aid category"
+              >
                 <Ear className="category-icon" />
                 Hearing Aid
               </button>
-              <button className="category-button">
+              <button
+                className="category-button"
+                onClick={() => setCategoryFilters({ ...categoryFilters, physical: true })}
+                aria-label="Filter by Physical Keyboard category"
+              >
                 <Keyboard className="category-icon" />
                 Physical Keyboard
               </button>
-              <button className="category-button">
+              <button
+                className="category-button"
+                onClick={() => setCategoryFilters({ ...categoryFilters, cognitive: true })}
+                aria-label="Filter by Cognitive Aid category"
+              >
                 <Brain className="category-icon" />
                 Cognitive Aid
               </button>
@@ -610,7 +648,6 @@ const SearchTech = () => {
         </div>
       </div>
 
-      {/* Sort Options Modal */}
       <AnimatePresence>
         {isSortModalOpen && (
           <motion.div
@@ -622,44 +659,41 @@ const SearchTech = () => {
           >
             <motion.div
               className="modal-content sort-modal"
+              ref={sortModalRef}
               variants={modalVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
               onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-labelledby="sort-modal-title"
+              tabIndex={-1}
             >
+              <h2 id="sort-modal-title" className="visually-hidden">Sort Options</h2>
               <button
+                ref={firstSortFocusableRef}
                 className="modal-close"
                 onClick={() => setIsSortModalOpen(false)}
+                aria-label="Close sort options"
               >
                 <X className="modal-close-icon" />
               </button>
-              <h2>Sort Options</h2>
               <div className="sort-options">
-                <button
-                  className={`sort-option ${
-                    sortOption === 'Most Popular' ? 'active' : ''
-                  }`}
-                  onClick={() => handleSortOptionSelect('Most Popular')}
-                >
-                  Most Popular
-                </button>
-                <button
-                  className={`sort-option ${
-                    sortOption === 'Newest' ? 'active' : ''
-                  }`}
-                  onClick={() => handleSortOptionSelect('Newest')}
-                >
-                  Newest
-                </button>
-                <button
-                  className={`sort-option ${
-                    sortOption === 'Highest Rated' ? 'active' : ''
-                  }`}
-                  onClick={() => handleSortOptionSelect('Highest Rated')}
-                >
-                  Highest Rated
-                </button>
+                {['Most Popular', 'Newest', 'Highest Rated'].map((option, index) => (
+                  <button
+                    key={option}
+                    className={`sort-option ${sortOption === option ? 'active' : ''}`}
+                    onClick={() => {
+                      setSortOption(option);
+                      setIsSortModalOpen(false);
+                      setCurrentPage(1);
+                    }}
+                    aria-selected={sortOption === option}
+                    ref={index === 2 ? lastSortFocusableRef : null}
+                  >
+                    {option}
+                  </button>
+                ))}
               </div>
             </motion.div>
           </motion.div>

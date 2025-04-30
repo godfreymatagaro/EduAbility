@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Moon, Sun, Menu, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import logo from '../../assets/images/logo.png';
@@ -8,10 +8,39 @@ import './Navbar.css';
 const Navbar = () => {
   const [isDark, setIsDark] = useDarkMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef(null);
+  const firstFocusableRef = useRef(null);
+  const lastFocusableRef = useRef(null);
+  const menuButtonRef = useRef(null);
 
+  // Handle mobile link click and close menu
   const handleMobileLinkClick = () => {
     setIsMobileMenuOpen(false);
+    menuButtonRef.current?.focus();
   };
+
+  // Focus trapping for mobile menu
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      firstFocusableRef.current?.focus();
+      const handleKeyDown = (e) => {
+        if (e.key === 'Tab') {
+          if (e.shiftKey && document.activeElement === firstFocusableRef.current) {
+            e.preventDefault();
+            lastFocusableRef.current?.focus();
+          } else if (!e.shiftKey && document.activeElement === lastFocusableRef.current) {
+            e.preventDefault();
+            firstFocusableRef.current?.focus();
+          }
+        } else if (e.key === 'Escape') {
+          setIsMobileMenuOpen(false);
+          menuButtonRef.current?.focus();
+        }
+      };
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isMobileMenuOpen]);
 
   // Debug: Log dark mode state and HTML class
   useEffect(() => {
@@ -20,64 +49,90 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="navbar">
+      <nav className="navbar" aria-label="Main navigation">
         <div className="navbar-container">
-          <img src={logo} alt="Logo" className="navbar-logo" />
-          <div className="navbar-links">
+          <NavLink to="/" className="navbar-logo-link" aria-label="Home page">
+            <img src={logo} alt="EduAbility Logo" className="navbar-logo" />
+          </NavLink>
+          <div className="navbar-links" role="navigation">
             <NavLink
               to="/"
               className={({ isActive }) => (isActive ? 'active' : '')}
+              aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
             >
               Home
             </NavLink>
             <NavLink
               to="/technologies"
               className={({ isActive }) => (isActive ? 'active' : '')}
+              aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
             >
               Technologies
             </NavLink>
             <NavLink
               to="/compare"
               className={({ isActive }) => (isActive ? 'active' : '')}
+              aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
             >
               Compare
             </NavLink>
             <NavLink
               to="/feedback"
               className={({ isActive }) => (isActive ? 'active' : '')}
+              aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
             >
               Feedback
             </NavLink>
           </div>
-          <button
-            className="navbar-theme-toggle"
-            onClick={() => setIsDark(!isDark)}
-            aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-          >
-            <Sun className="sun" />
-            <Moon className="moon" />
-          </button>
-          <button
-            className="navbar-menu-button"
-            onClick={() => setIsMobileMenuOpen(true)}
-            aria-label="Open mobile menu"
-          >
-            <Menu />
-          </button>
+          <div className="navbar-controls">
+            <button
+              className="navbar-theme-toggle"
+              onClick={() => setIsDark(!isDark)}
+              aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+            >
+              <Sun className="sun" aria-hidden="true" />
+              <Moon className="moon" aria-hidden="true" />
+            </button>
+            <button
+              ref={menuButtonRef}
+              className="navbar-menu-button"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open mobile menu"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-menu"
+            >
+              <Menu aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </nav>
-      <div className={`navbar-mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
+      <div
+        className={`navbar-mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}
+        id="mobile-menu"
+        ref={mobileMenuRef}
+        role="dialog"
+        aria-labelledby="mobile-menu-title"
+        aria-hidden={!isMobileMenuOpen}
+      >
+        <h2 id="mobile-menu-title" className="visually-hidden">
+          Mobile Navigation Menu
+        </h2>
         <button
+          ref={firstFocusableRef}
           className="navbar-mobile-menu-close"
-          onClick={() => setIsMobileMenuOpen(false)}
+          onClick={() => {
+            setIsMobileMenuOpen(false);
+            menuButtonRef.current?.focus();
+          }}
           aria-label="Close mobile menu"
         >
-          <X />
+          <X aria-hidden="true" />
         </button>
         <NavLink
           to="/"
           className={({ isActive }) => (isActive ? 'active' : '')}
           onClick={handleMobileLinkClick}
+          aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
         >
           Home
         </NavLink>
@@ -85,6 +140,7 @@ const Navbar = () => {
           to="/technologies"
           className={({ isActive }) => (isActive ? 'active' : '')}
           onClick={handleMobileLinkClick}
+          aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
         >
           Technologies
         </NavLink>
@@ -92,6 +148,7 @@ const Navbar = () => {
           to="/compare"
           className={({ isActive }) => (isActive ? 'active' : '')}
           onClick={handleMobileLinkClick}
+          aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
         >
           Compare
         </NavLink>
@@ -99,6 +156,8 @@ const Navbar = () => {
           to="/feedback"
           className={({ isActive }) => (isActive ? 'active' : '')}
           onClick={handleMobileLinkClick}
+          ref={lastFocusableRef}
+          aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
         >
           Feedback
         </NavLink>

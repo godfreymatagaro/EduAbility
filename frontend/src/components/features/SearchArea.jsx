@@ -1,35 +1,92 @@
-// src/components/SearchArea.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, BarChart2, Users, Shield } from 'lucide-react';
+import { Search, X, BarChart2, Users, Shield, History } from 'lucide-react';
 import './SearchArea.css';
 
-const mockResults = [
-  'Assistive Technology for Reading',
-  'Speech-to-Text Tools',
-  'Screen Readers for Accessibility',
-  'Inclusive Learning Platforms',
-  'Educational Apps for Visual Impairment',
-];
+const API_URL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_API_PROD_BACKEND_URL
+    : import.meta.env.VITE_API_DEV_BACKEND_URL;
 
 const SearchArea = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [liveResults, setLiveResults] = useState([]);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const searchInputRef = useRef(null);
+  const modalRef = useRef(null);
 
+  // Load search history from localStorage on mount
   useEffect(() => {
-    if (searchTerm) {
-      const filtered = mockResults.filter((result) =>
-        result.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setLiveResults(filtered);
-    } else {
-      setLiveResults([]);
-    }
+    const storedHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
+    setSearchHistory(storedHistory);
+  }, []);
+
+  // Fetch real-time search results from API
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (!searchTerm.trim()) {
+        setLiveResults([]);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`${API_URL}/api/technologies/search?q=${encodeURIComponent(searchTerm)}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch results: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        setLiveResults(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err.message);
+        setLiveResults([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResults();
   }, [searchTerm]);
+
+  // Handle search submission (e.g., Enter key)
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      const updatedHistory = [searchTerm, ...searchHistory.filter((term) => term !== searchTerm)].slice(0, 5);
+      setSearchHistory(updatedHistory);
+      localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+    }
+  };
 
   const handleClear = () => {
     setSearchTerm('');
     setLiveResults([]);
+    setIsModalOpen(false);
+  };
+
+  // Focus management for accessibility
+  useEffect(() => {
+    if (isModalOpen) {
+      modalRef.current?.focus();
+    } else {
+      searchInputRef.current?.focus();
+    }
+  }, [isModalOpen]);
+
+  // Handle keyboard navigation for modal
+  const handleModalKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      setIsModalOpen(false);
+    }
+  };
+
+  // Select a history item or result
+  const handleSelectItem = (item) => {
+    setSearchTerm(typeof item === 'string' ? item : item.name);
+    setIsModalOpen(false);
   };
 
   // Search bar animation
@@ -38,10 +95,11 @@ const SearchArea = () => {
     visible: { width: '100%', opacity: 1, transition: { duration: 0.5, ease: 'easeOut' } },
   };
 
-  // Search results animation
-  const resultVariants = {
-    hidden: { opacity: 0, y: -10 },
+  // Modal animation
+  const modalVariants = {
+    hidden: { opacity: 0, y: -20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+    exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: 'easeOut' } },
   };
 
   // Card container animation for staggering children
@@ -50,7 +108,7 @@ const SearchArea = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2, // Stagger each card
+        staggerChildren: 0.2,
         delayChildren: 0.3,
       },
     },
@@ -81,13 +139,17 @@ const SearchArea = () => {
           variants={searchBarVariants}
         >
           <div className="search-bar">
-            <Search className="search-icon" />
+            <Search className="search-icon" aria-hidden="true" />
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="Search assistive technologies"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => setIsModalOpen(true)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               className="search-input"
+              aria-label="Search assistive technologies"
             />
             {searchTerm && (
               <button onClick={handleClear} className="search-clear" aria-label="Clear search">
@@ -95,26 +157,70 @@ const SearchArea = () => {
               </button>
             )}
           </div>
+
+          {/* YouTube-style Modal for Results and History */}
           <AnimatePresence>
-            {liveResults.length > 0 && (
+            {isModalOpen && (
               <motion.div
-                className="search-results"
+                className="search-modal"
+                ref={modalRef}
                 initial="hidden"
                 animate="visible"
-                exit="hidden"
-                variants={resultVariants}
+                exit="exit"
+                variants={modalVariants}
+                onKeyDown={handleModalKeyDown}
+                role="dialog"
+                aria-labelledby="search-modal-title"
+                tabIndex={0}
               >
-                {liveResults.map((result, index) => (
-                  <motion.div
-                    key={index}
-                    className="search-result-item"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    {result}
-                  </motion.div>
-                ))}
+                <div className="search-modal-content">
+                  {/* Real-Time Results */}
+                  {searchTerm && (
+                    <div className="search-results-section">
+                      <h3>Results</h3>
+                      {loading && <p>Loading...</p>}
+                      {error && <p className="error-message">Error: {error}</p>}
+                      {!loading && !error && liveResults.length === 0 && (
+                        <p>No results found.</p>
+                      )}
+                      {liveResults.map((result, index) => (
+                        <div
+                          key={index}
+                          className="search-result-item"
+                          onClick={() => handleSelectItem(result)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSelectItem(result)}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`Select ${result.name}`}
+                        >
+                          <span>{result.name}</span>
+                          <span className="result-category">({result.category})</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Search History */}
+                  <div className="search-history-section">
+                    <h3>
+                      <History className="history-icon" aria-hidden="true" /> Recent Searches
+                    </h3>
+                    {searchHistory.length === 0 && <p>No recent searches.</p>}
+                    {searchHistory.map((term, index) => (
+                      <div
+                        key={index}
+                        className="search-history-item"
+                        onClick={() => handleSelectItem(term)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSelectItem(term)}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Select recent search: ${term}`}
+                      >
+                        {term}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -130,6 +236,8 @@ const SearchArea = () => {
             className="search-card"
             variants={cardVariants}
             whileHover="hover"
+            tabIndex={0}
+            aria-label="Data-Driven Insights: Make informed decisions with comprehensive analytics and evaluation metrics."
           >
             <BarChart2 className="card-icon" />
             <h3>Data-Driven Insights</h3>
@@ -139,6 +247,8 @@ const SearchArea = () => {
             className="search-card"
             variants={cardVariants}
             whileHover="hover"
+            tabIndex={0}
+            aria-label="Inclusive Community: Join a network of educators committed to accessible education for all students."
           >
             <Users className="card-icon" />
             <h3>Inclusive Community</h3>
@@ -148,6 +258,8 @@ const SearchArea = () => {
             className="search-card"
             variants={cardVariants}
             whileHover="hover"
+            tabIndex={0}
+            aria-label="Trusted Reviews: Access verified reviews from educational professionals and institutions."
           >
             <Shield className="card-icon" />
             <h3>Trusted Reviews</h3>

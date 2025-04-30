@@ -54,6 +54,25 @@ const SearchArea = () => {
     fetchResults();
   }, [searchTerm]);
 
+  // Handle click outside to close modal
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target) &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target)
+      ) {
+        setIsModalOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Handle search submission (e.g., Enter key)
   const handleSearch = () => {
     if (searchTerm.trim()) {
@@ -71,10 +90,8 @@ const SearchArea = () => {
 
   // Focus management for accessibility
   useEffect(() => {
-    if (isModalOpen) {
-      modalRef.current?.focus();
-    } else {
-      searchInputRef.current?.focus();
+    if (isModalOpen && modalRef.current) {
+      modalRef.current.focus();
     }
   }, [isModalOpen]);
 
@@ -82,20 +99,19 @@ const SearchArea = () => {
   const handleModalKeyDown = (e) => {
     if (e.key === 'Escape') {
       setIsModalOpen(false);
+      searchInputRef.current?.focus();
     }
   };
 
   // Select a history item or result and redirect if it's a result
   const handleSelectItem = (item) => {
     if (typeof item === 'string') {
-      // If the item is a history term (string), set the search term and re-trigger search
       setSearchTerm(item);
       const updatedHistory = [item, ...searchHistory.filter((term) => term !== item)].slice(0, 5);
       setSearchHistory(updatedHistory);
       localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
       setIsModalOpen(false);
     } else {
-      // If the item is a search result (object), redirect to tech details
       setSearchTerm(item.name);
       const updatedHistory = [item.name, ...searchHistory.filter((term) => term !== item.name)].slice(0, 5);
       setSearchHistory(updatedHistory);
@@ -103,6 +119,7 @@ const SearchArea = () => {
       setIsModalOpen(false);
       navigate(`/tech-details/${item._id}`);
     }
+    searchInputRef.current?.focus();
   };
 
   // Search bar animation
@@ -163,6 +180,7 @@ const SearchArea = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => setIsModalOpen(true)}
+              onClick={() => setIsModalOpen(true)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               className="search-input"
               aria-label="Search assistive technologies"
@@ -174,7 +192,7 @@ const SearchArea = () => {
             )}
           </div>
 
-          {/* YouTube-style Modal for Results and History */}
+          {/* Modal for Results and History */}
           <AnimatePresence>
             {isModalOpen && (
               <motion.div

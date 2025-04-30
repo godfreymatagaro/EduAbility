@@ -1,4 +1,3 @@
-/* src/components/Reviews.css */
 .reviews-section {
     background-color: #ffffff;
     padding: 3rem 1rem;
@@ -9,38 +8,51 @@
   }
   
   .reviews-content {
-    max-width: 800px;
+    max-width: 1200px; /* Increased to accommodate carousel */
     margin: 0 auto;
     text-align: center;
   }
   
   .reviews-content h2 {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 600;
     color: #000000;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
   }
   
   :where(.dark) .reviews-content h2 {
     color: #ffffff;
   }
   
+  .reviews-carousel-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .reviews-carousel {
+    width: 100%;
+    overflow: hidden;
+  }
+  
   .reviews-grid {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    justify-content: center;
+    flex-wrap: nowrap; /* Prevent wrapping for carousel */
+    width: 100%;
+    transition: transform 0.5s ease-in-out; /* Smooth sliding animation */
   }
   
   .review-card {
-    flex: 1;
-    min-width: 200px;
-    max-width: 250px;
+    flex: 0 0 33.33%; /* Show 3 cards at a time on larger screens */
+    min-width: 250px;
+    max-width: 350px;
     background-color: #f9fafb;
     border-radius: 0.5rem;
     padding: 1.5rem;
     text-align: left;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    margin: 0 0.75rem; /* Space between cards */
   }
   
   :where(.dark) .review-card {
@@ -93,6 +105,42 @@
     color: #d1d5db;
   }
   
+  /* Navigation Arrows */
+  .carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background-color 0.3s ease;
+  }
+  
+  .carousel-arrow:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+  
+  .carousel-arrow svg {
+    width: 24px;
+    height: 24px;
+    color: #ffffff;
+  }
+  
+  .left-arrow {
+    left: 10px;
+  }
+  
+  .right-arrow {
+    right: 10px;
+  }
+  
   .reviews-dots {
     display: flex;
     justify-content: center;
@@ -105,6 +153,8 @@
     height: 8px;
     background-color: #d1d5db;
     border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
   }
   
   .dot.active {
@@ -119,28 +169,113 @@
     background-color: #d1d5db;
   }
   
-  /* Responsive adjustments */
+  /* Responsive Adjustments */
+  @media (max-width: 1024px) {
+    .review-card {
+      flex: 0 0 50%; /* Show 2 cards at a time on medium screens */
+      max-width: 300px;
+    }
+  
+    .reviews-content h2 {
+      font-size: 1.75rem;
+    }
+  
+    .carousel-arrow {
+      width: 35px;
+      height: 35px;
+    }
+  
+    .carousel-arrow svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+  
   @media (max-width: 768px) {
     .reviews-content h2 {
-      font-size: 1.25rem;
+      font-size: 1.5rem;
     }
   
     .reviews-grid {
-      flex-direction: column;
-      align-items: center;
+      flex-direction: row; /* Keep horizontal for carousel */
     }
   
     .review-card {
-      max-width: 100%;
+      flex: 0 0 100%; /* Show 1 card at a time on smaller screens */
+      max-width: 400px;
+      margin: 0 auto; /* Center the card */
+    }
+  
+    .carousel-arrow {
+      width: 30px;
+      height: 30px;
+    }
+  
+    .carousel-arrow svg {
+      width: 18px;
+      height: 18px;
+    }
+  
+    .left-arrow {
+      left: 5px;
+    }
+  
+    .right-arrow {
+      right: 5px;
     }
   }
   
   @media (max-width: 480px) {
+    .reviews-section {
+      padding: 2rem 0.5rem;
+    }
+  
+    .reviews-content h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+  
     .review-card {
       padding: 1rem;
+      max-width: 300px;
     }
   
     .review-text {
       font-size: 0.75rem;
+    }
+  
+    .review-header h4 {
+      font-size: 0.875rem;
+    }
+  
+    .review-role {
+      font-size: 0.65rem;
+    }
+  
+    .review-stars {
+      font-size: 0.75rem;
+    }
+  
+    .review-avatar {
+      width: 35px;
+      height: 35px;
+    }
+  
+    .carousel-arrow {
+      width: 25px;
+      height: 25px;
+    }
+  
+    .carousel-arrow svg {
+      width: 16px;
+      height: 16px;
+    }
+  
+    .left-arrow {
+      left: 2px;
+    }
+  
+    .right-arrow {
+      right: 2px;
     }
   }

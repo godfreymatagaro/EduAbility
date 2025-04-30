@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ChevronDown, Star, X, ChevronLeft, ChevronRight, Eye, Ear, Keyboard, Brain, Compare } from 'lucide-react';
+import { Search, ChevronDown, Star, ChevronLeft, ChevronRight, Eye, Ear, Keyboard, Brain } from 'lucide-react';
 import Button from '../common/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import './SearchTech.css';
@@ -34,7 +34,6 @@ const SearchTech = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [technologies, setTechnologies] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
-  const [selectedTechs, setSelectedTechs] = useState([]); // For comparison
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -150,22 +149,6 @@ const SearchTech = () => {
     }
   };
 
-  // Handle technology selection for comparison
-  const handleSelectTech = (tech) => {
-    if (selectedTechs.length >= 5) {
-      alert('Maximum 5 technologies can be compared!');
-      return;
-    }
-    if (!selectedTechs.some(t => t._id === tech._id)) {
-      setSelectedTechs([...selectedTechs, tech]);
-    }
-  };
-
-  // Remove technology from comparison
-  const handleRemoveTech = (id) => {
-    setSelectedTechs(selectedTechs.filter(tech => tech._id !== id));
-  };
-
   const sectionVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
@@ -257,32 +240,6 @@ const SearchTech = () => {
       viewport={{ once: true, amount: 0.2 }}
     >
       <div className="search-tech-container">
-        {/* Selected Technologies for Comparison */}
-        {selectedTechs.length > 0 && (
-          <div className="selected-techs">
-            <h3>Selected for Comparison</h3>
-            <div className="selected-tech-list">
-              {selectedTechs.map(tech => (
-                <div key={tech._id} className="selected-tech-item">
-                  <span>{tech.name}</span>
-                  <button
-                    onClick={() => handleRemoveTech(tech._id)}
-                    className="remove-tech-button"
-                    aria-label={`Remove ${tech.name} from comparison`}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-              <Link to="/tech-comparison" state={{ selectedTechs }}>
-                <Button variant="filled" size="md" className="compare-button">
-                  Compare Now ({selectedTechs.length})
-                </Button>
-              </Link>
-            </div>
-          </div>
-        )}
-
         <div className="search-tech-header">
           <div className="search-bar-wrapper">
             <div className="search-bar">
@@ -434,28 +391,16 @@ const SearchTech = () => {
                 >
                   <h3>{tech.name}</h3>
                   <p>{tech.description}</p>
-                  <div className="tech-card-actions">
-                    <Link to={`/tech-details/${tech._id}`}>
-                      <Button
-                        variant="filled"
-                        size="md"
-                        className="tech-card-button glow"
-                        ariaLabel={`Learn more about ${tech.name}`}
-                      >
-                        Learn More
-                      </Button>
-                    </Link>
+                  <Link to={`/tech-details/${tech._id}`}>
                     <Button
-                      variant="outline"
+                      variant="filled"
                       size="md"
-                      onClick={() => handleSelectTech(tech)}
-                      className="compare-button"
-                      ariaLabel={`Add ${tech.name} to comparison`}
-                      disabled={selectedTechs.some(t => t._id === tech._id)}
+                      className="tech-card-button glow"
+                      ariaLabel={`Learn more about ${tech.name}`}
                     >
-                      <Compare size={16} /> Compare
+                      Learn More
                     </Button>
-                  </div>
+                  </Link>
                 </motion.div>
               ))}
             </motion.div>
@@ -548,26 +493,15 @@ const SearchTech = () => {
                   <div key={tech._id} className="modal-result-item">
                     <h3>{tech.name}</h3>
                     <p>{tech.description}</p>
-                    <div className="modal-result-actions">
-                      <Link to={`/tech-details/${tech._id}`}>
-                        <Button
-                          variant="filled"
-                          size="sm"
-                          ariaLabel={`Learn more about ${tech.name}`}
-                        >
-                          Learn More
-                        </Button>
-                      </Link>
+                    <Link to={`/tech-details/${tech._id}`}>
                       <Button
-                        variant="outline"
+                        variant="filled"
                         size="sm"
-                        onClick={() => handleSelectTech(tech)}
-                        ariaLabel={`Add ${tech.name} to comparison`}
-                        disabled={selectedTechs.some(t => t._id === tech._id)}
+                        ariaLabel={`Learn more about ${tech.name}`}
                       >
-                        <Compare size={16} /> Compare
+                        Learn More
                       </Button>
-                    </div>
+                    </Link>
                   </div>
                 ))}
               </div>

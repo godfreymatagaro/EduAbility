@@ -15,17 +15,17 @@ const TechComparison = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [technologies, setTechnologies] = useState([]);
-  const [selectedTechs, setSelectedTechs] = useState(location.state?.selectedTechs || []);
+  const [selectedTechs, setSelectedTechs] = useState([]);
   const [availableTechs, setAvailableTechs] = useState([]);
   const [toasts, setToasts] = useState([]);
   const [badges, setBadges] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [sortCriterion, setSortCriterion] = useState(''); // For sorting comparison table
+  const [sortCriterion, setSortCriterion] = useState('');
   const addMoreButtonRef = useRef(null);
   const modalRef = useRef(null);
 
-  // Fetch technologies on component mount
+  // Fetch technologies and initialize selectedTechs from localStorage (simulated Redis cache)
   useEffect(() => {
     const fetchTechnologies = async () => {
       setLoading(true);
@@ -43,8 +43,12 @@ const TechComparison = () => {
         const techs = Array.isArray(data) ? data : [];
         setTechnologies(techs);
 
+        // Load selected technologies from localStorage (simulated Redis cache)
+        const cachedTechs = JSON.parse(localStorage.getItem('comparisonTechs')) || [];
+        setSelectedTechs(cachedTechs);
+
         // Update available technologies (exclude selected ones)
-        const available = techs.filter((tech) => !selectedTechs.some(t => t._id === tech._id));
+        const available = techs.filter((tech) => !cachedTechs.some(t => t._id === tech._id));
         setAvailableTechs(available);
       } catch (err) {
         console.error('Error fetching technologies:', err);
@@ -57,7 +61,7 @@ const TechComparison = () => {
     };
 
     fetchTechnologies();
-  }, [selectedTechs]);
+  }, []);
 
   // Fetch search results using /api/technology/search
   const handleSearch = async () => {
@@ -145,7 +149,9 @@ const TechComparison = () => {
       addToast('Maximum 5 technologies can be compared!');
       return;
     }
-    setSelectedTechs([...selectedTechs, tech]);
+    const updatedTechs = [...selectedTechs, tech];
+    setSelectedTechs(updatedTechs);
+    localStorage.setItem('comparisonTechs', JSON.stringify(updatedTechs));
     setAvailableTechs(availableTechs.filter((t) => t._id !== tech._id));
     setIsModalOpen(false);
     setSearchQuery('');
@@ -154,7 +160,9 @@ const TechComparison = () => {
 
   const handleRemoveTech = (id) => {
     const removedTech = selectedTechs.find((tech) => tech._id === id);
-    setSelectedTechs(selectedTechs.filter((tech) => tech._id !== id));
+    const updatedTechs = selectedTechs.filter((tech) => tech._id !== id);
+    setSelectedTechs(updatedTechs);
+    localStorage.setItem('comparisonTechs', JSON.stringify(updatedTechs));
     setAvailableTechs([...availableTechs, removedTech]);
     addToast('Technology removed!');
   };
@@ -162,7 +170,8 @@ const TechComparison = () => {
   // Modal Focus Management
   useEffect(() => {
     if (isModalOpen) {
-      modalRef.current?.focus();
+      modalRef.current?.
+focus();
     } else {
       addMoreButtonRef.current?.focus();
     }
@@ -272,6 +281,7 @@ const TechComparison = () => {
         >
           <h2>Selected Technologies</h2>
           <div className="tech-list">
+            {selectedTechs.length === 0 && <p>No technologies selected for comparison.</p>}
             {selectedTechs.map((tech) => (
               <motion.div
                 key={tech._id}
@@ -305,138 +315,146 @@ const TechComparison = () => {
         </motion.div>
 
         {/* Summary Section */}
-        <motion.div
-          className="summary-section"
-          initial="hidden"
-          animate="visible"
-          variants={sectionVariants}
-        >
-          {selectedTechs.map((tech) => (
-            <motion.div
-              key={tech._id}
-              className="summary-card"
-              variants={cardVariants}
-              initial="rest"
-              whileHover="hover"
-              tabIndex={0}
-              aria-label={`Summary for ${tech.name}: Rating ${tech.coreVitals?.featuresRating || 'N/A'}, Cost ${tech.cost || 'N/A'}`}
-            >
-              <h3>{tech.name}</h3>
-              <div className="summary-details">
-                <p>
-                  <strong>Rating:</strong> {tech.coreVitals?.featuresRating || 'N/A'} <Star className="star-icon" />
-                </p>
-                <p>
-                  <strong>Cost:</strong> {tech.cost || 'N/A'}
-                </p>
-                <p>
-                  <strong>Category:</strong> {tech.category || 'N/A'}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+        {selectedTechs.length > 0 && (
+          <motion.div
+            className="summary-section"
+            initial="hidden"
+            animate="visible"
+            variants={sectionVariants}
+          >
+            {selectedTechs.map((tech) => (
+              <motion.div
+                key={tech._id}
+                className="summary-card"
+                variants={cardVariants}
+                initial="rest"
+                whileHover="hover"
+                tabIndex={0}
+                aria-label={`Summary for ${tech.name}: Rating ${tech.coreVitals?.featuresRating || 'N/A'}, Cost ${tech.cost || 'N/A'}`}
+              >
+                <h3>{tech.name}</h3>
+                <div className="summary-details">
+                  <p>
+                    <strong>Rating:</strong> {tech.coreVitals?.featuresRating || 'N/A'} <Star className="star-icon" />
+                  </p>
+                  <p>
+                    <strong>Cost:</strong> {tech.cost || 'N/A'}
+                  </p>
+                  <p>
+                    <strong>Category:</strong> {tech.category || 'N/A'}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
 
         {/* Detailed Comparison Table */}
-        <motion.div
-          className="detailed-comparison"
-          initial="hidden"
-          animate="visible"
-          variants={sectionVariants}
-        >
-          <h2>Detailed Comparison</h2>
-          <div className="sort-controls">
-            <label>Sort by: </label>
-            <select
-              value={sortCriterion}
-              onChange={(e) => setSortCriterion(e.target.value)}
-              aria-label="Sort comparison criteria"
-            >
-              <option value="">None</option>
-              {techCriteriaBase.map((criteria) => (
-                <option key={criteria.criterion} value={criteria.criterion}>
-                  {criteria.criterion} (Highest)
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="table-wrapper">
-            <table className="comparison-table detailed-table">
-              <thead>
-                <tr>
-                  <th scope="col">Criteria</th>
-                  {selectedTechs.map((tech) => (
-                    <th key={tech._id} scope="col">{tech.name}</th>
-                  ))}
-                  <th scope="col">Average</th>
-                </tr>
-              </thead>
-              <tbody>
-                {techCriteria.map((criteria, index) => (
-                  <tr key={index}>
-                    <td>{criteria.criterion}</td>
-                    {criteria.ratings.map((rating, i) => (
-                      <td key={i}>
-                        {rating || 'N/A'} {rating ? <Star className="star-icon" /> : null}
-                      </td>
-                    ))}
-                    <td>
-                      {criteria.ratings.every((r) => r)
-                        ? (criteria.ratings.reduce((a, b) => a + b, 0) / criteria.ratings.length).toFixed(1)
-                        : 'N/A'}{' '}
-                      {criteria.ratings.every((r) => r) ? <Star className="star-icon" /> : null}
-                    </td>
-                  </tr>
+        {selectedTechs.length > 0 && (
+          <motion.div
+            className="detailed-comparison"
+            initial="hidden"
+            animate="visible"
+            variants={sectionVariants}
+          >
+            <h2>Detailed Comparison</h2>
+            <div className="sort-controls">
+              <label>Sort by: </label>
+              <select
+                value={sortCriterion}
+                onChange={(e) => setSortCriterion(e.target.value)}
+                aria-label="Sort comparison criteria"
+              >
+                <option value="">None</option>
+                {techCriteriaBase.map((criteria) => (
+                  <option key={criteria.criterion} value={criteria.criterion}>
+                    {criteria.criterion} (Highest)
+                  </option>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
+              </select>
+            </div>
+            <div className="table-wrapper">
+              <table className="comparison-table detailed-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Criteria</th>
+                    {selectedTechs.map((tech) => (
+                      <th key={tech._id} scope="col">{tech.name}</th>
+                    ))}
+                    <th scope="col">Average</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {techCriteria.map((criteria, index) => (
+                    <tr key={index}>
+                      <td>{criteria.criterion}</td>
+                      {criteria.ratings.map((rating, i) => (
+                        <td key={i}>
+                          {rating || 'N/A'} {rating ? <Star className="star-icon" /> : null}
+                        </td>
+                      ))}
+                      <td>
+                        {criteria.ratings.every((r) => r)
+                          ? (criteria.ratings.reduce((a, b) => a + b, 0) / criteria.ratings.length).toFixed(1)
+                          : 'N/A'}{' '}
+                        {criteria.ratings.every((r) => r) ? <Star className="star-icon" /> : null}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        )}
 
         {/* Feature Comparison Table */}
-        <motion.div
-          className="feature-comparison"
-          initial="hidden"
-          animate="visible"
-          variants={sectionVariants}
-        >
-          <h2>Feature Comparison</h2>
-          <div className="table-wrapper">
-            <table className="comparison-table feature-table">
-              <thead>
-                <tr>
-                  <th scope="col">Feature</th>
-                  {selectedTechs.map((tech) => (
-                    <th key={tech._id} scope="col">{tech.name}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {featureComparison.map((feature, index) => (
-                  <tr key={index}>
-                    <td>{feature.feature}</td>
-                    {feature.available.map((avail, i) => (
-                      <td key={i}>
-                        <span className={`dot ${avail ? 'available' : 'unavailable'}`} />
-                      </td>
+        {selectedTechs.length > 0 && (
+          <motion.div
+            className="feature-comparison"
+            initial="hidden"
+            animate="visible"
+            variants={sectionVariants}
+          >
+            <h2>Feature Comparison</h2>
+            <div className="table-wrapper">
+              <table className="comparison-table feature-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Feature</th>
+                    {selectedTechs.map((tech) => (
+                      <th key={tech._id} scope="col">{tech.name}</th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
+                </thead>
+                <tbody>
+                  {featureComparison.map((feature, index) => (
+                    <tr key={index}>
+                      <td>{feature.feature}</td>
+                      {feature.available.map((avail, i) => (
+                        <td key={i}>
+                          <span className={`dot ${avail ? 'available' : 'unavailable'}`} />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        )}
 
         {/* User Reviews Section */}
-        <motion.div
-          className="reviews-section"
-          initial="hidden"
-          animate="visible"
-          variants={sectionVariants}
-        >
-          <h2>User Reviews</h2>
-          <Reviews techs={selectedTechs} />
-        </motion.div>
+        {selectedTechs.length > 0 && (
+          <motion.div
+            className="reviews-section"
+            initial="hidden"
+            animate="visible"
+            variants={sectionVariants}
+          >
+            <h2>User Reviews</h2>
+            <Reviews techs={selectedTechs} />
+          </motion.div>
+        )}
 
         {/* Add Technology Modal */}
         {isModalOpen && (

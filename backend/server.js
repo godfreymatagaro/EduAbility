@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth.routes');
 const reviewRoutes = require('./routes/review.routes');
 const techRoutes = require('./routes/tech.routes');
 const searchRoutes = require('./routes/search.routes');
+const cors = require('cors'); // Add CORS package
 
 // Skip loading .env file for now
 // dotenv.config();
@@ -22,6 +23,12 @@ process.env.FROM_EMAIL = 'info@rackssoftwares.co.ke';
 process.env.PORT = '3000';
 process.env.UPLOAD_DIR = './uploads';
 
+// Define allowed origins
+const allowedOrigins = [
+  'http://localhost:5173', // Vite frontend (development)
+  'https://edu-ability.vercel.app', // Production frontend
+];
+
 // Log hardcoded environment variables for debugging
 console.log('Hardcoded Environment Variables:');
 console.log('MONGO_URI:', process.env.MONGO_URI.replace(/:\/\/[^:]+:[^@]+@/, '://[REDACTED]:[REDACTED]@'));
@@ -33,6 +40,24 @@ console.log('PORT:', process.env.PORT);
 console.log('UPLOAD_DIR:', process.env.UPLOAD_DIR);
 
 const app = express();
+
+// CORS Middleware Configuration
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g., Postman, curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow these HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
+    credentials: true, // Allow credentials (if needed for cookies or auth)
+  })
+);
 
 // Middleware
 app.use(morgan('dev'));
@@ -51,6 +76,9 @@ app.use('/api/search', searchRoutes);
 // Error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ message: 'CORS policy: Origin not allowed' });
+  }
   res.status(500).json({ message: 'Something went wrong!' });
 });
 

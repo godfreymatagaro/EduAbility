@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Search, ChevronDown, Star, X, ChevronLeft, ChevronRight, Eye, Ear, Keyboard, Brain } from 'lucide-react';
 import Button from '../common/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import './SearchTech.css';
+
+// Determine the API URL based on the environment
+const API_URL = import.meta.env.NODE_ENV === 'production'
+  ? import.meta.env.VITE_API_PROD_BACKEND_URL
+  : import.meta.env.VITE_API_DEV_BACKEND_URL;
 
 const SearchTech = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -11,6 +16,7 @@ const SearchTech = () => {
     visual: false,
     auditory: false,
     physical: false,
+    cognitive: false, // Added cognitive to match backend categories
   });
   const [costFilters, setCostFilters] = useState({
     free: false,
@@ -26,58 +32,124 @@ const SearchTech = () => {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [technologies, setTechnologies] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const technologies = [
-    {
-      id: 1,
-      category: 'Visual',
-      name: 'JAWS Screen Reader',
-      description: 'Screen reader for blind and visually impaired users.',
-      link: '/tech-details',
-    },
-    {
-      id: 2,
-      category: 'Auditory',
-      name: 'Voice Command Plus',
-      description: 'Voice recognition software with 99% accuracy.',
-      link: '/tech/voice-command-plus',
-    },
-    {
-      id: 3,
-      category: 'Visual',
-      name: 'Text Magnifier',
-      description: 'Magnifies text for better readability.',
-      link: '/tech/text-magnifier',
-    },
-    {
-      id: 4,
-      category: 'Physical',
-      name: 'Adaptive Keyboard',
-      description: 'Customizable keyboard for physical accessibility.',
-      link: '/tech/adaptive-keyboard',
-    },
-    {
-      id: 5,
-      category: 'Cognitive',
-      name: 'Mind Mapper',
-      description: 'Tool to assist with cognitive organization and memory.',
-      link: '/tech/mind-mapper',
-    },
-    {
-      id: 6,
-      category: 'Visual',
-      name: 'Color Adjuster',
-      description: 'Adjusts screen colors for visual accessibility.',
-      link: '/tech/color-adjuster',
-    },
-  ];
+  // Hardcoded JWT token (same as AdminDash.jsx)
+  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNzU1N2U4Yi0wMmYzLTQyYmQtYTkwNi1jZmU2NDk5NzdkMGYiLCJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDU5OTEzNTcsImV4cCI6MTc0NjA3Nzc1N30.EFnagJsRqlnab0znRF1b6E6UladFwjubZCCKIm0Vtxo';
 
+  // Fetch technologies on component mount
+  useEffect(() => {
+    const fetchTechnologies = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`${API_URL}/api/technologies`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch technologies');
+        }
+        const data = await response.json();
+        // Handle null response
+        setTechnologies(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err.message);
+        setTechnologies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTechnologies();
+  }, []);
+
+  // Apply filters and sorting to technologies
+  const filteredTechnologies = technologies.filter((tech) => {
+    // Category filter
+    const categoryMatch = Object.keys(categoryFilters).some(
+      (key) => categoryFilters[key] && tech.category.toLowerCase() === key
+    );
+    if (Object.values(categoryFilters).some(Boolean) && !categoryMatch) {
+      return false;
+    }
+
+    // Cost filter
+    let costMatch = true;
+    if (Object.values(costFilters).some(Boolean)) {
+      costMatch = false;
+      if (costFilters.free && tech.cost === 'free') costMatch = true;
+      if (costFilters.low && tech.cost === 'paid' && parseFloat(tech.price) <= 50) costMatch = true;
+      if (costFilters.medium && tech.cost === 'paid' && parseFloat(tech.price) > 50 && parseFloat(tech.price) <= 200) costMatch = true;
+      if (costFilters.high && tech.cost === 'paid' && parseFloat(tech.price) > 200) costMatch = true;
+    }
+    if (!costMatch) return false;
+
+    // Rating filter
+    const avgRating = tech.coreVitals?.featuresRating || 0;
+    const ratingMatch = Object.keys(ratingFilters).every((key) => {
+      if (ratingFilters[key]) {
+        if (key === 'fourPlus' && avgRating < 4) return false;
+        if (key === 'threePlus' && avgRating < 3) return false;
+      }
+      return true;
+    });
+    if (Object.values(ratingFilters).some(Boolean) && !ratingMatch) return false;
+
+    return true;
+  });
+
+  // Sort technologies
+  const sortedTechnologies = [...filteredTechnologies].sort((a, b) => {
+    if (sortOption === 'Newest') {
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    }
+    if (sortOption === 'Highest Rated') {
+      const ratingA = a.coreVitals?.featuresRating || 0;
+      const ratingB = b.coreVitals?.featuresRating || 0;
+      return ratingB - ratingA;
+    }
+    // Default: Most Popular (for now, sort by ID or name)
+    return a.name.localeCompare(b.name);
+  });
+
+  // Pagination
   const itemsPerPage = 3;
-  const totalPages = Math.ceil(technologies.length / itemsPerPage);
-  const paginatedTechnologies = technologies.slice(
+  const totalPages = Math.ceil(sortedTechnologies.length / itemsPerPage);
+  const paginatedTechnologies = sortedTechnologies.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // Fetch search results when search modal opens
+  const handleSearch = async () => {
+    if (searchQuery.trim()) {
+      setIsSearchModalOpen(true);
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`${API_URL}/api/search?q=${encodeURIComponent(searchQuery)}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch search results');
+        }
+        const data = await response.json();
+        setSearchResults(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err.message);
+        setSearchResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
   const sectionVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -132,6 +204,7 @@ const SearchTech = () => {
       ...prev,
       [filter]: !prev[filter],
     }));
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const handleCostChange = (filter) => {
@@ -139,6 +212,7 @@ const SearchTech = () => {
       ...prev,
       [filter]: !prev[filter],
     }));
+    setCurrentPage(1);
   };
 
   const handleRatingChange = (filter) => {
@@ -146,17 +220,13 @@ const SearchTech = () => {
       ...prev,
       [filter]: !prev[filter],
     }));
+    setCurrentPage(1);
   };
 
   const handleSortOptionSelect = (option) => {
     setSortOption(option);
     setIsSortModalOpen(false);
-  };
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      setIsSearchModalOpen(true);
-    }
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page) => {
@@ -208,7 +278,7 @@ const SearchTech = () => {
                   checked={categoryFilters.visual}
                   onChange={() => handleCategoryChange('visual')}
                 />
-                <span>Visual (24)</span>
+                <span>Visual</span>
               </label>
               <label>
                 <input
@@ -216,7 +286,7 @@ const SearchTech = () => {
                   checked={categoryFilters.auditory}
                   onChange={() => handleCategoryChange('auditory')}
                 />
-                <span>Auditory (18)</span>
+                <span>Auditory</span>
               </label>
               <label>
                 <input
@@ -224,7 +294,15 @@ const SearchTech = () => {
                   checked={categoryFilters.physical}
                   onChange={() => handleCategoryChange('physical')}
                 />
-                <span>Physical (15)</span>
+                <span>Physical</span>
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={categoryFilters.cognitive}
+                  onChange={() => handleCategoryChange('cognitive')}
+                />
+                <span>Cognitive</span>
               </label>
             </div>
             <div className="filter-group">
@@ -294,6 +372,11 @@ const SearchTech = () => {
             </div>
           </div>
           <div className="tech-cards-wrapper">
+            {loading && <p>Loading technologies...</p>}
+            {error && <p className="error-message">Error: {error}</p>}
+            {!loading && !error && sortedTechnologies.length === 0 && (
+              <p>No technologies found.</p>
+            )}
             <motion.div
               className="tech-cards"
               variants={cardContainerVariants}
@@ -303,14 +386,14 @@ const SearchTech = () => {
             >
               {paginatedTechnologies.map((tech) => (
                 <motion.div
-                  key={tech.id}
+                  key={tech._id}
                   className="tech-card"
                   variants={cardVariants}
                   whileHover="hover"
                 >
                   <h3>{tech.name}</h3>
                   <p>{tech.description}</p>
-                  <Link to={tech.link}>
+                  <Link to={`/tech/${tech._id}`}>
                     <Button
                       variant="filled"
                       size="md"
@@ -403,25 +486,26 @@ const SearchTech = () => {
               </button>
               <h2>Search Results for "{searchQuery}"</h2>
               <div className="modal-results">
-                {technologies
-                  .filter((tech) =>
-                    tech.name.toLowerCase().includes(searchQuery.toLowerCase())
-                  )
-                  .map((tech) => (
-                    <div key={tech.id} className="modal-result-item">
-                      <h3>{tech.name}</h3>
-                      <p>{tech.description}</p>
-                      <Link to={tech.link}>
-                        <Button
-                          variant="filled"
-                          size="sm"
-                          ariaLabel={`Learn more about ${tech.name}`}
-                        >
-                          Learn More
-                        </Button>
-                      </Link>
-                    </div>
-                  ))}
+                {loading && <p>Loading search results...</p>}
+                {error && <p className="error-message">Error: {error}</p>}
+                {!loading && !error && searchResults.length === 0 && (
+                  <p>No results found for "{searchQuery}".</p>
+                )}
+                {searchResults.map((tech) => (
+                  <div key={tech._id} className="modal-result-item">
+                    <h3>{tech.name}</h3>
+                    <p>{tech.description}</p>
+                    <Link to={`/tech/${tech._id}`}>
+                      <Button
+                        variant="filled"
+                        size="sm"
+                        ariaLabel={`Learn more about ${tech.name}`}
+                      >
+                        Learn More
+                      </Button>
+                    </Link>
+                  </div>
+                ))}
               </div>
             </motion.div>
           </motion.div>

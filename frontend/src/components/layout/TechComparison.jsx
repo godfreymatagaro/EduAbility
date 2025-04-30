@@ -6,9 +6,10 @@ import Reviews from './Reviews';
 import './TechComparison.css';
 
 // Determine the API URL based on the environment
-const API_URL = import.meta.env.NODE_ENV === 'production'
-  ? import.meta.env.VITE_API_PROD_BACKEND_URL
-  : import.meta.env.VITE_API_DEV_BACKEND_URL;
+const API_URL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_API_PROD_BACKEND_URL
+    : import.meta.env.VITE_API_DEV_BACKEND_URL;
 
 const TechComparison = () => {
   const location = useLocation();
@@ -69,7 +70,7 @@ const TechComparison = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${API_URL}/api/technology/search?q=${encodeURIComponent(searchQuery)}`);
+        const response = await fetch(`${API_URL}/api/technologies/search?q=${encodeURIComponent(searchQuery)}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch search results: ${response.status} ${response.statusText}`);
         }
@@ -170,8 +171,7 @@ const TechComparison = () => {
   // Modal Focus Management
   useEffect(() => {
     if (isModalOpen) {
-      modalRef.current?.
-focus();
+      modalRef.current?.focus();
     } else {
       addMoreButtonRef.current?.focus();
     }
@@ -290,8 +290,11 @@ focus();
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
                 transition={{ duration: 0.3 }}
+                tabIndex={0}
+                aria-label={`Selected technology: ${tech.name}, Category: ${tech.category || 'N/A'}`}
               >
-                <span>{tech.name}</span>
+                <span className="tech-name">{tech.name}</span>
+                <span className="tech-category">{tech.category || 'N/A'}</span>
                 <button
                   className="remove-tech"
                   onClick={() => handleRemoveTech(tech._id)}
@@ -359,8 +362,9 @@ focus();
           >
             <h2>Detailed Comparison</h2>
             <div className="sort-controls">
-              <label>Sort by: </label>
+              <label htmlFor="sort-criteria">Sort by:</label>
               <select
+                id="sort-criteria"
                 value={sortCriterion}
                 onChange={(e) => setSortCriterion(e.target.value)}
                 aria-label="Sort comparison criteria"

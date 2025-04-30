@@ -34,10 +34,10 @@ const AdminDash = () => {
     developer: '',
     inputs: '',
     coreVitals: {
-      customerSupport: '',
-      valueForMoney: '',
-      featuresRating: '',
-      easeOfUse: '',
+      customerSupport: 0,
+      valueForMoney: 0,
+      featuresRating: 0,
+      easeOfUse: 0,
     },
     featureComparison: {
       security: false,
@@ -152,6 +152,24 @@ const AdminDash = () => {
     }
   };
 
+  const handleInputChange = (e, nestedField = null) => {
+    const { name, value, type, checked } = e.target;
+    if (nestedField) {
+      setNewTech((prev) => ({
+        ...prev,
+        [nestedField]: {
+          ...prev[nestedField],
+          [name]: type === 'checkbox' ? checked : parseFloat(value) || 0,
+        },
+      }));
+    } else {
+      setNewTech((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
   const handleAddTech = async (e) => {
     e.preventDefault();
     const {
@@ -194,6 +212,7 @@ const AdminDash = () => {
       featuresRating: parseFloat(coreVitals.featuresRating) || 0,
       easeOfUse: parseFloat(coreVitals.easeOfUse) || 0,
     };
+
     if (Object.values(parsedCoreVitals).some(val => val < 0 || val > 5)) {
       setTechError('Core vitals must be between 0 and 5.');
       return;
@@ -212,15 +231,7 @@ const AdminDash = () => {
       developer: developer.trim(),
       inputs: inputs.trim(),
       coreVitals: parsedCoreVitals,
-      featureComparison: {
-        security: featureComparison.security === 'true',
-        integration: featureComparison.integration === 'true',
-        support: featureComparison.support === 'true',
-        userManagement: featureComparison.userManagement === 'true',
-        api: featureComparison.api === 'true',
-        webhooks: featureComparison.webhooks === 'true',
-        community: featureComparison.community === 'true',
-      },
+      featureComparison,
     };
 
     try {
@@ -252,10 +263,10 @@ const AdminDash = () => {
         developer: '',
         inputs: '',
         coreVitals: {
-          customerSupport: '',
-          valueForMoney: '',
-          featuresRating: '',
-          easeOfUse: '',
+          customerSupport: 0,
+          valueForMoney: 0,
+          featuresRating: 0,
+          easeOfUse: 0,
         },
         featureComparison: {
           security: false,
@@ -555,10 +566,9 @@ const AdminDash = () => {
                         <input
                           id="tech-name"
                           type="text"
+                          name="name"
                           value={newTech.name}
-                          onChange={(e) =>
-                            setNewTech({ ...newTech, name: e.target.value })
-                          }
+                          onChange={handleInputChange}
                           className="form-input"
                           aria-label="Technology name"
                           required
@@ -570,10 +580,9 @@ const AdminDash = () => {
                         </label>
                         <select
                           id="tech-category"
+                          name="category"
                           value={newTech.category}
-                          onChange={(e) =>
-                            setNewTech({ ...newTech, category: e.target.value })
-                          }
+                          onChange={handleInputChange}
                           className="form-input"
                           aria-label="Technology category"
                           required
@@ -593,10 +602,9 @@ const AdminDash = () => {
                         </label>
                         <select
                           id="tech-cost"
+                          name="cost"
                           value={newTech.cost}
-                          onChange={(e) =>
-                            setNewTech({ ...newTech, cost: e.target.value })
-                          }
+                          onChange={handleInputChange}
                           className="form-input"
                           aria-label="Technology cost"
                           required
@@ -619,10 +627,9 @@ const AdminDash = () => {
                         <input
                           id="tech-version"
                           type="text"
+                          name="version"
                           value={newTech.version}
-                          onChange={(e) =>
-                            setNewTech({ ...newTech, version: e.target.value })
-                          }
+                          onChange={handleInputChange}
                           className="form-input"
                           aria-label="Technology version"
                           required
@@ -635,10 +642,9 @@ const AdminDash = () => {
                         <input
                           id="tech-platform"
                           type="text"
+                          name="platform"
                           value={newTech.platform}
-                          onChange={(e) =>
-                            setNewTech({ ...newTech, platform: e.target.value })
-                          }
+                          onChange={handleInputChange}
                           className="form-input"
                           aria-label="Supported platforms"
                           required
@@ -651,10 +657,9 @@ const AdminDash = () => {
                         <input
                           id="tech-developer"
                           type="text"
+                          name="developer"
                           value={newTech.developer}
-                          onChange={(e) =>
-                            setNewTech({ ...newTech, developer: e.target.value })
-                          }
+                          onChange={handleInputChange}
                           className="form-input"
                           aria-label="Technology developer"
                           required
@@ -666,10 +671,9 @@ const AdminDash = () => {
                         </label>
                         <textarea
                           id="tech-system-requirements"
+                          name="systemRequirements"
                           value={newTech.systemRequirements}
-                          onChange={(e) =>
-                            setNewTech({ ...newTech, systemRequirements: e.target.value })
-                          }
+                          onChange={handleInputChange}
                           className="form-textarea"
                           aria-label="System requirements"
                           required
@@ -681,10 +685,9 @@ const AdminDash = () => {
                         </label>
                         <textarea
                           id="tech-inputs"
+                          name="inputs"
                           value={newTech.inputs}
-                          onChange={(e) =>
-                            setNewTech({ ...newTech, inputs: e.target.value })
-                          }
+                          onChange={handleInputChange}
                           className="form-textarea"
                           aria-label="Input methods"
                           required
@@ -701,10 +704,9 @@ const AdminDash = () => {
                         </label>
                         <textarea
                           id="tech-description"
+                          name="description"
                           value={newTech.description}
-                          onChange={(e) =>
-                            setNewTech({ ...newTech, description: e.target.value })
-                          }
+                          onChange={handleInputChange}
                           className="form-textarea"
                           aria-label="Technology description"
                           required
@@ -716,10 +718,9 @@ const AdminDash = () => {
                         </label>
                         <textarea
                           id="tech-evaluation"
+                          name="evaluation"
                           value={newTech.evaluation}
-                          onChange={(e) =>
-                            setNewTech({ ...newTech, evaluation: e.target.value })
-                          }
+                          onChange={handleInputChange}
                           className="form-textarea"
                           aria-label="Technology evaluation"
                           required
@@ -731,10 +732,9 @@ const AdminDash = () => {
                         </label>
                         <textarea
                           id="tech-key-features"
+                          name="keyFeatures"
                           value={newTech.keyFeatures}
-                          onChange={(e) =>
-                            setNewTech({ ...newTech, keyFeatures: e.target.value })
-                          }
+                          onChange={handleInputChange}
                           className="form-textarea"
                           aria-label="Key features"
                           required
@@ -755,13 +755,9 @@ const AdminDash = () => {
                           step="0.1"
                           min="0"
                           max="5"
+                          name="customerSupport"
                           value={newTech.coreVitals.customerSupport}
-                          onChange={(e) =>
-                            setNewTech({
-                              ...newTech,
-                              coreVitals: { ...newTech.coreVitals, customerSupport: e.target.value },
-                            })
-                          }
+                          onChange={(e) => handleInputChange(e, 'coreVitals')}
                           className="form-input"
                           aria-label="Customer support rating"
                         />
@@ -776,13 +772,9 @@ const AdminDash = () => {
                           step="0.1"
                           min="0"
                           max="5"
+                          name="valueForMoney"
                           value={newTech.coreVitals.valueForMoney}
-                          onChange={(e) =>
-                            setNewTech({
-                              ...newTech,
-                              coreVitals: { ...newTech.coreVitals, valueForMoney: e.target.value },
-                            })
-                          }
+                          onChange={(e) => handleInputChange(e, 'coreVitals')}
                           className="form-input"
                           aria-label="Value for money rating"
                         />
@@ -797,13 +789,9 @@ const AdminDash = () => {
                           step="0.1"
                           min="0"
                           max="5"
+                          name="featuresRating"
                           value={newTech.coreVitals.featuresRating}
-                          onChange={(e) =>
-                            setNewTech({
-                              ...newTech,
-                              coreVitals: { ...newTech.coreVitals, featuresRating: e.target.value },
-                            })
-                          }
+                          onChange={(e) => handleInputChange(e, 'coreVitals')}
                           className="form-input"
                           aria-label="Features rating"
                         />
@@ -818,13 +806,9 @@ const AdminDash = () => {
                           step="0.1"
                           min="0"
                           max="5"
+                          name="easeOfUse"
                           value={newTech.coreVitals.easeOfUse}
-                          onChange={(e) =>
-                            setNewTech({
-                              ...newTech,
-                              coreVitals: { ...newTech.coreVitals, easeOfUse: e.target.value },
-                            })
-                          }
+                          onChange={(e) => handleInputChange(e, 'coreVitals')}
                           className="form-input"
                           aria-label="Ease of use rating"
                         />
@@ -833,34 +817,24 @@ const AdminDash = () => {
 
                     {/* Feature Comparison */}
                     <div className="form-section">
-                      <h4 className="form-section-title">Feature Comparison</h4>
-                      {['security', 'integration', 'support', 'userManagement', 'api', 'webhooks', 'community'].map((feature) => (
-                        <div className="form-group" key={feature}>
-                          <label htmlFor={`tech-${feature}`} className="form-label">
-                            {feature.charAt(0).toUpperCase() + feature.slice(1)} *
-                          </label>
-                          <select
-                            id={`tech-${feature}`}
-                            value={newTech.featureComparison[feature]}
-                            onChange={(e) =>
-                              setNewTech({
-                                ...newTech,
-                                featureComparison: {
-                                  ...newTech.featureComparison,
-                                  [feature]: e.target.value,
-                                },
-                              })
-                            }
-                            className="form-input"
-                            aria-label={`${feature} support`}
-                            required
-                          >
-                            <option value="false">No</option>
-                            <option value="true">Yes</option>
-                          </select>
-                        </div>
-                      ))}
-                    </div>
+  <h4 className="form-section-title">Feature Comparison</h4>
+  <div className="feature-comparison-grid">
+    {['security', 'integration', 'support', 'userManagement', 'api', 'webhooks', 'community'].map((feature) => (
+      <div className="form-group" key={feature}>
+        <label className="form-label">
+          <input
+            type="checkbox"
+            name={feature}
+            checked={newTech.featureComparison[feature]}
+            onChange={(e) => handleInputChange(e, 'featureComparison')}
+            aria-label={`${feature} support`}
+          />
+          {feature.charAt(0).toUpperCase() + feature.slice(1)}
+        </label>
+      </div>
+    ))}
+  </div>
+</div>
 
                     {techError && (
                       <p className="error-message" aria-live="assertive">

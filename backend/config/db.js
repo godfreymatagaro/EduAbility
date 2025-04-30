@@ -27,9 +27,13 @@ const connectDB = async () => {
     isConnected = true;
     console.log('MongoDB connected successfully');
 
-    // Ensure Redis is connected
-    await redisClient.ping();
-    console.log('Redis ping successful');
+    // Ensure Redis is connected (non-critical)
+    try {
+      await redisClient.ping();
+      console.log('Redis ping successful');
+    } catch (err) {
+      console.error('Redis ping failed, continuing without Redis:', err);
+    }
   } catch (error) {
     console.error('Database connection error:', error);
     isConnected = false;

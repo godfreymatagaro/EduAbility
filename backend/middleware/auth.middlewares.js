@@ -1,7 +1,13 @@
 const jwt = require('jsonwebtoken');
 
-const authMiddleware = (requiredRole = null) => (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
+const authMiddleware = (req, res, next) => {
+  // Add safeguard for req.headers
+  if (!req || !req.headers) {
+    return res.status(400).json({ message: 'Invalid request' });
+  }
+
+  const token = req.headers.authorization?.replace('Bearer ', '');
+
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
   }
@@ -9,11 +15,6 @@ const authMiddleware = (requiredRole = null) => (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-
-    if (requiredRole && decoded.role !== requiredRole) {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-
     next();
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });

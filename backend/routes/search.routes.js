@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { search } = require('../controllers/search.controller');
-const authMiddleware = require('../middleware/auth.middlewares');
+const searchController = require('../controllers/search.controller');
 
-router.get('/', authMiddleware(), search);
+router.get('/', searchController.search);
 
 module.exports = router;

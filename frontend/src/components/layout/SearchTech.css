@@ -772,7 +772,8 @@
     }
   
     .search-bar-wrapper {
-      max-width: 70%;
+      max-width: 90%;
+      
       margin: 0 4px; /* 4px margin left and right */
     }
   
@@ -782,6 +783,7 @@
   
     .search-input {
       font-size: 0.875rem;
+      width: 400px;
     }
   
     .search-icon,

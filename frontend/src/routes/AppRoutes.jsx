@@ -3,7 +3,8 @@ import Home from '../pages/Home';
 import Technologies from '../pages/Technologies';
 import Compare from '../pages/Compare';
 import Feedback from '../pages/Feedback';
-import Details from '../pages/Details'; // Import TechDetails instead of Details
+import Details from '../pages/Details'; 
+import Dashboard from '../pages/DashBoard';
 import Admin from '../pages/Admin';
 
 const AppRoutes = () => {
@@ -14,6 +15,7 @@ const AppRoutes = () => {
       <Route path="/tech-details/:id" element={<Details />} /> {/* Add :id parameter */}
       <Route path="/compare" element={<Compare />} />
       <Route path="/feedback" element={<Feedback />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/admin-dash" element={<Admin />} />
     </Routes>
   );

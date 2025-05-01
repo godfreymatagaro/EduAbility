@@ -1,38 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Star, Trash2, X, Plus, Info } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { Search, Filter, Trash2, Plus } from 'lucide-react';
+import { toast } from 'react-toastify';
 import './AdminDash.css';
 
-// Determine the API URL based on the environment
-const API_URL = import.meta.env.NODE_ENV === 'production'
+const API_URL = import.meta.env.MODE === "production"
   ? import.meta.env.VITE_API_PROD_BACKEND_URL
   : import.meta.env.VITE_API_DEV_BACKEND_URL;
 
+const finalAPI_URL = API_URL || (import.meta.env.MODE === "production" ? "https://eduability.onrender.com" : "http://localhost:3000");
+
 const AdminDash = () => {
-  const [activeTab, setActiveTab] = useState('feedback');
-  const [feedbackList, setFeedbackList] = useState([
-    { id: 1, rating: 4, feedback: 'Great experience, but could use more features.', date: '2025-04-28' },
-    { id: 2, rating: 5, feedback: 'Absolutely love it! Very intuitive.', date: '2025-04-27' },
-    { id: 3, rating: 3, feedback: 'It’s okay, but the UI needs improvement.', date: '2025-04-26' },
-    { id: 4, rating: 2, feedback: 'Not very user-friendly.', date: '2025-04-25' },
-  ]);
-  const [technologies, setTechnologies] = useState([]);
-  const [reviews, setReviews] = useState([]);
-  const [filterRating, setFilterRating] = useState(null);
-  const [toasts, setToasts] = useState([]);
-  const [isAddTechModalOpen, setIsAddTechModalOpen] = useState(false);
-  const [newTech, setNewTech] = useState({
+  const [activeTab, setActiveTab] = useState('add');
+  const [formData, setFormData] = useState({
     name: '',
-    keyFeatures: '',
-    systemRequirements: '',
-    category: '',
     description: '',
-    cost: '',
-    evaluation: '',
-    version: '',
-    platform: '',
-    developer: '',
-    inputs: '',
     coreVitals: {
       customerSupport: 0,
       valueForMoney: 0,
@@ -40,228 +21,110 @@ const AdminDash = () => {
       easeOfUse: 0,
     },
     featureComparison: {
-      security: false,
       integration: false,
+      security: false,
       support: false,
       userManagement: false,
       api: false,
       webhooks: false,
       community: false,
     },
+    inputs: '',
+    developer: '',
+    platform: '',
+    version: '',
+    evaluation: '',
+    cost: 'free',
+    price: '',
+    category: '',
+    systemRequirements: '',
+    keyFeatures: '',
+    tech_img_link: '',
   });
-  const [techError, setTechError] = useState('');
-  const modalRef = useRef(null);
+  const [technologies, setTechnologies] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Replace with your JWT token
-  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNzU1N2U4Yi0wMmYzLTQyYmQtYTkwNi1jZmU2NDk5NzdkMGYiLCJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDU5OTEzNTcsImV4cCI6MTc0NjA3Nzc1N30.EFnagJsRqlnab0znRF1b6E6UladFwjubZCCKIm0Vtxo';
-
-  // Fetch technologies from API
+  // Fetch technologies on mount
   useEffect(() => {
     const fetchTechnologies = async () => {
+      setLoading(true);
       try {
-        const response = await fetch(`${API_URL}/api/technologies`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(`${finalAPI_URL}/api/technologies`);
         if (!response.ok) {
-          throw new Error('Failed to fetch technologies');
+          throw new Error(`Failed to fetch technologies: ${response.status}`);
         }
         const data = await response.json();
         setTechnologies(data);
-      } catch (error) {
-        addToast(`Error fetching technologies: ${error.message}`);
+      } catch (err) {
+        toast.error(`Error fetching technologies: ${err.message}`);
+      } finally {
+        setLoading(false);
       }
     };
-
-    const fetchReviews = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/reviews`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error('Failed to fetch reviews');
-        }
-        const data = await response.json();
-        setReviews(data);
-      } catch (error) {
-        addToast(`Error fetching reviews: ${error.message}`);
-      }
-    };
-
     fetchTechnologies();
-    fetchReviews();
   }, []);
 
-  // Focus management for the modal
-  useEffect(() => {
-    if (isAddTechModalOpen) {
-      modalRef.current?.focus();
-    }
-  }, [isAddTechModalOpen]);
-
-  const totalFeedback = feedbackList.length;
-  const averageRating = feedbackList.length
-    ? (feedbackList.reduce((sum, item) => sum + item.rating, 0) / feedbackList.length).toFixed(1)
-    : 0;
-
-  const filteredFeedback = filterRating
-    ? feedbackList.filter((item) => item.rating === filterRating)
-    : feedbackList;
-
-  const handleDeleteFeedback = (id) => {
-    setFeedbackList(feedbackList.filter((item) => item.id !== id));
-    addToast('Feedback deleted successfully!');
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleDeleteTech = async (id) => {
-    try {
-      const response = await fetch(`${API_URL}/api/technologies/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete technology');
-      }
-      setTechnologies(technologies.filter((tech) => tech._id !== id));
-      addToast('Technology deleted successfully!');
-    } catch (error) {
-      addToast(`Error deleting technology: ${error.message}`);
-    }
+  const handleCoreVitalsChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      coreVitals: {
+        ...prev.coreVitals,
+        [name]: parseFloat(value) || 0,
+      },
+    }));
   };
 
-  const handleDeleteReview = async (id) => {
-    try {
-      const response = await fetch(`${API_URL}/api/reviews/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete review');
-      }
-      setReviews(reviews.filter((review) => review._id !== id));
-      addToast('Review deleted successfully!');
-    } catch (error) {
-      addToast(`Error deleting review: ${error.message}`);
-    }
+  const handleFeatureComparisonChange = (e) => {
+    const { name, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      featureComparison: {
+        ...prev.featureComparison,
+        [name]: checked,
+      },
+    }));
   };
 
-  const handleInputChange = (e, nestedField = null) => {
-    const { name, value, type, checked } = e.target;
-    if (nestedField) {
-      setNewTech((prev) => ({
-        ...prev,
-        [nestedField]: {
-          ...prev[nestedField],
-          [name]: type === 'checkbox' ? checked : parseFloat(value) || 0,
-        },
-      }));
-    } else {
-      setNewTech((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+  const handleCategoryChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      category: e.target.value,
+    }));
   };
 
-  const handleAddTech = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const {
-      name,
-      keyFeatures,
-      systemRequirements,
-      category,
-      description,
-      cost,
-      evaluation,
-      version,
-      platform,
-      developer,
-      inputs,
-      coreVitals,
-      featureComparison,
-    } = newTech;
-
-    // Validation
-    if (
-      !name.trim() ||
-      !keyFeatures.trim() ||
-      !systemRequirements.trim() ||
-      !category ||
-      !description.trim() ||
-      !cost ||
-      !evaluation.trim() ||
-      !version.trim() ||
-      !platform.trim() ||
-      !developer.trim() ||
-      !inputs.trim()
-    ) {
-      setTechError('Please fill in all required fields.');
-      return;
-    }
-
-    const parsedCoreVitals = {
-      customerSupport: parseFloat(coreVitals.customerSupport) || 0,
-      valueForMoney: parseFloat(coreVitals.valueForMoney) || 0,
-      featuresRating: parseFloat(coreVitals.featuresRating) || 0,
-      easeOfUse: parseFloat(coreVitals.easeOfUse) || 0,
-    };
-
-    if (Object.values(parsedCoreVitals).some(val => val < 0 || val > 5)) {
-      setTechError('Core vitals must be between 0 and 5.');
-      return;
-    }
-
-    const techData = {
-      name: name.trim(),
-      keyFeatures: keyFeatures.trim(),
-      systemRequirements: systemRequirements.trim(),
-      category,
-      description: description.trim(),
-      cost,
-      evaluation: evaluation.trim(),
-      version: version.trim(),
-      platform: platform.trim(),
-      developer: developer.trim(),
-      inputs: inputs.trim(),
-      coreVitals: parsedCoreVitals,
-      featureComparison,
-    };
-
     try {
-      const response = await fetch(`${API_URL}/api/technologies`, {
+      const response = await fetch(`${finalAPI_URL}/api/technologies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNzU1N2U4Yi0wMmYzLTQyYmQtYTkwNi1jZmU2NDk5NzdkMGYiLCJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDU5OTcyMDIsImV4cCI6MTc0NjA4MzYwMn0.hdUehWi1Z2U2GvZ9-IMulLOdOU6OLCUeQJ64FVmY_-0',
         },
-        body: JSON.stringify(techData),
+        body: JSON.stringify(formData),
       });
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add technology');
+        throw new Error(`Failed to submit: ${response.status}`);
       }
-      const newTechEntry = await response.json();
-      setTechnologies([...technologies, newTechEntry]);
-      setIsAddTechModalOpen(false);
-      setNewTech({
+
+      const data = await response.json();
+      setTechnologies((prev) => [...prev, data]);
+      toast.success('Technology added successfully!');
+      setFormData({
         name: '',
-        keyFeatures: '',
-        systemRequirements: '',
-        category: '',
         description: '',
-        cost: '',
-        evaluation: '',
-        version: '',
-        platform: '',
-        developer: '',
-        inputs: '',
         coreVitals: {
           customerSupport: 0,
           valueForMoney: 0,
@@ -269,661 +132,520 @@ const AdminDash = () => {
           easeOfUse: 0,
         },
         featureComparison: {
-          security: false,
           integration: false,
+          security: false,
           support: false,
           userManagement: false,
           api: false,
           webhooks: false,
           community: false,
         },
+        inputs: '',
+        developer: '',
+        platform: '',
+        version: '',
+        evaluation: '',
+        cost: 'free',
+        price: '',
+        category: '',
+        systemRequirements: '',
+        keyFeatures: '',
+        tech_img_link: '',
       });
-      setTechError('');
-      addToast('Technology added successfully!');
-    } catch (error) {
-      setTechError(error.message);
+    } catch (err) {
+      toast.error(`Error: ${err.message}`);
     }
   };
 
-  const addToast = (message) => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    }, 3000);
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`${finalAPI_URL}/api/technologies/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNzU1N2U4Yi0wMmYzLTQyYmQtYTkwNi1jZmU2NDk5NzdkMGYiLCJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDU5OTcyMDIsImV4cCI6MTc0NjA4MzYwMn0.hdUehWi1Z2U2GvZ9-IMulLOdOU6OLCUeQJ64FVmY_-0',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete: ${response.status}`);
+      }
+
+      setTechnologies((prev) => prev.filter((tech) => tech._id !== id));
+      toast.success('Technology deleted successfully!');
+    } catch (err) {
+      toast.error(`Error deleting technology: ${err.message}`);
+    }
   };
 
-  const clearFilter = () => {
-    setFilterRating(null);
-  };
-
-  const toastVariants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.3 } },
-  };
+  const filteredTechnologies = technologies.filter((tech) => {
+    const matchesSearch = tech.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = filterCategory ? tech.category === filterCategory : true;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <section className="admin-dash-section">
-      {/* Toast Notifications */}
-      <div className="toast-container">
-        <AnimatePresence>
-          {toasts.map((toast) => (
-            <motion.div
-              key={toast.id}
-              className="toast"
-              variants={toastVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              role="alert"
-              aria-live="polite"
-            >
-              {toast.message}
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-
       <div className="admin-dash-container">
-        {/* Tabs */}
-        <div className="tabs-section">
+        <h1 className="admin-dash-title">Admin Dashboard</h1>
+        <div className="tabs">
           <button
-            className={`tab-button ${activeTab === 'feedback' ? 'active' : ''}`}
-            onClick={() => setActiveTab('feedback')}
-            aria-label="View feedback section"
+            className={`tab ${activeTab === 'add' ? 'active' : ''}`}
+            onClick={() => setActiveTab('add')}
           >
-            Feedback
+            Add Technology
           </button>
           <button
-            className={`tab-button ${activeTab === 'technologies' ? 'active' : ''}`}
-            onClick={() => setActiveTab('technologies')}
-            aria-label="View technologies section"
+            className={`tab ${activeTab === 'manage-tech' ? 'active' : ''}`}
+            onClick={() => setActiveTab('manage-tech')}
           >
-            Technologies
+            Manage Technologies
           </button>
           <button
-            className={`tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reviews')}
-            aria-label="View reviews section"
+            className={`tab ${activeTab === 'manage-reviews' ? 'active' : ''}`}
+            onClick={() => setActiveTab('manage-reviews')}
           >
-            Reviews
+            Manage Reviews
           </button>
         </div>
 
-        {/* Feedback Section */}
-        {activeTab === 'feedback' && (
-          <>
-            {/* Summary Card */}
-            <motion.div
-              className="summary-card"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h3 className="summary-title">Feedback Summary</h3>
-              <div className="summary-details">
-                <p>
-                  <strong>Total Feedback:</strong> {totalFeedback}
-                </p>
-                <p>
-                  <strong>Average Rating:</strong> {averageRating}{' '}
-                  <Star className="star-icon" />
-                </p>
-              </div>
-            </motion.div>
-
-            {/* Filter Section */}
-            <div className="filter-section">
-              <label htmlFor="rating-filter" className="filter-label">
-                Filter by Rating:
-              </label>
-              <div className="filter-controls">
-                <select
-                  id="rating-filter"
-                  value={filterRating || ''}
-                  onChange={(e) => setFilterRating(e.target.value ? parseInt(e.target.value) : null)}
-                  className="filter-select"
-                  aria-label="Filter feedback by rating"
-                >
-                  <option value="">All Ratings</option>
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <option key={value} value={value}>
-                      {value} Star{value !== 1 ? 's' : ''}
-                    </option>
-                  ))}
-                </select>
-                {filterRating && (
-                  <button
-                    onClick={clearFilter}
-                    className="clear-filter-button"
-                    aria-label="Clear rating filter"
+        {/* Add Technology Tab */}
+        {activeTab === 'add' && (
+          <form className="admin-dash-form" onSubmit={handleSubmit}>
+            <div className="form-section">
+              <h2>Add New Technology</h2>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="name">Technology Name *</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Technology name"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="cost">Cost *</label>
+                  <select
+                    id="cost"
+                    name="cost"
+                    value={formData.cost}
+                    onChange={handleInputChange}
+                    required
                   >
-                    <X className="clear-icon" /> Clear
-                  </button>
-                )}
+                    <option value="free">Free</option>
+                    <option value="paid">Paid</option>
+                    <option value="subscription">Subscription</option>
+                  </select>
+                </div>
+              </div>
+              {formData.cost !== 'free' && (
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="price">Price ($)</label>
+                    <input
+                      type="number"
+                      id="price"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleInputChange}
+                      placeholder="$100 - $200"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="form-section">
+              <h2>Technology Description</h2>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="description">Detailed Technology Description *</label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Detailed technology description"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="inputs">Inputs *</label>
+                  <input
+                    type="text"
+                    id="inputs"
+                    name="inputs"
+                    value={formData.inputs}
+                    onChange={handleInputChange}
+                    placeholder="Voice, Touch, etc."
+                    required
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Feedback Table */}
-            <div className="table-section">
-              <h2 className="table-title">Feedback Entries</h2>
-              <div className="table-wrapper">
-                <table className="feedback-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Rating</th>
-                      <th scope="col">Feedback</th>
-                      <th scope="col">Date</th>
-                      <th scope="col">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <AnimatePresence>
-                      {filteredFeedback.map((item) => (
-                        <motion.tr
-                          key={item.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <td>
-                            <div className="rating-stars">
-                              {[...Array(5)].map((_, index) => (
-                                <Star
-                                  key={index}
-                                  className={`star-icon ${
-                                    index < item.rating ? 'selected' : 'unselected'
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          </td>
-                          <td>{item.feedback}</td>
-                          <td>{item.date}</td>
-                          <td>
-                            <button
-                              onClick={() => handleDeleteFeedback(item.id)}
-                              className="delete-button"
-                              aria-label={`Delete feedback ${item.id}`}
-                            >
-                              <Trash2 className="delete-icon" />
-                            </button>
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </AnimatePresence>
-                  </tbody>
-                </table>
+            <div className="form-section">
+              <h2>Core Vitals</h2>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="customerSupport">Customer Support (0-5)</label>
+                  <input
+                    type="number"
+                    id="customerSupport"
+                    name="customerSupport"
+                    value={formData.coreVitals.customerSupport}
+                    onChange={handleCoreVitalsChange}
+                    min="0"
+                    max="5"
+                    step="0.1"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="valueForMoney">Value for Money (0-5)</label>
+                  <input
+                    type="number"
+                    id="valueForMoney"
+                    name="valueForMoney"
+                    value={formData.coreVitals.valueForMoney}
+                    onChange={handleCoreVitalsChange}
+                    min="0"
+                    max="5"
+                    step="0.1"
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="featuresRating">Features Rating (0-5)</label>
+                  <input
+                    type="number"
+                    id="featuresRating"
+                    name="featuresRating"
+                    value={formData.coreVitals.featuresRating}
+                    onChange={handleCoreVitalsChange}
+                    min="0"
+                    max="5"
+                    step="0.1"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="easeOfUse">Ease of Use (0-5)</label>
+                  <input
+                    type="number"
+                    id="easeOfUse"
+                    name="easeOfUse"
+                    value={formData.coreVitals.easeOfUse}
+                    onChange={handleCoreVitalsChange}
+                    min="0"
+                    max="5"
+                    step="0.1"
+                  />
+                </div>
               </div>
             </div>
-          </>
+
+            <div className="form-section">
+              <h2>Category *</h2>
+              <div className="category-group">
+                <div className="checkbox-column">
+                  <label>
+                    <input
+                      type="radio"
+                      name="category"
+                      value="visual"
+                      checked={formData.category === 'visual'}
+                      onChange={handleCategoryChange}
+                      required
+                    />
+                    Visual
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="category"
+                      value="auditory"
+                      checked={formData.category === 'auditory'}
+                      onChange={handleCategoryChange}
+                    />
+                    Auditory
+                  </label>
+                </div>
+                <div className="checkbox-column">
+                  <label>
+                    <input
+                      type="radio"
+                      name="category"
+                      value="physical"
+                      checked={formData.category === 'physical'}
+                      onChange={handleCategoryChange}
+                    />
+                    Physical
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="category"
+                      value="cognitive"
+                      checked={formData.category === 'cognitive'}
+                      onChange={handleCategoryChange}
+                    />
+                    Cognitive
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="form-section">
+              <h2>Feature Comparison</h2>
+              <div className="feature-comparison-group">
+                <div className="checkbox-column">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="integration"
+                      checked={formData.featureComparison.integration}
+                      onChange={handleFeatureComparisonChange}
+                    />
+                    Integration
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="security"
+                      checked={formData.featureComparison.security}
+                      onChange={handleFeatureComparisonChange}
+                    />
+                    Security
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="support"
+                      checked={formData.featureComparison.support}
+                      onChange={handleFeatureComparisonChange}
+                    />
+                    Support
+                  </label>
+                </div>
+                <div className="checkbox-column">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="userManagement"
+                      checked={formData.featureComparison.userManagement}
+                      onChange={handleFeatureComparisonChange}
+                    />
+                    User Management
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="api"
+                      checked={formData.featureComparison.api}
+                      onChange={handleFeatureComparisonChange}
+                    />
+                    API
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="webhooks"
+                      checked={formData.featureComparison.webhooks}
+                      onChange={handleFeatureComparisonChange}
+                    />
+                    Webhooks
+                  </label>
+                </div>
+                <div className="checkbox-column">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="community"
+                      checked={formData.featureComparison.community}
+                      onChange={handleFeatureComparisonChange}
+                    />
+                    Community
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="form-section">
+              <h2>Additional Details</h2>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="developer">Developer</label>
+                  <input
+                    type="text"
+                    id="developer"
+                    name="developer"
+                    value={formData.developer}
+                    onChange={handleInputChange}
+                    placeholder="Developer name"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="platform">Platform</label>
+                  <input
+                    type="text"
+                    id="platform"
+                    name="platform"
+                    value={formData.platform}
+                    onChange={handleInputChange}
+                    placeholder="Windows, macOS, etc."
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="version">Version</label>
+                  <input
+                    type="text"
+                    id="version"
+                    name="version"
+                    value={formData.version}
+                    onChange={handleInputChange}
+                    placeholder="15.6"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="evaluation">Evaluation</label>
+                  <input
+                    type="text"
+                    id="evaluation"
+                    name="evaluation"
+                    value={formData.evaluation}
+                    onChange={handleInputChange}
+                    placeholder="Evaluation notes"
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="systemRequirements">System Requirements</label>
+                  <input
+                    type="text"
+                    id="systemRequirements"
+                    name="systemRequirements"
+                    value={formData.systemRequirements}
+                    onChange={handleInputChange}
+                    placeholder="Windows 10 or later"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="keyFeatures">Key Features</label>
+                  <input
+                    type="text"
+                    id="keyFeatures"
+                    name="keyFeatures"
+                    value={formData.keyFeatures}
+                    onChange={handleInputChange}
+                    placeholder="Voice command, etc."
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="tech_img_link">Technology Image Link</label>
+                  <input
+                    type="url"
+                    id="tech_img_link"
+                    name="tech_img_link"
+                    value={formData.tech_img_link}
+                    onChange={handleInputChange}
+                    placeholder="Paste image URL here"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" className="submit-button">Add Technology</button>
+          </form>
         )}
 
-        {/* Technologies Section */}
-        {activeTab === 'technologies' && (
-          <>
-            {/* Add Technology Button */}
-            <div className="add-tech-section">
-              <button
-                onClick={() => setIsAddTechModalOpen(true)}
-                className="add-tech-button"
-                aria-label="Add new technology"
-              >
-                <Plus className="add-icon" /> Add Technology
+        {/* Manage Technologies Tab */}
+        {activeTab === 'manage-tech' && (
+          <div className="manage-tech-section">
+            <h2>Technologies</h2>
+            <div className="table-header">
+              <div className="search-bar">
+                <Search className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search technologies..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="filter-group">
+                <label htmlFor="filterCategory">Filter</label>
+                <select
+                  id="filterCategory"
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                >
+                  <option value="">All Categories</option>
+                  <option value="visual">Visual Aid</option>
+                  <option value="auditory">Auditory</option>
+                  <option value="physical">Physical</option>
+                  <option value="cognitive">Cognitive</option>
+                </select>
+                <Filter className="filter-icon" />
+              </div>
+              <button className="add-button" onClick={() => setActiveTab('add')}>
+                <Plus className="add-icon" /> Add
               </button>
             </div>
-
-            {/* Technologies Table */}
-            <div className="table-section">
-              <h2 className="table-title">Technologies</h2>
-              <div className="table-wrapper">
-                <table className="tech-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Name</th>
-                      <th scope="col">Category</th>
-                      <th scope="col">Features</th>
-                      <th scope="col">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <AnimatePresence>
-                      {technologies.map((tech) => (
-                        <motion.tr
-                          key={tech._id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <td>{tech.name}</td>
-                          <td>{tech.category ? tech.category.charAt(0).toUpperCase() + tech.category.slice(1) : 'N/A'}</td>
-                          <td>
-                            <div className="features-cell">
-                              <button
-                                className="features-info-button"
-                                aria-label={`View features for ${tech.name}`}
-                              >
-                                <Info className="info-icon" />
-                              </button>
-                              <div className="features-tooltip">
-                                <ul>
-                                  <li><strong>Security:</strong> {tech.featureComparison?.security ? 'Yes' : 'No'}</li>
-                                  <li><strong>Integration:</strong> {tech.featureComparison?.integration ? 'Yes' : 'No'}</li>
-                                  <li><strong>Support:</strong> {tech.featureComparison?.support ? 'Yes' : 'No'}</li>
-                                  <li><strong>User Management:</strong> {tech.featureComparison?.userManagement ? 'Yes' : 'No'}</li>
-                                  <li><strong>API:</strong> {tech.featureComparison?.api ? 'Yes' : 'No'}</li>
-                                  <li><strong>Webhooks:</strong> {tech.featureComparison?.webhooks ? 'Yes' : 'No'}</li>
-                                  <li><strong>Community:</strong> {tech.featureComparison?.community ? 'Yes' : 'No'}</li>
-                                </ul>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <button
-                              onClick={() => handleDeleteTech(tech._id)}
-                              className="delete-button"
-                              aria-label={`Delete technology ${tech.name}`}
-                            >
-                              <Trash2 className="delete-icon" />
-                            </button>
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </AnimatePresence>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Add Technology Modal */}
-            {isAddTechModalOpen && (
-              <div className="modal-overlay">
-                <motion.div
-                  className="modal-content"
-                  ref={modalRef}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.3 }}
-                  role="dialog"
-                  aria-labelledby="modal-title"
-                  tabIndex={0}
-                >
-                  <h3 id="modal-title" className="modal-title">
-                    Add New Technology
-                  </h3>
-                  <form onSubmit={handleAddTech}>
-                    {/* General Information */}
-                    <div className="form-section">
-                      <h4 className="form-section-title">General Information</h4>
-                      <div className="form-group">
-                        <label htmlFor="tech-name" className="form-label">
-                          Name *
-                        </label>
-                        <input
-                          id="tech-name"
-                          type="text"
-                          name="name"
-                          value={newTech.name}
-                          onChange={handleInputChange}
-                          className="form-input"
-                          aria-label="Technology name"
-                          required
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="tech-category" className="form-label">
-                          Category *
-                        </label>
-                        <select
-                          id="tech-category"
-                          name="category"
-                          value={newTech.category}
-                          onChange={handleInputChange}
-                          className="form-input"
-                          aria-label="Technology category"
-                          required
-                        >
-                          <option value="">Select Category</option>
-                          <option value="visual">Visual</option>
-                          <option value="auditory">Auditory</option>
-                          <option value="physical">Physical</option>
-                          <option value="cognitive">Cognitive</option>
-                          <option value="ledger">Ledger</option>
-                          <option value="quantum">Quantum</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="tech-cost" className="form-label">
-                          Cost *
-                        </label>
-                        <select
-                          id="tech-cost"
-                          name="cost"
-                          value={newTech.cost}
-                          onChange={handleInputChange}
-                          className="form-input"
-                          aria-label="Technology cost"
-                          required
-                        >
-                          <option value="">Select Cost</option>
-                          <option value="free">Free</option>
-                          <option value="paid">Paid</option>
-                          <option value="subscription">Subscription</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Technical Details */}
-                    <div className="form-section">
-                      <h4 className="form-section-title">Technical Details</h4>
-                      <div className="form-group">
-                        <label htmlFor="tech-version" className="form-label">
-                          Version *
-                        </label>
-                        <input
-                          id="tech-version"
-                          type="text"
-                          name="version"
-                          value={newTech.version}
-                          onChange={handleInputChange}
-                          className="form-input"
-                          aria-label="Technology version"
-                          required
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="tech-platform" className="form-label">
-                          Platform *
-                        </label>
-                        <input
-                          id="tech-platform"
-                          type="text"
-                          name="platform"
-                          value={newTech.platform}
-                          onChange={handleInputChange}
-                          className="form-input"
-                          aria-label="Supported platforms"
-                          required
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="tech-developer" className="form-label">
-                          Developer *
-                        </label>
-                        <input
-                          id="tech-developer"
-                          type="text"
-                          name="developer"
-                          value={newTech.developer}
-                          onChange={handleInputChange}
-                          className="form-input"
-                          aria-label="Technology developer"
-                          required
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="tech-system-requirements" className="form-label">
-                          System Requirements *
-                        </label>
-                        <textarea
-                          id="tech-system-requirements"
-                          name="systemRequirements"
-                          value={newTech.systemRequirements}
-                          onChange={handleInputChange}
-                          className="form-textarea"
-                          aria-label="System requirements"
-                          required
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="tech-inputs" className="form-label">
-                          Inputs *
-                        </label>
-                        <textarea
-                          id="tech-inputs"
-                          name="inputs"
-                          value={newTech.inputs}
-                          onChange={handleInputChange}
-                          className="form-textarea"
-                          aria-label="Input methods"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Description and Evaluation */}
-                    <div className="form-section">
-                      <h4 className="form-section-title">Description and Evaluation</h4>
-                      <div className="form-group">
-                        <label htmlFor="tech-description" className="form-label">
-                          Description *
-                        </label>
-                        <textarea
-                          id="tech-description"
-                          name="description"
-                          value={newTech.description}
-                          onChange={handleInputChange}
-                          className="form-textarea"
-                          aria-label="Technology description"
-                          required
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="tech-evaluation" className="form-label">
-                          Evaluation *
-                        </label>
-                        <textarea
-                          id="tech-evaluation"
-                          name="evaluation"
-                          value={newTech.evaluation}
-                          onChange={handleInputChange}
-                          className="form-textarea"
-                          aria-label="Technology evaluation"
-                          required
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="tech-key-features" className="form-label">
-                          Key Features *
-                        </label>
-                        <textarea
-                          id="tech-key-features"
-                          name="keyFeatures"
-                          value={newTech.keyFeatures}
-                          onChange={handleInputChange}
-                          className="form-textarea"
-                          aria-label="Key features"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Core Vitals */}
-                    <div className="form-section">
-                      <h4 className="form-section-title">Core Vitals</h4>
-                      <div className="form-group">
-                        <label htmlFor="tech-customer-support" className="form-label">
-                          Customer Support (0-5)
-                        </label>
-                        <input
-                          id="tech-customer-support"
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          max="5"
-                          name="customerSupport"
-                          value={newTech.coreVitals.customerSupport}
-                          onChange={(e) => handleInputChange(e, 'coreVitals')}
-                          className="form-input"
-                          aria-label="Customer support rating"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="tech-value-for-money" className="form-label">
-                          Value for Money (0-5)
-                        </label>
-                        <input
-                          id="tech-value-for-money"
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          max="5"
-                          name="valueForMoney"
-                          value={newTech.coreVitals.valueForMoney}
-                          onChange={(e) => handleInputChange(e, 'coreVitals')}
-                          className="form-input"
-                          aria-label="Value for money rating"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="tech-features-rating" className="form-label">
-                          Features Rating (0-5)
-                        </label>
-                        <input
-                          id="tech-features-rating"
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          max="5"
-                          name="featuresRating"
-                          value={newTech.coreVitals.featuresRating}
-                          onChange={(e) => handleInputChange(e, 'coreVitals')}
-                          className="form-input"
-                          aria-label="Features rating"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="tech-ease-of-use" className="form-label">
-                          Ease of Use (0-5)
-                        </label>
-                        <input
-                          id="tech-ease-of-use"
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          max="5"
-                          name="easeOfUse"
-                          value={newTech.coreVitals.easeOfUse}
-                          onChange={(e) => handleInputChange(e, 'coreVitals')}
-                          className="form-input"
-                          aria-label="Ease of use rating"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Feature Comparison */}
-                    <div className="form-section">
-  <h4 className="form-section-title">Feature Comparison</h4>
-  <div className="feature-comparison-grid">
-    {['security', 'integration', 'support', 'userManagement', 'api', 'webhooks', 'community'].map((feature) => (
-      <div className="form-group" key={feature}>
-        <label className="form-label">
-          <input
-            type="checkbox"
-            name={feature}
-            checked={newTech.featureComparison[feature]}
-            onChange={(e) => handleInputChange(e, 'featureComparison')}
-            aria-label={`${feature} support`}
-          />
-          {feature.charAt(0).toUpperCase() + feature.slice(1)}
-        </label>
-      </div>
-    ))}
-  </div>
-</div>
-
-                    {techError && (
-                      <p className="error-message" aria-live="assertive">
-                        {techError}
-                      </p>
-                    )}
-                    <div className="modal-actions">
-                      <button
-                        type="button"
-                        onClick={() => setIsAddTechModalOpen(false)}
-                        className="cancel-button"
-                        aria-label="Cancel"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="submit-button"
-                        aria-label="Add technology"
-                      >
-                        Add Technology
-                      </button>
-                    </div>
-                  </form>
-                </motion.div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Reviews Section */}
-        {activeTab === 'reviews' && (
-          <div className="table-section">
-            <h2 className="table-title">Reviews</h2>
-            <div className="table-wrapper">
-              <table className="review-table">
+            {loading ? (
+              <p className="loading-message">Loading...</p>
+            ) : (
+              <table className="tech-table">
                 <thead>
                   <tr>
-                    <th scope="col">Technology</th>
-                    <th scope="col">User</th>
-                    <th scope="col">Rating</th>
-                    <th scope="col">Comment</th>
-                    <th scope="col">Tags</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">Actions</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price Range</th>
+                    <th>Security</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <AnimatePresence>
-                    {reviews.map((review) => (
-                      <motion.tr
-                        key={review._id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <td>{review.technologyId?.name || 'N/A'}</td>
-                        <td>{review.userId?.email || 'N/A'}</td>
-                        <td>
-                          <div className="rating-stars">
-                            {[...Array(5)].map((_, index) => (
-                              <Star
-                                key={index}
-                                className={`star-icon ${
-                                  index < review.rating ? 'selected' : 'unselected'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </td>
-                        <td>{review.comment}</td>
-                        <td>{review.tags?.join(', ') || 'None'}</td>
-                        <td>{new Date(review.createdAt).toLocaleDateString()}</td>
-                        <td>
-                          <button
-                            onClick={() => handleDeleteReview(review._id)}
-                            className="delete-button"
-                            aria-label={`Delete review ${review._id}`}
-                          >
-                            <Trash2 className="delete-icon" />
-                          </button>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </AnimatePresence>
+                  {filteredTechnologies.map((tech) => (
+                    <tr key={tech._id}>
+                      <td>{tech.name}</td>
+                      <td>{tech.category.charAt(0).toUpperCase() + tech.category.slice(1)}</td>
+                      <td>
+                        {tech.cost === 'free' ? 'Free' : `$${tech.price}`}
+                      </td>
+                      <td>
+                        {tech.featureComparison.security ? '2FA, SSL Encryption, Audit Logs' : '-'}
+                      </td>
+                      <td>
+                        <button
+                          className="delete-button"
+                          onClick={() => handleDelete(tech._id)}
+                          aria-label={`Delete ${tech.name}`}
+                        >
+                          <Trash2 className="delete-icon" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-            </div>
+            )}
+          </div>
+        )}
+
+        {/* Manage Reviews Tab (Placeholder) */}
+        {activeTab === 'manage-reviews' && (
+          <div className="manage-reviews-section">
+            <h2>Manage Reviews</h2>
+            <p>Review management functionality coming soon...</p>
           </div>
         )}
       </div>

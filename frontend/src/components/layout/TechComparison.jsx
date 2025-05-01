@@ -605,3 +605,4 @@ const TechComparison = () => {
 };
 
 export default TechComparison;
+// fixed bug

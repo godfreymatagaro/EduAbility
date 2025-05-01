@@ -6,9 +6,14 @@ import './TechDetails.css';
 import noImage from '../../assets/images/no-image.jpg'; 
 
 // Determine the API URL based on the environment
-const API_URL = import.meta.env.NODE_ENV === 'production'
+const API_URL = import.meta.env.MODE === 'production'
   ? import.meta.env.VITE_API_PROD_BACKEND_URL
   : import.meta.env.VITE_API_DEV_BACKEND_URL;
+
+// Validate API_URL to prevent invalid requests
+if (!API_URL) {
+  console.error('API_URL is not defined. Ensure VITE_API_PROD_BACKEND_URL or VITE_API_DEV_BACKEND_URL is set in your environment variables.');
+}
 
 const TechDetails = () => {
   const { id } = useParams();
@@ -27,6 +32,12 @@ const TechDetails = () => {
   // Fetch technology details and related technologies
   useEffect(() => {
     const fetchTechDetails = async () => {
+      if (!API_URL) {
+        setError('API URL is not configured. Please contact the administrator.');
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
       try {

@@ -46,7 +46,6 @@ const AdminDash = () => {
   const [filterCategory, setFilterCategory] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch technologies on mount
   useEffect(() => {
     const fetchTechnologies = async () => {
       setLoading(true);
@@ -103,8 +102,26 @@ const AdminDash = () => {
     }));
   };
 
+  const validateForm = () => {
+    if (!formData.name || !formData.description) {
+      toast.error('Name and description are required');
+      return false;
+    }
+    if (!formData.category) {
+      toast.error('Category is required');
+      return false;
+    }
+    if (formData.tech_img_link && !/^https?:\/\/.+/.test(formData.tech_img_link)) {
+      toast.error('Please enter a valid image URL (starting with http:// or https://)');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     try {
       const response = await fetch(`${finalAPI_URL}/api/technologies`, {
         method: 'POST',
@@ -115,11 +132,12 @@ const AdminDash = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`Failed to submit: ${response.status}`);
+        throw new Error(data.message || `Failed to submit: ${response.status}`);
       }
 
-      const data = await response.json();
       setTechnologies((prev) => [...prev, data]);
       toast.success('Technology added successfully!');
       setFormData({
@@ -153,7 +171,7 @@ const AdminDash = () => {
         tech_img_link: '',
       });
     } catch (err) {
-      toast.error(`Error: ${err.message}`);
+      toast.error(err.message || 'An unexpected error occurred');
     }
   };
 
@@ -166,14 +184,16 @@ const AdminDash = () => {
         },
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`Failed to delete: ${response.status}`);
+        throw new Error(data.message || `Failed to delete: ${response.status}`);
       }
 
       setTechnologies((prev) => prev.filter((tech) => tech._id !== id));
       toast.success('Technology deleted successfully!');
     } catch (err) {
-      toast.error(`Error deleting technology: ${err.message}`);
+      toast.error(err.message || 'An unexpected error occurred');
     }
   };
 
@@ -208,7 +228,6 @@ const AdminDash = () => {
           </button>
         </div>
 
-        {/* Add Technology Tab */}
         {activeTab === 'add' && (
           <form className="admin-dash-form" onSubmit={handleSubmit}>
             <div className="form-section">
@@ -567,7 +586,6 @@ const AdminDash = () => {
           </form>
         )}
 
-        {/* Manage Technologies Tab */}
         {activeTab === 'manage-tech' && (
           <div className="manage-tech-section">
             <h2>Technologies</h2>
@@ -606,6 +624,7 @@ const AdminDash = () => {
               <table className="tech-table">
                 <thead>
                   <tr>
+                    <th>Image</th>
                     <th>Name</th>
                     <th>Category</th>
                     <th>Price Range</th>
@@ -616,6 +635,19 @@ const AdminDash = () => {
                 <tbody>
                   {filteredTechnologies.map((tech) => (
                     <tr key={tech._id}>
+                      <td>
+                        {tech.image_url ? (
+                          <img
+                            src={tech.image_url}
+                            alt={`${tech.name} image`}
+                            className="tech-image"
+                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                            onError={(e) => (e.target.src = '/placeholder-image.png')} // Fallback image
+                          />
+                        ) : (
+                          '-'
+                        )}
+                      </td>
                       <td>{tech.name}</td>
                       <td>{tech.category.charAt(0).toUpperCase() + tech.category.slice(1)}</td>
                       <td>
@@ -641,7 +673,6 @@ const AdminDash = () => {
           </div>
         )}
 
-        {/* Manage Reviews Tab (Placeholder) */}
         {activeTab === 'manage-reviews' && (
           <div className="manage-reviews-section">
             <h2>Manage Reviews</h2>

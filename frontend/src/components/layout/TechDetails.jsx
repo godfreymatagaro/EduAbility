@@ -136,9 +136,10 @@ const TechDetails = () => {
             <div className="tech-image-info">
               <div className="tech-image">
                 <img
-                  src={techDetails.logo || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'}
+                  src={techDetails.image_url || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'}
                   alt={`${techDetails.name} logo`}
                   loading="lazy"
+                  onError={(e) => (e.target.src = '/placeholder-image.png')} // Fallback if image_url fails
                 />
               </div>
               <div className="tech-info">
@@ -258,10 +259,11 @@ const TechDetails = () => {
                 aria-label={`Related technology: ${tech.name}`}
               >
                 <img
-                  src={tech.logo || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'}
+                  src={tech.image_url || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'}
                   alt={`${tech.name} logo`}
                   className="related-tech-image"
                   loading="lazy"
+                  onError={(e) => (e.target.src = '/placeholder-image.png')} // Fallback if image_url fails
                 />
                 <div className="related-tech-content">
                   <h3>{tech.name}</h3>

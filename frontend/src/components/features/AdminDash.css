@@ -558,3 +558,6 @@
       font-size: 0.875rem;
     }
   }
+  .tech-image {
+    border-radius: 4px;
+  }

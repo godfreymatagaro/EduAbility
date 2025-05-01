@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ChevronLeft, Star, X, Search, Award } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Reviews from './Reviews';
 import './TechComparison.css';
 
 // Determine the API URL based on the environment
@@ -128,6 +127,22 @@ const TechComparison = () => {
     { feature: 'Community', available: selectedTechs.map((tech) => tech.featureComparison?.community || false) },
   ];
 
+  // Calculate Summary Metrics
+  const averageRating = selectedTechs.length > 0
+    ? (selectedTechs.reduce((sum, tech) => sum + (tech.coreVitals?.featuresRating || 0), 0) / selectedTechs.length).toFixed(1)
+    : 'N/A';
+  const priceRange = selectedTechs.length > 0
+    ? selectedTechs.map(tech => tech.cost || '$0').sort((a, b) => parseFloat(a.replace('$', '')) - parseFloat(b.replace('$', ''))).join(' - ')
+    : '$0';
+  const totalReviews = selectedTechs.length > 0
+    ? selectedTechs.reduce((sum, tech) => sum + (tech.reviews?.length || 0), 0)
+    : 0;
+
+  const categoryAverage = 4.0; // Assume category average for comparison (can be fetched from API if available)
+  const ratingComparison = averageRating !== 'N/A'
+    ? (((averageRating - categoryAverage) / categoryAverage) * 100).toFixed(0)
+    : 0;
+
   // Add Toast Notification
   const addToast = (message) => {
     const id = Date.now();
@@ -227,36 +242,6 @@ const TechComparison = () => {
       </div>
 
       <div className="tech-comparison-container">
-        {/* Progress Indicator */}
-        <motion.div
-          className="progress-section"
-          initial="hidden"
-          animate="visible"
-          variants={sectionVariants}
-        >
-          <p>
-            You’ve compared {selectedTechs.length} out of 5 technologies!
-          </p>
-          <div className="progress-bar">
-            <motion.div
-              className="progress-fill"
-              initial={{ width: 0 }}
-              animate={{ width: `${(selectedTechs.length / 5) * 100}%` }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-          {badges.length > 0 && (
-            <div className="badges">
-              {badges.includes('explorer') && (
-                <div className="badge" aria-label="Explorer Badge">
-                  <Award className="badge-icon" />
-                  <span>Explorer</span>
-                </div>
-              )}
-            </div>
-          )}
-        </motion.div>
-
         {/* Header */}
         <motion.div
           className="comparison-header"
@@ -280,31 +265,32 @@ const TechComparison = () => {
           variants={sectionVariants}
         >
           <h2>Selected Technologies</h2>
-          <div className="tech-list">
-            {selectedTechs.length === 0 && <p>No technologies selected for comparison.</p>}
-            {selectedTechs.map((tech) => (
-              <motion.div
-                key={tech._id}
-                className="tech-item"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                tabIndex={0}
-                aria-label={`Selected technology: ${tech.name}, Category: ${tech.category || 'N/A'}`}
-              >
-                <span className="tech-name">{tech.name}</span>
-                <span className="tech-category">{tech.category || 'N/A'}</span>
-                <button
-                  className="remove-tech"
-                  onClick={() => handleRemoveTech(tech._id)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleRemoveTech(tech._id)}
-                  aria-label={`Remove ${tech.name}`}
+          <div className="tech-list-card">
+            <div className="tech-list">
+              {selectedTechs.length === 0 && <p>No technologies selected for comparison.</p>}
+              {selectedTechs.map((tech) => (
+                <motion.div
+                  key={tech._id}
+                  className="tech-item"
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  tabIndex={0}
+                  aria-label={`Selected technology: ${tech.name}`}
                 >
-                  <X className="remove-icon" />
-                </button>
-              </motion.div>
-            ))}
+                  <span>{tech.name}</span>
+                  <button
+                    className="remove-tech"
+                    onClick={() => handleRemoveTech(tech._id)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleRemoveTech(tech._id)}
+                    aria-label={`Remove ${tech.name}`}
+                  >
+                    <X className="remove-icon" />
+                  </button>
+                </motion.div>
+              ))}
+            </div>
             <button
               ref={addMoreButtonRef}
               className="add-more-button"
@@ -325,30 +311,48 @@ const TechComparison = () => {
             animate="visible"
             variants={sectionVariants}
           >
-            {selectedTechs.map((tech) => (
-              <motion.div
-                key={tech._id}
-                className="summary-card"
-                variants={cardVariants}
-                initial="rest"
-                whileHover="hover"
-                tabIndex={0}
-                aria-label={`Summary for ${tech.name}: Rating ${tech.coreVitals?.featuresRating || 'N/A'}, Cost ${tech.cost || 'N/A'}`}
-              >
-                <h3>{tech.name}</h3>
-                <div className="summary-details">
+            <div className="summary-card">
+              <div className="summary-details">
+                <div className="summary-item">
+                  <h3>Average Rating</h3>
                   <p>
-                    <strong>Rating:</strong> {tech.coreVitals?.featuresRating || 'N/A'} <Star className="star-icon" />
+                    {averageRating} <Star className="star-icon" />
                   </p>
-                  <p>
-                    <strong>Cost:</strong> {tech.cost || 'N/A'}
-                  </p>
-                  <p>
-                    <strong>Category:</strong> {tech.category || 'N/A'}
-                  </p>
+                  <span>{ratingComparison > 0 ? `${ratingComparison}% higher than category average` : 'N/A'}</span>
                 </div>
-              </motion.div>
-            ))}
+                <div className="summary-item">
+                  <h3>Price Range</h3>
+                  <p>{priceRange}</p>
+                  <span>Per user/month</span>
+                </div>
+                <div className="summary-item">
+                  <h3>Total Reviews</h3>
+                  <p>{totalReviews.toLocaleString()}</p>
+                  <span>Across all platforms</span>
+                </div>
+              </div>
+              <div className="progress-section">
+                <p>You’ve compared {selectedTechs.length} out of 5 technologies!</p>
+                <div className="progress-bar">
+                  <motion.div
+                    className="progress-fill"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(selectedTechs.length / 5) * 100}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+                {badges.length > 0 && (
+                  <div className="badges">
+                    {badges.includes('explorer') && (
+                      <div className="badge" aria-label="Explorer Badge">
+                        <Award className="badge-icon" />
+                        <span>Explorer</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </motion.div>
         )}
 
@@ -446,8 +450,6 @@ const TechComparison = () => {
             </div>
           </motion.div>
         )}
-
-      
 
         {/* Add Technology Modal */}
         {isModalOpen && (

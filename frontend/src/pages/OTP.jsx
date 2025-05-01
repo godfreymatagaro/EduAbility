@@ -38,16 +38,17 @@ const OTP = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`OTP verification failed: ${response.status}`);
+        throw new Error(data.message || `OTP verification failed: ${response.status}`);
       }
 
-      const data = await response.json();
       localStorage.setItem('token', data.token);
       toast.success('Login successful!');
-      navigate('/compare'); // Redirect to /compare
+      navigate('/compare');
     } catch (err) {
-      toast.error(`Error: ${err.message}`);
+      toast.error(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

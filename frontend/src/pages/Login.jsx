@@ -43,15 +43,16 @@ const Login = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`Login failed: ${response.status}`);
+        throw new Error(data.message || `Login failed: ${response.status}`);
       }
 
-      const data = await response.json();
       toast.success('OTP sent to your email!');
       navigate(`/otp/${data.userId}`);
     } catch (err) {
-      toast.error(`Error: ${err.message}`);
+      toast.error(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

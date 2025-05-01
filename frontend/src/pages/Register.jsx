@@ -44,14 +44,16 @@ const Register = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`Registration failed: ${response.status}`);
+        throw new Error(data.message || `Registration failed: ${response.status}`);
       }
 
       toast.success('Registration successful! Please log in.');
       navigate('/login');
     } catch (err) {
-      toast.error(`Error: ${err.message}`);
+      toast.error(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

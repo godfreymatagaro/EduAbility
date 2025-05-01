@@ -27,3 +27,5 @@ EA/frontend/
 ├── package.json
 ├── yarn.lock
 ├── vite.config.js
+
+https://www.figma.com/design/WtJWZzZqSx8vBGPMrLpHXJ/EduAbility_UED?node-id=0-1&p=f&t=04j061bztvHwBtgq-0

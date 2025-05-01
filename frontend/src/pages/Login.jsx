@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Eye, EyeOff } from 'lucide-react';
 import './Auth.css';
 
 const API_URL = import.meta.env.MODE === "production"
@@ -14,6 +15,7 @@ const Login = () => {
     email: '',
     password: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -23,6 +25,10 @@ const Login = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const handleSubmit = async (e) => {
@@ -43,7 +49,7 @@ const Login = () => {
 
       const data = await response.json();
       toast.success('OTP sent to your email!');
-      navigate(`/otp/${data.userId}`); // Redirect to OTP page with userId
+      navigate(`/otp/${data.userId}`);
     } catch (err) {
       toast.error(`Error: ${err.message}`);
     } finally {
@@ -66,21 +72,40 @@ const Login = () => {
               onChange={handleInputChange}
               placeholder="Enter your email"
               required
+              aria-required="true"
+              aria-label="Email address"
             />
           </div>
           <div className="form-group">
             <label htmlFor="password">Password *</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              placeholder="Enter your password"
-              required
-            />
+            <div className="password-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Enter your password"
+                required
+                aria-required="true"
+                aria-label="Password"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={togglePasswordVisibility}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
+              </button>
+            </div>
           </div>
-          <button type="submit" className="auth-button" disabled={loading}>
+          <button
+            type="submit"
+            className="auth-button"
+            disabled={loading}
+            aria-label="Login"
+          >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>

@@ -1,5 +1,5 @@
 .auth-section {
-    background-color: #f9fafb; /* Light background for default */
+    background-color: #f9fafb;
     padding: 2rem 1rem;
     min-height: 100vh;
     text-align: start;
@@ -9,7 +9,7 @@
   }
   
   :where(.dark) .auth-section {
-    background-color: #111827; /* Dark mode background */
+    background-color: #111827;
   }
   
   .auth-container {
@@ -21,7 +21,7 @@
   .auth-title {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #111827; /* Dark text for light mode */
+    color: #111827;
     margin-bottom: 2rem;
     text-align: center;
   }
@@ -31,7 +31,7 @@
   }
   
   .auth-form {
-    background-color: #ffffff; /* White background for forms */
+    background-color: #ffffff;
     border-radius: 1rem;
     padding: 2rem;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -61,13 +61,15 @@
   }
   
   .form-group input {
-    padding: 0.5rem;
+    padding: 0.5rem 1rem;
+    height: 55px; /* Set input height to 55px */
     border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
     background-color: #f9fafb;
     color: #111827;
     font-size: 1rem;
     font-family: 'Inter', sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
   
   :where(.dark) .form-group input {
@@ -85,6 +87,42 @@
   :where(.dark) .form-group input:focus {
     border-color: #93c5fd;
     box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  }
+  
+  .password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .password-toggle {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .password-toggle svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #4b5563;
+  }
+  
+  :where(.dark) .password-toggle svg {
+    color: #d1d5db;
+  }
+  
+  .password-toggle:hover svg {
+    color: #2563eb;
+  }
+  
+  :where(.dark) .password-toggle:hover svg {
+    color: #93c5fd;
   }
   
   .auth-button {
@@ -149,6 +187,28 @@
     color: #93c5fd;
   }
   
+  /* Accessibility enhancements */
+  .auth-form input:focus,
+  .auth-button:focus {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+  }
+  
+  :where(.dark) .auth-form input:focus,
+  :where(.dark) .auth-button:focus {
+    outline-color: #93c5fd;
+  }
+  
+  .auth-link a:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  
+  :where(.dark) .auth-link a:focus {
+    outline-color: #93c5fd;
+  }
+  
   /* Responsive adjustments */
   @media (max-width: 480px) {
     .auth-section {
@@ -166,5 +226,9 @@
     .auth-button {
       padding: 0.5rem;
       font-size: 0.875rem;
+    }
+  
+    .form-group input {
+      height: 48px; /* Slightly smaller on mobile for better fit */
     }
   }

@@ -10,7 +10,7 @@ const API_URL = import.meta.env.MODE === "production"
 const finalAPI_URL = API_URL || (import.meta.env.MODE === "production" ? "https://eduability.onrender.com" : "http://localhost:3000");
 
 const OTP = () => {
-  const { userId } = useParams(); // Get userId from URL
+  const { userId } = useParams();
   const [formData, setFormData] = useState({
     email: '',
     otp: '',
@@ -43,9 +43,9 @@ const OTP = () => {
       }
 
       const data = await response.json();
-      localStorage.setItem('token', data.token); // Store token in localStorage
+      localStorage.setItem('token', data.token);
       toast.success('Login successful!');
-      navigate('/dashboard'); // Redirect to dashboard
+      navigate('/compare'); // Redirect to /compare
     } catch (err) {
       toast.error(`Error: ${err.message}`);
     } finally {
@@ -68,6 +68,8 @@ const OTP = () => {
               onChange={handleInputChange}
               placeholder="Enter your email"
               required
+              aria-required="true"
+              aria-label="Email address"
             />
           </div>
           <div className="form-group">
@@ -80,9 +82,16 @@ const OTP = () => {
               onChange={handleInputChange}
               placeholder="Enter the OTP"
               required
+              aria-required="true"
+              aria-label="One-time password"
             />
           </div>
-          <button type="submit" className="auth-button" disabled={loading}>
+          <button
+            type="submit"
+            className="auth-button"
+            disabled={loading}
+            aria-label="Verify OTP"
+          >
             {loading ? 'Verifying...' : 'Verify OTP'}
           </button>
         </form>

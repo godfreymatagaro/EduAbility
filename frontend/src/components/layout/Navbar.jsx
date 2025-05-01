@@ -1,4 +1,3 @@
-// Navbar.jsx
 import { useState, useEffect, useRef } from 'react';
 import { Moon, Sun, Menu, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
@@ -66,6 +65,9 @@ const Navbar = () => {
               <NavLink to="/feedback" className={({ isActive }) => (isActive ? 'active' : '')}>
                 Feedback
               </NavLink>
+              <NavLink to="/login" className="navbar-login-button">
+                Log in
+              </NavLink>
             </div>
             <div className="navbar-controls">
               <button
@@ -122,8 +124,16 @@ const Navbar = () => {
         <NavLink to="/compare" onClick={handleMobileLinkClick}>
           Compare
         </NavLink>
-        <NavLink to="/feedback" onClick={handleMobileLinkClick} ref={lastFocusableRef}>
+        <NavLink to="/feedback" onClick={handleMobileLinkClick}>
           Feedback
+        </NavLink>
+        <NavLink
+          to="/login"
+          onClick={handleMobileLinkClick}
+          ref={lastFocusableRef}
+          className="navbar-mobile-login-button"
+        >
+          Log in
         </NavLink>
       </div>
     </>

@@ -9,9 +9,8 @@ const API_URL = import.meta.env.MODE === "production"
 
 const finalAPI_URL = API_URL || (import.meta.env.MODE === "production" ? "https://eduability.onrender.com" : "http://localhost:3000");
 
-const Register = () => {
+const Login = () => {
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     password: '',
   });
@@ -30,7 +29,7 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch(`${finalAPI_URL}/api/auth/register`, {
+      const response = await fetch(`${finalAPI_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,11 +38,12 @@ const Register = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Registration failed: ${response.status}`);
+        throw new Error(`Login failed: ${response.status}`);
       }
 
-      toast.success('Registration successful! Please log in.');
-      navigate('/login'); // Redirect to login page
+      const data = await response.json();
+      toast.success('OTP sent to your email!');
+      navigate(`/otp/${data.userId}`); // Redirect to OTP page with userId
     } catch (err) {
       toast.error(`Error: ${err.message}`);
     } finally {
@@ -54,20 +54,8 @@ const Register = () => {
   return (
     <section className="auth-section">
       <div className="auth-container">
-        <h1 className="auth-title">Register</h1>
+        <h1 className="auth-title">Login</h1>
         <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="username">Username *</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleInputChange}
-              placeholder="Enter your username"
-              required
-            />
-          </div>
           <div className="form-group">
             <label htmlFor="email">Email *</label>
             <input
@@ -93,16 +81,16 @@ const Register = () => {
             />
           </div>
           <button type="submit" className="auth-button" disabled={loading}>
-            {loading ? 'Registering...' : 'Register'}
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
         <p className="auth-link">
-          Already have an account?{' '}
-          <a href="/login">Login</a>
+          Don't have an account?{' '}
+          <a href="/register">Register</a>
         </p>
       </div>
     </section>
   );
 };
 
-export default Register;
+export default Login;

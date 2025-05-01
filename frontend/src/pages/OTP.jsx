@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import './Auth.css';
 
@@ -9,11 +9,11 @@ const API_URL = import.meta.env.MODE === "production"
 
 const finalAPI_URL = API_URL || (import.meta.env.MODE === "production" ? "https://eduability.onrender.com" : "http://localhost:3000");
 
-const Register = () => {
+const OTP = () => {
+  const { userId } = useParams(); // Get userId from URL
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
-    password: '',
+    otp: '',
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch(`${finalAPI_URL}/api/auth/register`, {
+      const response = await fetch(`${finalAPI_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,11 +39,13 @@ const Register = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Registration failed: ${response.status}`);
+        throw new Error(`OTP verification failed: ${response.status}`);
       }
 
-      toast.success('Registration successful! Please log in.');
-      navigate('/login'); // Redirect to login page
+      const data = await response.json();
+      localStorage.setItem('token', data.token); // Store token in localStorage
+      toast.success('Login successful!');
+      navigate('/dashboard'); // Redirect to dashboard
     } catch (err) {
       toast.error(`Error: ${err.message}`);
     } finally {
@@ -54,20 +56,8 @@ const Register = () => {
   return (
     <section className="auth-section">
       <div className="auth-container">
-        <h1 className="auth-title">Register</h1>
+        <h1 className="auth-title">Verify OTP</h1>
         <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="username">Username *</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleInputChange}
-              placeholder="Enter your username"
-              required
-            />
-          </div>
           <div className="form-group">
             <label htmlFor="email">Email *</label>
             <input
@@ -81,28 +71,27 @@ const Register = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password *</label>
+            <label htmlFor="otp">OTP *</label>
             <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
+              type="text"
+              id="otp"
+              name="otp"
+              value={formData.otp}
               onChange={handleInputChange}
-              placeholder="Enter your password"
+              placeholder="Enter the OTP"
               required
             />
           </div>
           <button type="submit" className="auth-button" disabled={loading}>
-            {loading ? 'Registering...' : 'Register'}
+            {loading ? 'Verifying...' : 'Verify OTP'}
           </button>
         </form>
         <p className="auth-link">
-          Already have an account?{' '}
-          <a href="/login">Login</a>
+          Back to <a href="/login">Login</a>
         </p>
       </div>
     </section>
   );
 };
 
-export default Register;
+export default OTP;

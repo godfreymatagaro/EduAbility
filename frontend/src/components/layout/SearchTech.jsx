@@ -141,6 +141,18 @@ const SearchTech = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isSearchModalOpen, isSortModalOpen]);
 
+  // Close search modal on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (isSearchModalOpen && searchModalRef.current && !searchModalRef.current.contains(e.target)) {
+        setIsSearchModalOpen(false);
+        searchInputRef.current?.focus();
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [isSearchModalOpen]);
+
   // Arrow key navigation for search modal
   const handleSearchModalKeyDown = (e) => {
     if (e.key === 'Escape') {
@@ -242,6 +254,26 @@ const SearchTech = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // Truncate description to 10 words
+  const truncateDescription = (description) => {
+    const words = description.split(' ');
+    return words.slice(0, 10).join(' ') + (words.length > 10 ? '...' : '');
+  };
+
+  // Pagination button logic (show 4 buttons, then ellipsis, then last page)
+  const maxVisiblePages = 4;
+  const pageNumbers = [];
+  let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+  let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+  if (endPage - startPage + 1 < maxVisiblePages) {
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    pageNumbers.push(i);
+  }
 
   // Animation variants
   const sectionVariants = {
@@ -395,7 +427,7 @@ const SearchTech = () => {
               aria-expanded={isSortModalOpen}
               aria-controls="sort-modal"
             >
-              {sortOption}
+              Sort by: {sortOption}
               <ChevronDown className="dropdown-icon" />
             </button>
           </div>
@@ -559,14 +591,19 @@ const SearchTech = () => {
                   onKeyPress={(e) => e.key === 'Enter' && navigate(`/tech-details/${tech._id}`)}
                   aria-label={`Technology: ${tech.name}, ${tech.description}`}
                 >
-                  <h3>{tech.name}</h3>
-                  <p>{tech.description}</p>
+                  <div className="tech-card-header">
+                    <h3>{tech.name}</h3>
+                    <span className="price-tag">
+                      {tech.cost === 'free' ? 'Free' : tech.price ? `$${tech.price}` : 'N/A'}
+                    </span>
+                  </div>
+                  <p>{truncateDescription(tech.description)}</p>
                   <div className="tech-card-actions">
                     <Link to={`/tech-details/${tech._id}`}>
                       <Button
                         variant="filled"
                         size="md"
-                        className="tech-card-button glow"
+                        className="tech-card-button"
                         aria-label={`Learn more about ${tech.name}`}
                       >
                         Learn More
@@ -585,17 +622,30 @@ const SearchTech = () => {
               >
                 <ChevronLeft className="pagination-icon" />
               </button>
-              {[...Array(totalPages)].map((_, index) => (
+              {pageNumbers.map((page) => (
                 <button
-                  key={index + 1}
-                  className={`pagination-number ${currentPage === index + 1 ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(index + 1)}
-                  aria-label={`Page ${index + 1}`}
-                  aria-current={currentPage === index + 1 ? 'page' : undefined}
+                  key={page}
+                  className={`pagination-number ${currentPage === page ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(page)}
+                  aria-label={`Page ${page}`}
+                  aria-current={currentPage === page ? 'page' : undefined}
                 >
-                  {index + 1}
+                  {page}
                 </button>
               ))}
+              {endPage < totalPages && (
+                <>
+                  <span className="pagination-ellipsis">...</span>
+                  <button
+                    className={`pagination-number ${currentPage === totalPages ? 'active' : ''}`}
+                    onClick={() => setCurrentPage(totalPages)}
+                    aria-label={`Page ${totalPages}`}
+                    aria-current={currentPage === totalPages ? 'page' : undefined}
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
               <button
                 className="pagination-arrow"
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
@@ -618,6 +668,7 @@ const SearchTech = () => {
               >
                 <Eye className="category-icon" />
                 Visual Aid
+                <span className="category-count">24 Tools</span>
               </button>
               <button
                 className="category-button"
@@ -626,14 +677,16 @@ const SearchTech = () => {
               >
                 <Ear className="category-icon" />
                 Hearing Aid
+                <span className="category-count">12 Tools</span>
               </button>
               <button
                 className="category-button"
                 onClick={() => setCategoryFilters({ ...categoryFilters, physical: true })}
-                aria-label="Filter by Physical Keyboard category"
+                aria-label="Filter by Physical Aid category"
               >
                 <Keyboard className="category-icon" />
-                Physical Keyboard
+                Physical Aid
+                <span className="category-count">15 Tools</span>
               </button>
               <button
                 className="category-button"
@@ -642,6 +695,7 @@ const SearchTech = () => {
               >
                 <Brain className="category-icon" />
                 Cognitive Aid
+                <span className="category-count">8 Tools</span>
               </button>
             </div>
           </div>

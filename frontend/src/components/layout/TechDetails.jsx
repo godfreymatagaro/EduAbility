@@ -3,6 +3,7 @@ import { useParams, NavLink } from 'react-router-dom';
 import { ChevronRight, Tag, Monitor, User, Plus, FileText, Headphones, Video, Keyboard, MessageSquare, Wrench, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import './TechDetails.css';
+import noImage from '../../assets/images/no-image.jpg'; 
 
 // Determine the API URL based on the environment
 const API_URL = import.meta.env.NODE_ENV === 'production'
@@ -136,10 +137,10 @@ const TechDetails = () => {
             <div className="tech-image-info">
               <div className="tech-image">
                 <img
-                  src={techDetails.image_url || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'}
+                  src={techDetails.image_url || noImage}
                   alt={`${techDetails.name} logo`}
                   loading="lazy"
-                  onError={(e) => (e.target.src = '/placeholder-image.png')} // Fallback if image_url fails
+                  onError={(e) => (e.target.src = noImage)} // Use imported no-image.jpg as fallback
                 />
               </div>
               <div className="tech-info">
@@ -259,11 +260,11 @@ const TechDetails = () => {
                 aria-label={`Related technology: ${tech.name}`}
               >
                 <img
-                  src={tech.image_url || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'}
+                  src={tech.image_url || noImage}
                   alt={`${tech.name} logo`}
                   className="related-tech-image"
                   loading="lazy"
-                  onError={(e) => (e.target.src = '/placeholder-image.png')} // Fallback if image_url fails
+                  onError={(e) => (e.target.src = noImage)} // Use imported no-image.jpg as fallback
                 />
                 <div className="related-tech-content">
                   <h3>{tech.name}</h3>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { ChevronRight, Tag, Monitor, User, Plus, FileText, Headphones } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, NavLink } from 'react-router-dom';
+import { ChevronRight, Tag, Monitor, User, Plus, FileText, Headphones, Video, Keyboard, MessageSquare, Wrench, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import './TechDetails.css';
 
@@ -16,6 +16,9 @@ const TechDetails = () => {
   const [relatedTechnologies, setRelatedTechnologies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const tabListRef = useRef(null);
+  const firstTabRef = useRef(null);
+  const lastTabRef = useRef(null);
 
   // Hardcoded JWT token
   const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNzU1N2U4Yi0wMmYzLTQyYmQtYTkwNi1jZmU2NDk5NzdkMGYiLCJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDU5OTEzNTcsImV4cCI6MTc0NjA3Nzc1N30.EFnagJsRqlnab0znRF1b6E6UladFwjubZCCKIm0Vtxo';
@@ -26,8 +29,8 @@ const TechDetails = () => {
       setLoading(true);
       setError(null);
       try {
-        console.log(`Fetching tech details for ID: ${id}`); // Debug log
-        console.log(`API URL: ${API_URL}/api/technologies/${id}`); // Debug log
+        console.log(`Fetching tech details for ID: ${id}`);
+        console.log(`API URL: ${API_URL}/api/technologies/${id}`);
 
         // Fetch the specific technology
         const techResponse = await fetch(`${API_URL}/api/technologies/${id}`, {
@@ -39,12 +42,12 @@ const TechDetails = () => {
           throw new Error(`Failed to fetch technology details: ${techResponse.status} ${techResponse.statusText}`);
         }
         const techData = await techResponse.json();
-        console.log('Tech Details Response:', techData); // Debug log
+        console.log('Tech Details Response:', techData);
         setTechDetails(techData);
 
-        // Fetch related technologies (same category, excluding current tech)
+        // Fetch related technologies
         if (techData?.category) {
-          console.log(`Fetching related technologies for category: ${techData.category}`); // Debug log
+          console.log(`Fetching related technologies for category: ${techData.category}`);
           const relatedResponse = await fetch(
             `${API_URL}/api/technologies?category=${techData.category}`,
             {
@@ -57,8 +60,7 @@ const TechDetails = () => {
             throw new Error(`Failed to fetch related technologies: ${relatedResponse.status} ${relatedResponse.statusText}`);
           }
           const relatedData = await relatedResponse.json();
-          console.log('Related Technologies Response:', relatedData); // Debug log
-          // Exclude the current technology and limit to 3
+          console.log('Related Technologies Response:', relatedData);
           const filteredRelated = relatedData
             .filter((tech) => tech._id !== id)
             .slice(0, 3);
@@ -67,7 +69,7 @@ const TechDetails = () => {
           setRelatedTechnologies([]);
         }
       } catch (err) {
-        console.error('Error fetching tech details:', err); // Debug log
+        console.error('Error fetching tech details:', err);
         setError(err.message);
         setTechDetails(null);
         setRelatedTechnologies([]);
@@ -79,7 +81,25 @@ const TechDetails = () => {
     fetchTechDetails();
   }, [id]);
 
-  // Framer Motion variants for animations
+  // Handle keyboard navigation for tabs
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const tabs = tabListRef.current?.querySelectorAll('.tab');
+        const currentIndex = Array.from(tabs).findIndex((tab) => tab === document.activeElement);
+        let nextIndex = e.key === 'ArrowRight' ? currentIndex + 1 : currentIndex - 1;
+        if (nextIndex >= tabs.length) nextIndex = 0;
+        if (nextIndex < 0) nextIndex = tabs.length - 1;
+        tabs[nextIndex]?.focus();
+        setActiveTab(tabs[nextIndex].textContent);
+      }
+    };
+    tabListRef.current?.addEventListener('keydown', handleKeyDown);
+    return () => tabListRef.current?.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Framer Motion variants
   const sectionVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
@@ -90,24 +110,24 @@ const TechDetails = () => {
     hover: { scale: 1.05, transition: { duration: 0.3 } },
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p className="error-message">Error: {error}</p>;
-  if (!techDetails) return <p>Technology not found.</p>;
+  if (loading) return <p className="loading-message" aria-live="polite">Loading...</p>;
+  if (error) return <p className="error-message" aria-live="assertive">Error: {error}</p>;
+  if (!techDetails) return <p className="error-message" aria-live="assertive">Technology not found.</p>;
 
   return (
-    <section className="tech-details-section">
+    <section className="tech-details-section" aria-label="Technology Details">
       <div className="tech-details-container">
         {/* Breadcrumb */}
-        <nav className="breadcrumb">
-          <a href="/technologies" className="breadcrumb-link">
+        <nav className="breadcrumb" aria-label="Breadcrumb">
+          <NavLink to="/technologies" className="breadcrumb-link">
             Technologies
-          </a>
-          <ChevronRight className="breadcrumb-icon" />
-          <a href={`/tech-details/${techDetails._id}`} className="breadcrumb-link">
+          </NavLink>
+          <ChevronRight className="breadcrumb-icon" aria-hidden="true" />
+          <NavLink to={`/tech-details/${techDetails._id}`} className="breadcrumb-link">
             {techDetails.name}
-          </a>
-          <ChevronRight className="breadcrumb-icon" />
-          <span className="breadcrumb-current">{techDetails.name}</span>
+          </NavLink>
+          <ChevronRight className="breadcrumb-icon" aria-hidden="true" />
+          <span className="breadcrumb-current" aria-current="page">{techDetails.name}</span>
         </nav>
 
         {/* Main Tech Display with Tabs */}
@@ -115,44 +135,62 @@ const TechDetails = () => {
           <div className="tech-image-info-card">
             <div className="tech-image-info">
               <div className="tech-image">
-                <img src={techDetails.logo || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'} alt={`${techDetails.name} logo`} />
+                <img
+                  src={techDetails.logo || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'}
+                  alt={`${techDetails.name} logo`}
+                  loading="lazy"
+                />
               </div>
               <div className="tech-info">
                 <h1 className="tech-title">{techDetails.name}</h1>
                 <div className="tech-meta">
                   <p>
-                    <Tag className="meta-icon" />
+                    <Tag className="meta-icon" aria-hidden="true" />
                     <span><strong>Latest Version:</strong> {techDetails.version || 'N/A'}</span>
                   </p>
                   <p>
-                    <Monitor className="meta-icon" />
+                    <Monitor className="meta-icon" aria-hidden="true" />
                     <span><strong>Platform:</strong> {techDetails.platform || 'N/A'}</span>
                   </p>
                   <p>
-                    <User className="meta-icon" />
+                    <User className="meta-icon" aria-hidden="true" />
                     <span><strong>Developer:</strong> {techDetails.developer || 'N/A'}</span>
                   </p>
                 </div>
                 <div className="tech-actions">
-                  <button className="add-compare-button">
-                    <Plus className="button-icon" />
+                  <NavLink
+                    to={`/compare?techId=${techDetails._id}`}
+                    className="add-compare-button"
+                    aria-label={`Add ${techDetails.name} to compare`}
+                  >
+                    <Plus className="button-icon" aria-hidden="true" />
                     Add to Compare
-                  </button>
+                  </NavLink>
                 </div>
               </div>
             </div>
           </div>
           <div className="tech-tabs-card">
-            <div className="tech-tabs">
-              <div className="tab-list">
+            <div className="tech-tabs" role="tabpanel">
+              <div className="tab-list" role="tablist" ref={tabListRef} aria-label="Technology Information Tabs">
                 <button
+                  ref={firstTabRef}
                   className={`tab ${activeTab === 'Details' ? 'active' : ''}`}
+                  role="tab"
+                  aria-selected={activeTab === 'Details'}
+                  aria-controls="details-panel"
+                  id="details-tab"
                   onClick={() => setActiveTab('Details')}
                 >
                   Details
                 </button>
                 <button
+                  ref={lastTabRef}
                   className={`tab ${activeTab === 'Evaluation' ? 'active' : ''}`}
+                  role="tab"
+                  aria-selected={activeTab === 'Evaluation'}
+                  aria-controls="evaluation-panel"
+                  id="evaluation-tab"
                   onClick={() => setActiveTab('Evaluation')}
                 >
                   Evaluation
@@ -160,7 +198,7 @@ const TechDetails = () => {
               </div>
               <div className="tab-content">
                 {activeTab === 'Details' && (
-                  <div className="tab-pane">
+                  <div className="tab-pane" id="details-panel" role="tabpanel" aria-labelledby="details-tab">
                     <p>{techDetails.description || 'No description available.'}</p>
                     <div className="tech-features">
                       <h3>Key Features</h3>
@@ -181,7 +219,7 @@ const TechDetails = () => {
                   </div>
                 )}
                 {activeTab === 'Evaluation' && (
-                  <div className="tab-pane">
+                  <div className="tab-pane" id="evaluation-panel" role="tabpanel" aria-labelledby="evaluation-tab">
                     <h3>Core Vitals</h3>
                     <ul>
                       <li>Features Rating: {techDetails.coreVitals?.featuresRating || 'N/A'}</li>
@@ -204,18 +242,35 @@ const TechDetails = () => {
         </div>
 
         {/* Related Technologies */}
-        <div className="related-tech">
+        <div className="related-tech" aria-live="polite">
           <h2>Related Technologies</h2>
           <div className="related-tech-grid">
+            {relatedTechnologies.length === 0 && <p>No related technologies found.</p>}
             {relatedTechnologies.map((tech) => (
-              <div key={tech._id} className="related-tech-card">
-                <img src={tech.logo || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'} alt={`${tech.name} logo`} className="related-tech-image" />
+              <motion.div
+                key={tech._id}
+                className="related-tech-card"
+                variants={cardVariants}
+                initial="rest"
+                whileHover="hover"
+                tabIndex={0}
+                onKeyPress={(e) => e.key === 'Enter' && window.location.assign(`/tech-details/${tech._id}`)}
+                aria-label={`Related technology: ${tech.name}`}
+              >
+                <img
+                  src={tech.logo || 'https://modernsolutions.co.ke/wp-content/uploads/2023/11/jaws-product-image.jpg'}
+                  alt={`${tech.name} logo`}
+                  className="related-tech-image"
+                  loading="lazy"
+                />
                 <div className="related-tech-content">
                   <h3>{tech.name}</h3>
                   <p>{tech.description}</p>
-                  <a href={`/tech-details/${tech._id}`} className="learn-more-button">Learn More</a>
+                  <NavLink to={`/tech-details/${tech._id}`} className="learn-more-button" aria-label={`Learn more about ${tech.name}`}>
+                    Learn More
+                  </NavLink>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -226,6 +281,7 @@ const TechDetails = () => {
           initial="hidden"
           animate="visible"
           variants={sectionVariants}
+          aria-label="Additional Resources"
         >
           <h2>Additional Resources</h2>
           <div className="resources-grid">
@@ -234,15 +290,17 @@ const TechDetails = () => {
               variants={cardVariants}
               initial="rest"
               whileHover="hover"
+              tabIndex={0}
+              aria-label="Documentation resources"
             >
               <div className="resource-icon-wrapper blue-bg">
-                <FileText className="resource-icon" />
+                <FileText className="resource-icon" aria-hidden="true" />
               </div>
               <h3>Documentation</h3>
               <ul>
-                <li><span className="emoji">📘</span> User Manual (PDF)</li>
-                <li><span className="emoji">🎥</span> Video Tutorials</li>
-                <li><span className="emoji">⌨️</span> Keyboard Shortcuts Guide</li>
+                <li><BookOpen className="resource-icon small" aria-hidden="true" /> User Manual (PDF)</li>
+                <li><Video className="resource-icon small" aria-hidden="true" /> Video Tutorials</li>
+                <li><Keyboard className="resource-icon small" aria-hidden="true" /> Keyboard Shortcuts Guide</li>
               </ul>
             </motion.div>
             <motion.div
@@ -250,15 +308,17 @@ const TechDetails = () => {
               variants={cardVariants}
               initial="rest"
               whileHover="hover"
+              tabIndex={0}
+              aria-label="Support resources"
             >
               <div className="resource-icon-wrapper green-bg">
-                <Headphones className="resource-icon" />
+                <Headphones className="resource-icon" aria-hidden="true" />
               </div>
               <h3>Support</h3>
               <ul>
-                <li><span className="emoji">💬</span> Community Forum</li>
-                <li><span className="emoji">🛠️</span> Technical Support</li>
-                <li><span className="emoji">📚</span> Training Programs</li>
+                <li><MessageSquare className="resource-icon small" aria-hidden="true" /> Community Forum</li>
+                <li><Wrench className="resource-icon small" aria-hidden="true" /> Technical Support</li>
+                <li><BookOpen className="resource-icon small" aria-hidden="true" /> Training Programs</li>
               </ul>
             </motion.div>
           </div>

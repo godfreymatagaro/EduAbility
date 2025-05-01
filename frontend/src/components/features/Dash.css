@@ -1,7 +1,12 @@
 .dashboard-section {
-    background-color: #212121;
+    background-color: #f9fafb; /* Light background for default */
     padding: 2rem 1rem;
     min-height: 100vh;
+    text-align: start;
+  }
+  
+  :where(.dark) .dashboard-section {
+    background-color: #111827; /* Dark mode background */
   }
   
   .dashboard-container {
@@ -12,9 +17,14 @@
   .dashboard-title {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #ffffff;
+    color: #111827; /* Dark text for light mode */
     margin-bottom: 2rem;
     text-transform: uppercase;
+    text-align: start;
+  }
+  
+  :where(.dark) .dashboard-title {
+    color: #ffffff;
   }
   
   .stats-wrapper {
@@ -24,35 +34,58 @@
   }
   
   .stat-card {
-    background-color: #2d2d2d;
+    background-color: #ffffff; /* White background for cards */
     border-radius: 1rem;
     padding: 1.5rem;
-    text-align: center;
+    text-align: start;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Lighter shadow */
+  }
+  
+  :where(.dark) .stat-card {
+    background-color: #1f2937;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
   
   .stat-card h2 {
     font-size: 1.125rem;
     font-weight: 500;
-    color: #b0b0b0;
+    color: #4b5563; /* Medium gray for stat titles */
     margin-bottom: 1rem;
+    text-align: start;
+  }
+  
+  :where(.dark) .stat-card h2 {
+    color: #d1d5db;
   }
   
   .stat-number {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #ffffff;
+    color: #111827; /* Dark text for numbers */
+    text-align: start;
+  }
+  
+  :where(.dark) .stat-number {
+    color: #d1d5db;
   }
   
   .loading-message,
   .error-message {
-    color: #ffffff;
-    text-align: center;
+    color: #4b5563; /* Medium gray for messages */
+    text-align: start;
     margin-top: 1rem;
   }
   
+  :where(.dark) .loading-message {
+    color: #d1d5db;
+  }
+  
   .error-message {
-    color: #ff4444;
+    color: #ef4444; /* Red for errors */
+  }
+  
+  :where(.dark) .error-message {
+    color: #ff6666;
   }
   
   /* Responsive adjustments */

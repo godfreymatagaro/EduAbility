@@ -1,5 +1,3 @@
-
-/* SearchTech.css */
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -481,17 +479,17 @@
   }
   
   .price-tag {
-    background-color: #e5e7eb;
+    background-color: #29ab87; /* Jungle green */
     border-radius: 4px;
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
     font-weight: 500;
-    color: #1f2937;
+    color: #ffffff;
   }
   
   :where(.dark) .price-tag {
-    background-color: #4b5563;
-    color: #e2e8f0;
+    background-color: #29ab87;
+    color: #ffffff;
   }
   
   .tech-card p {
@@ -700,7 +698,7 @@
     color: #1f2937;
   }
   
-  :where(.dark) .category-icon {
+  :where(.dark) .Category-icon {
     color: #e2e8f0;
   }
   
@@ -909,8 +907,8 @@
     }
   
     .search-bar-wrapper {
-      max-width: 100%;
-      margin: 0 4px;
+      max-width: 85%;
+      margin: 0 auto;
     }
   
     .search-bar {
@@ -934,6 +932,9 @@
     }
   
     .search-modal {
+      max-width: 85%;
+      left: 50%;
+      transform: translateX(-50%);
       max-height: 250px;
       padding: 0.5rem;
     }

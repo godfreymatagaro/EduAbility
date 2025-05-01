@@ -356,3 +356,9 @@
       margin: 1rem 0;
     }
   }
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+  

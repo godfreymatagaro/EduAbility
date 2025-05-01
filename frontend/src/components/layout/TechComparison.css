@@ -88,8 +88,9 @@
 }
 
 .back-link:focus {
-    outline: 2px solid #006bb8;
+    outline: 3px solid #006bb8;
     outline-offset: 2px;
+    border-radius: 4px;
 }
 
 :where(.dark) .back-link:focus {
@@ -155,6 +156,16 @@
     color: #e5e7eb;
 }
 
+.tech-item:focus {
+    outline: 3px solid #006bb8;
+    outline-offset: 2px;
+    border-radius: 1rem;
+}
+
+:where(.dark) .tech-item:focus {
+    outline-color: #27a145;
+}
+
 .remove-tech {
     background: none;
     border: none;
@@ -163,8 +174,9 @@
 }
 
 .remove-tech:focus {
-    outline: 2px solid #006bb8;
+    outline: 3px solid #006bb8;
     outline-offset: 2px;
+    border-radius: 4px;
 }
 
 :where(.dark) .remove-tech:focus {
@@ -203,8 +215,9 @@
 }
 
 .add-more-button:focus {
-    outline: 2px solid #006bb8;
+    outline: 3px solid #006bb8;
     outline-offset: 2px;
+    border-radius: 4px;
 }
 
 :where(.dark) .add-more-button:focus {
@@ -230,8 +243,9 @@
 }
 
 .summary-card:focus {
-    outline: 2px solid #006bb8;
+    outline: 3px solid #006bb8;
     outline-offset: 2px;
+    border-radius: 0.5rem;
 }
 
 :where(.dark) .summary-card:focus {
@@ -360,6 +374,16 @@
 :where(.dark) .badge {
     background-color: #4b5563;
     color: #e5e7eb;
+}
+
+.badge:focus {
+    outline: 3px solid #006bb8;
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+}
+
+:where(.dark) .badge:focus {
+    outline-color: #27a145;
 }
 
 .badge-icon {
@@ -543,8 +567,9 @@
 }
 
 .modal-content:focus {
-    outline: 2px solid #006bb8;
+    outline: 3px solid #006bb8;
     outline-offset: 2px;
+    border-radius: 0.5rem;
 }
 
 :where(.dark) .modal-content:focus {
@@ -604,8 +629,9 @@
 }
 
 .search-bar input:focus {
-    outline: 2px solid #006bb8;
+    outline: 3px solid #006bb8;
     outline-offset: -2px;
+    border-radius: 8px;
 }
 
 :where(.dark) .search-bar input:focus {
@@ -639,8 +665,9 @@
 }
 
 .tech-option:focus {
-    outline: 2px solid #006bb8;
+    outline: 3px solid #006bb8;
     outline-offset: 2px;
+    border-radius: 4px;
 }
 
 :where(.dark) .tech-option:focus {
@@ -703,8 +730,9 @@
 }
 
 .add-tech-button:focus {
-    outline: 2px solid #006bb8;
+    outline: 3px solid #006bb8;
     outline-offset: 2px;
+    border-radius: 8px;
 }
 
 :where(.dark) .add-tech-button:focus {
@@ -756,8 +784,9 @@
 }
 
 .cancel-button:focus {
-    outline: 2px solid #006bb8;
+    outline: 3px solid #006bb8;
     outline-offset: 2px;
+    border-radius: 8px;
 }
 
 :where(.dark) .cancel-button:focus {
@@ -789,8 +818,9 @@
 }
 
 .add-selected-button:focus {
-    outline: 2px solid #006bb8;
+    outline: 3px solid #006bb8;
     outline-offset: 2px;
+    border-radius: 8px;
 }
 
 :where(.dark) .add-selected-button:focus {
@@ -843,12 +873,13 @@
 .sort-controls select:focus {
     outline: none;
     border-color: #006bb8;
-    box-shadow: 0 0 0 2px rgba(0, 107, 184, 0.2);
+    box-shadow: 0 0 0 3px rgba(0, 107, 184, 0.2);
+    border-radius: 0.5rem;
 }
 
 :where(.dark) .sort-controls select:focus {
     border-color: #27a145;
-    box-shadow: 0 0 0 2px rgba(39, 161, 69, 0.2);
+    box-shadow: 0 0 0 3px rgba(39, 161, 69, 0.2);
 }
 
 /* Responsive Adjustments */

@@ -24,6 +24,8 @@ const TechComparison = () => {
   const [sortCriterion, setSortCriterion] = useState('');
   const addMoreButtonRef = useRef(null);
   const modalRef = useRef(null);
+  const firstFocusableElementRef = useRef(null);
+  const lastFocusableElementRef = useRef(null);
 
   // Fetch technologies and initialize selectedTechs from localStorage (simulated Redis cache)
   useEffect(() => {
@@ -186,7 +188,31 @@ const TechComparison = () => {
   // Modal Focus Management
   useEffect(() => {
     if (isModalOpen) {
-      modalRef.current?.focus();
+      const focusableElements = modalRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      firstFocusableElementRef.current = firstElement;
+      lastFocusableElementRef.current = lastElement;
+
+      firstElement.focus();
+
+      const handleTabKey = (e) => {
+        if (e.key === 'Tab') {
+          if (e.shiftKey && document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          } else if (!e.shiftKey && document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      };
+
+      modalRef.current.addEventListener('keydown', handleTabKey);
+      return () => modalRef.current.removeEventListener('keydown', handleTabKey);
     } else {
       addMoreButtonRef.current?.focus();
     }
@@ -199,7 +225,20 @@ const TechComparison = () => {
     }
   };
 
-  // Framer Motion variants
+  // Framer Motion variants for modal
+  const modalVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.3 } },
+    exit: { opacity: 0, transition: { duration: 0.3 } },
+  };
+
+  const modalContentVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+    exit: { opacity: 0, scale: 0.9, transition: { duration: 0.3 } },
+  };
+
+  // Framer Motion variants for other sections
   const sectionVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
@@ -220,9 +259,9 @@ const TechComparison = () => {
   if (error) return <p className="error-message">Error: {error}</p>;
 
   return (
-    <section className="tech-comparison-section">
+    <section className="tech-comparison-section" aria-label="Technology Comparison Section">
       {/* Toast Notifications */}
-      <div className="toast-container">
+      <div className="toast-container" role="region" aria-live="polite">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
@@ -233,7 +272,7 @@ const TechComparison = () => {
               animate="visible"
               exit="exit"
               role="alert"
-              aria-live="polite"
+              aria-live="assertive"
             >
               {toast.message}
             </motion.div>
@@ -249,10 +288,10 @@ const TechComparison = () => {
           animate="visible"
           variants={sectionVariants}
         >
-          <h1>Technology Comparison</h1>
+          <h1 id="comparison-title">Technology Comparison</h1>
           <p>Compare features, pricing, and ratings across different technologies</p>
-          <a href="/technologies" className="back-link">
-            <ChevronLeft className="back-icon" />
+          <a href="/technologies" className="back-link" aria-label="Back to Technologies">
+            <ChevronLeft className="back-icon" aria-hidden="true" />
             Back to Technologies
           </a>
         </motion.div>
@@ -264,8 +303,8 @@ const TechComparison = () => {
           animate="visible"
           variants={sectionVariants}
         >
-          <h2>Selected Technologies</h2>
-          <div className="tech-list-card">
+          <h2 id="selected-techs-heading">Selected Technologies</h2>
+          <div className="tech-list-card" aria-labelledby="selected-techs-heading">
             <div className="tech-list">
               {selectedTechs.length === 0 && <p>No technologies selected for comparison.</p>}
               {selectedTechs.map((tech) => (
@@ -278,15 +317,16 @@ const TechComparison = () => {
                   transition={{ duration: 0.3 }}
                   tabIndex={0}
                   aria-label={`Selected technology: ${tech.name}`}
+                  onKeyDown={(e) => e.key === 'Enter' && handleRemoveTech(tech._id)}
                 >
                   <span>{tech.name}</span>
                   <button
                     className="remove-tech"
                     onClick={() => handleRemoveTech(tech._id)}
                     onKeyDown={(e) => e.key === 'Enter' && handleRemoveTech(tech._id)}
-                    aria-label={`Remove ${tech.name}`}
+                    aria-label={`Remove ${tech.name} from comparison`}
                   >
-                    <X className="remove-icon" />
+                    <X className="remove-icon" aria-hidden="true" />
                   </button>
                 </motion.div>
               ))}
@@ -297,6 +337,7 @@ const TechComparison = () => {
               onClick={() => setIsModalOpen(true)}
               onKeyDown={(e) => e.key === 'Enter' && setIsModalOpen(true)}
               tabIndex={0}
+              aria-label="Add more technologies to compare"
             >
               Add More +
             </button>
@@ -310,13 +351,16 @@ const TechComparison = () => {
             initial="hidden"
             animate="visible"
             variants={sectionVariants}
+            role="region"
+            aria-live="polite"
+            aria-label="Comparison Summary"
           >
-            <div className="summary-card">
+            <div className="summary-card" tabIndex={0}>
               <div className="summary-details">
                 <div className="summary-item">
                   <h3>Average Rating</h3>
                   <p>
-                    {averageRating} <Star className="star-icon" />
+                    {averageRating} <Star className="star-icon" aria-hidden="true" />
                   </p>
                   <span>{ratingComparison > 0 ? `${ratingComparison}% higher than category average` : 'N/A'}</span>
                 </div>
@@ -333,7 +377,7 @@ const TechComparison = () => {
               </div>
               <div className="progress-section">
                 <p>You’ve compared {selectedTechs.length} out of 5 technologies!</p>
-                <div className="progress-bar">
+                <div className="progress-bar" role="progressbar" aria-valuenow={selectedTechs.length} aria-valuemin="0" aria-valuemax="5">
                   <motion.div
                     className="progress-fill"
                     initial={{ width: 0 }}
@@ -344,8 +388,8 @@ const TechComparison = () => {
                 {badges.length > 0 && (
                   <div className="badges">
                     {badges.includes('explorer') && (
-                      <div className="badge" aria-label="Explorer Badge">
-                        <Award className="badge-icon" />
+                      <div className="badge" tabIndex={0} aria-label="Explorer Badge">
+                        <Award className="badge-icon" aria-hidden="true" />
                         <span>Explorer</span>
                       </div>
                     )}
@@ -364,7 +408,7 @@ const TechComparison = () => {
             animate="visible"
             variants={sectionVariants}
           >
-            <h2>Detailed Comparison</h2>
+            <h2 id="detailed-comparison-heading">Detailed Comparison</h2>
             <div className="sort-controls">
               <label htmlFor="sort-criteria">Sort by:</label>
               <select
@@ -382,7 +426,7 @@ const TechComparison = () => {
               </select>
             </div>
             <div className="table-wrapper">
-              <table className="comparison-table detailed-table">
+              <table className="comparison-table detailed-table" aria-labelledby="detailed-comparison-heading">
                 <thead>
                   <tr>
                     <th scope="col">Criteria</th>
@@ -398,14 +442,14 @@ const TechComparison = () => {
                       <td>{criteria.criterion}</td>
                       {criteria.ratings.map((rating, i) => (
                         <td key={i}>
-                          {rating || 'N/A'} {rating ? <Star className="star-icon" /> : null}
+                          {rating || 'N/A'} {rating ? <Star className="star-icon" aria-hidden="true" /> : null}
                         </td>
                       ))}
                       <td>
                         {criteria.ratings.every((r) => r)
                           ? (criteria.ratings.reduce((a, b) => a + b, 0) / criteria.ratings.length).toFixed(1)
                           : 'N/A'}{' '}
-                        {criteria.ratings.every((r) => r) ? <Star className="star-icon" /> : null}
+                        {criteria.ratings.every((r) => r) ? <Star className="star-icon" aria-hidden="true" /> : null}
                       </td>
                     </tr>
                   ))}
@@ -423,9 +467,9 @@ const TechComparison = () => {
             animate="visible"
             variants={sectionVariants}
           >
-            <h2>Feature Comparison</h2>
+            <h2 id="feature-comparison-heading">Feature Comparison</h2>
             <div className="table-wrapper">
-              <table className="comparison-table feature-table">
+              <table className="comparison-table feature-table" aria-labelledby="feature-comparison-heading">
                 <thead>
                   <tr>
                     <th scope="col">Feature</th>
@@ -440,7 +484,10 @@ const TechComparison = () => {
                       <td>{feature.feature}</td>
                       {feature.available.map((avail, i) => (
                         <td key={i}>
-                          <span className={`dot ${avail ? 'available' : 'unavailable'}`} />
+                          <span
+                            className={`dot ${avail ? 'available' : 'unavailable'}`}
+                            aria-label={avail ? `${feature.feature} available` : `${feature.feature} unavailable`}
+                          />
                         </td>
                       ))}
                     </tr>
@@ -452,94 +499,106 @@ const TechComparison = () => {
         )}
 
         {/* Add Technology Modal */}
-        {isModalOpen && (
-          <div className="modal-overlay" onKeyDown={handleModalKeyDown}>
+        <AnimatePresence>
+          {isModalOpen && (
             <motion.div
-              className="modal-content"
-              ref={modalRef}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
-              role="dialog"
-              aria-labelledby="modal-title"
-              tabIndex={0}
+              className="modal-overlay"
+              variants={modalVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onKeyDown={handleModalKeyDown}
             >
-              <h3 id="modal-title">Add Technology</h3>
-              <div className="search-bar">
-                <Search className="search-icon" aria-hidden="true" />
-                <input
-                  type="text"
-                  placeholder="Search technologies..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  aria-label="Search technologies"
-                />
-              </div>
-              <div className="tech-options">
-                {availableTechs.length === 0 && !loading && !error && (
-                  <p>No available technologies to add.</p>
-                )}
-                {loading && <p>Loading...</p>}
-                {error && <p className="error-message">Error: {error}</p>}
-                {availableTechs.map((tech) => (
-                  <motion.div
-                    key={tech._id}
-                    className={`tech-option ${
-                      selectedTechs.some((t) => t._id === tech._id) ? 'selected' : ''
-                    }`}
-                    variants={cardVariants}
-                    initial="rest"
-                    whileHover="hover"
-                    tabIndex={0}
-                    onKeyDown={(e) =>
-                      e.key === 'Enter' && !selectedTechs.some((t) => t._id === tech._id) && handleAddTech(tech)
-                    }
-                  >
-                    <div className="tech-info">
-                      <h4>{tech.name}</h4>
-                      <p>
-                        {tech.coreVitals?.featuresRating || 'N/A'} <Star className="star-icon" /> •{' '}
-                        {tech.category || 'N/A'}
-                      </p>
-                    </div>
-                    <button
-                      className="add-tech-button"
-                      onClick={() => handleAddTech(tech)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleAddTech(tech)}
-                      disabled={selectedTechs.some((t) => t._id === tech._id)}
-                      aria-label={`Add ${tech.name}`}
-                    >
-                      Add
-                    </button>
-                  </motion.div>
-                ))}
-              </div>
-              <div className="modal-footer">
-                <p>Selected: {selectedTechs.length} technologies</p>
-                <div className="modal-actions">
-                  <button
-                    className="cancel-button"
-                    onClick={() => setIsModalOpen(false)}
-                    onKeyDown={(e) => e.key === 'Enter' && setIsModalOpen(false)}
-                    aria-label="Cancel"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="add-selected-button"
-                    onClick={() => setIsModalOpen(false)}
-                    onKeyDown={(e) => e.key === 'Enter' && setIsModalOpen(false)}
-                    aria-label="Add selected technologies"
-                  >
-                    Add Selected
-                  </button>
+              <motion.div
+                className="modal-content"
+                ref={modalRef}
+                variants={modalContentVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                role="dialog"
+                aria-labelledby="modal-title"
+                tabIndex={-1}
+              >
+                <h3 id="modal-title">Add Technology</h3>
+                <div className="search-bar">
+                  <Search className="search-icon" aria-hidden="true" />
+                  <input
+                    type="text"
+                    id="search-input"
+                    placeholder="Search technologies..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    aria-label="Search technologies to add"
+                  />
                 </div>
-              </div>
+                <div className="tech-options" role="listbox" aria-label="Available Technologies">
+                  {availableTechs.length === 0 && !loading && !error && (
+                    <p>No available technologies to add.</p>
+                  )}
+                  {loading && <p>Loading...</p>}
+                  {error && <p className="error-message">Error: {error}</p>}
+                  {availableTechs.map((tech) => (
+                    <motion.div
+                      key={tech._id}
+                      className={`tech-option ${
+                        selectedTechs.some((t) => t._id === tech._id) ? 'selected' : ''
+                      }`}
+                      variants={cardVariants}
+                      initial="rest"
+                      whileHover="hover"
+                      tabIndex={0}
+                      role="option"
+                      aria-selected={selectedTechs.some((t) => t._id === tech._id)}
+                      onKeyDown={(e) =>
+                        e.key === 'Enter' && !selectedTechs.some((t) => t._id === tech._id) && handleAddTech(tech)
+                      }
+                    >
+                      <div className="tech-info">
+                        <h4>{tech.name}</h4>
+                        <p>
+                          {tech.coreVitals?.featuresRating || 'N/A'} <Star className="star-icon" aria-hidden="true" /> •{' '}
+                          {tech.category || 'N/A'}
+                        </p>
+                      </div>
+                      <button
+                        className="add-tech-button"
+                        onClick={() => handleAddTech(tech)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddTech(tech)}
+                        disabled={selectedTechs.some((t) => t._id === tech._id)}
+                        aria-label={`Add ${tech.name} to comparison`}
+                      >
+                        Add
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="modal-footer">
+                  <p>Selected: {selectedTechs.length} technologies</p>
+                  <div className="modal-actions">
+                    <button
+                      className="cancel-button"
+                      onClick={() => setIsModalOpen(false)}
+                      onKeyDown={(e) => e.key === 'Enter' && setIsModalOpen(false)}
+                      aria-label="Cancel adding technology"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="add-selected-button"
+                      onClick={() => setIsModalOpen(false)}
+                      onKeyDown={(e) => e.key === 'Enter' && setIsModalOpen(false)}
+                      aria-label="Add selected technologies and close"
+                    >
+                      Add Selected
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

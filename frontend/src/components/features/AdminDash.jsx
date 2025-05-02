@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Filter, Trash2, Plus } from 'lucide-react';
 import { toast } from 'react-toastify';
 import './AdminDash.css';
@@ -46,14 +47,53 @@ const AdminDash = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const checkSession = () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+        const role = tokenPayload.role;
+
+        if (role !== 'admin') {
+          navigate('/login');
+        } else {
+          setAuthLoading(false);
+        }
+      } catch (err) {
+        toast.error('Invalid token. Please log in again.');
+        navigate('/login');
+      }
+    };
+
+    checkSession();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (authLoading) return;
+
     const fetchData = async () => {
       setLoading(true);
       try {
+        const token = localStorage.getItem('token');
         const [techResponse, reviewResponse] = await Promise.all([
-          fetch(`${finalAPI_URL}/api/technologies`),
-          fetch(`${finalAPI_URL}/api/reviews`),
+          fetch(`${finalAPI_URL}/api/technologies`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          }),
+          fetch(`${finalAPI_URL}/api/reviews`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          }),
         ]);
         if (!techResponse.ok) throw new Error(`Failed to fetch technologies: ${techResponse.status}`);
         if (!reviewResponse.ok) throw new Error(`Failed to fetch reviews: ${reviewResponse.status}`);
@@ -68,7 +108,7 @@ const AdminDash = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [authLoading]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -240,6 +280,8 @@ const AdminDash = () => {
   const filteredReviews = reviews.filter((review) =>
     review.comment.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (authLoading) return null;
 
   return (
     <section className="admin-dash-section">

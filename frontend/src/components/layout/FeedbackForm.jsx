@@ -1,159 +1,231 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Star } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+// frontend/src/components/FeedbackForm/FeedbackForm.jsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '@utils/api'; // Adjusted with alias from vite.config.js
 import './FeedbackForm.css';
 
 const FeedbackForm = () => {
-  const [rating, setRating] = useState(0);
-  const [feedback, setFeedback] = useState('');
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    technologyId: '',
+    rating: '',
+    comment: '',
+    tags: '',
+  });
+  const [technologies, setTechnologies] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const ratingRefs = useRef([]);
-  const feedbackRef = useRef(null);
-  const submitButtonRef = useRef(null);
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const token = localStorage.getItem('token');
 
-  const handleRating = (value) => {
-    setRating(value);
-    setError('');
-    ratingRefs.current[value - 1]?.focus();
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!feedback.trim()) {
-      setError('Please provide your feedback.');
-      feedbackRef.current?.focus();
-      return;
-    }
-    if (rating === 0) {
-      setError('Please select a rating.');
-      ratingRefs.current[0]?.focus();
-      return;
-    }
-    // Simulate form submission
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setRating(0);
-      setFeedback('');
-      setError('');
-      ratingRefs.current[0]?.focus();
-    }, 3000);
-  };
-
+  // Fetch technologies on component mount
   useEffect(() => {
-    ratingRefs.current[0]?.focus();
+    const fetchTechnologies = async () => {
+      try {
+        const response = await api.get('/technologies');
+        setTechnologies(response.data);
+      } catch (err) {
+        setError('Failed to load technologies. Please try again.');
+      }
+    };
+    fetchTechnologies();
   }, []);
 
-  const messageVariants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.3 } },
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleTechnologyChange = (e) => {
+    const selectedId = e.target.value;
+    setFormData((prev) => ({ ...prev, technologyId: selectedId }));
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const filteredTechnologies = technologies.filter((tech) =>
+    tech.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    tech.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    if (!formData.technologyId) {
+      setError('Please select a technology.');
+      setLoading(false);
+      return;
+    }
+    if (!formData.rating || formData.rating < 1 || formData.rating > 5) {
+      setError('Rating must be between 1 and 5.');
+      setLoading(false);
+      return;
+    }
+    if (!formData.comment || formData.comment.trim() === '') {
+      setError('Comment is required.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const tags = formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+      const response = await api.post(
+        '/reviews',
+        {
+          technologyId: formData.technologyId,
+          rating: parseInt(formData.rating),
+          comment: formData.comment,
+          tags,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setSuccess('Review submitted successfully!');
+      setFormData({ technologyId: '', rating: '', comment: '', tags: '' });
+      setTimeout(() => navigate('/technologies'), 2000);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError('Invalid token. Please log in again.');
+        setTimeout(() => navigate('/login'), 2000);
+      } else {
+        setError(err.response?.data?.message || 'Failed to submit review.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <section className="feedback-section">
-      <AnimatePresence>
-        {submitted && (
-          <motion.div
-            className="submission-message"
-            variants={messageVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            role="alert"
-            aria-live="polite"
-          >
-            Thank you for your feedback! 🎉
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className="feedback-section">
+      <div className="feedback-form-container" role="form" aria-labelledby="feedback-form-title">
+        <h2 id="feedback-form-title" className="feedback-form-title">Submit Your Feedback</h2>
+        <form onSubmit={handleSubmit} aria-describedby="feedback-instructions">
+          <p id="feedback-instructions" className="sr-only">
+            Use the form below to submit a review. Select a technology, rate it from 1 to 5, add a comment, and optionally include tags.
+          </p>
 
-      <div className="feedback-form-container">
-        <h2 className="feedback-form-title">Help Us Improve</h2>
-        <form onSubmit={handleSubmit}>
-          {/* Rating Section */}
-          <div className="rating-section">
-            <label htmlFor="rating" className="rating-label">
-              How would you rate your experience
-            </label>
-            <div className="rating-stars" role="radiogroup" id="rating">
-              {[1, 2, 3, 4, 5].map((value) => (
+          <div className="rating-section" role="group" aria-label="Technology Selection">
+            <label htmlFor="technology-search" className="rating-label">Search or Select Technology:</label>
+            <input
+              type="text"
+              id="technology-search"
+              name="technology-search"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder="Search technologies..."
+              className="feedback-textarea"
+              aria-controls="technology-list"
+              disabled={loading}
+            />
+            <select
+              id="technology-select"
+              name="technologyId"
+              value={formData.technologyId}
+              onChange={handleTechnologyChange}
+              className="feedback-textarea"
+              aria-label="Select a technology"
+              disabled={loading}
+              required
+            >
+              <option value="">Select a technology</option>
+              {filteredTechnologies.map((tech) => (
+                <option key={tech._id} value={tech._id}>
+                  {tech.name} - {tech.description.substring(0, 50)}{tech.description.length > 50 ? '...' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="rating-section" role="group" aria-label="Rating Selection">
+            <label htmlFor="rating" className="rating-label">Rating (1-5):</label>
+            <div className="rating-stars" role="radiogroup">
+              {[1, 2, 3, 4, 5].map((star) => (
                 <button
-                  key={value}
+                  key={star}
                   type="button"
-                  ref={(el) => (ratingRefs.current[value - 1] = el)}
-                  onClick={() => handleRating(value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      handleRating(value);
-                      e.preventDefault();
-                    }
-                  }}
-                  aria-label={`Rate ${value} out of 5 stars`}
-                  aria-checked={rating === value}
-                  role="radio"
-                  className={`rating-star ${rating === value ? 'selected' : ''}`}
-                  tabIndex={0}
+                  className="rating-star"
+                  onClick={() => handleChange({ target: { name: 'rating', value: star } })}
+                  aria-label={`Rate ${star} stars`}
+                  disabled={loading}
                 >
-                  <Star
-                    className={`star-icon ${
-                      value <= rating ? 'selected' : 'unselected'
-                    }`}
-                  />
+                  <span
+                    className={`star-icon ${parseInt(formData.rating) >= star ? 'selected' : 'unselected'}`}
+                    role="img"
+                    aria-hidden="true"
+                  >
+                    ★
+                  </span>
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* Feedback Textarea */}
-          <div className="feedback-section">
-            <label htmlFor="feedback" className="feedback-label">
-              Your feedback
-            </label>
-            <textarea
-              id="feedback"
-              ref={feedbackRef}
-              value={feedback}
-              onChange={(e) => {
-                setFeedback(e.target.value);
-                setError('');
-              }}
-              placeholder="Share your thoughts with us..."
-              className="feedback-textarea"
-              aria-label="Your feedback"
-              aria-describedby="error-message"
+            <input
+              type="number"
+              id="rating"
+              name="rating"
+              value={formData.rating}
+              onChange={handleChange}
+              min="1"
+              max="5"
+              className="sr-only"
               required
+              aria-required="true"
             />
-            <AnimatePresence>
-              {error && (
-                <motion.p
-                  id="error-message"
-                  className="error-message"
-                  aria-live="assertive"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {error}
-                </motion.p>
-              )}
-            </AnimatePresence>
           </div>
 
-          {/* Submit Button */}
+          <div className="feedback-section" role="group" aria-label="Comment Section">
+            <label htmlFor="comment" className="feedback-label">Comment:</label>
+            <textarea
+              id="comment"
+              name="comment"
+              value={formData.comment}
+              onChange={handleChange}
+              placeholder="Share your thoughts..."
+              className="feedback-textarea"
+              rows="5"
+              required
+              aria-required="true"
+              disabled={loading}
+            />
+          </div>
+
+          <div className="feedback-section" role="group" aria-label="Tags Section">
+            <label htmlFor="tags" className="feedback-label">Tags (comma-separated, optional):</label>
+            <input
+              type="text"
+              id="tags"
+              name="tags"
+              value={formData.tags}
+              onChange={handleChange}
+              placeholder="e.g., accessibility, screen-reader"
+              className="feedback-textarea"
+              disabled={loading}
+              aria-describedby="tags-help"
+            />
+            <small id="tags-help" className="sr-only">Enter tags separated by commas, e.g., accessibility, screen-reader</small>
+          </div>
+
+          {error && <p className="error-message" role="alert">{error}</p>}
+          {success && <div className="submission-message" role="alert">{success}</div>}
+
           <button
             type="submit"
-            ref={submitButtonRef}
             className="submit-button"
-            aria-label="Send feedback"
+            disabled={loading}
+            aria-busy={loading ? 'true' : 'false'}
           >
-            Send Feedback
+            {loading ? 'Submitting...' : 'Submit Review'}
           </button>
         </form>
       </div>
-    </section>
+    </div>
   );
 };
 

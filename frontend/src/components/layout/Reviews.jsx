@@ -1,154 +1,100 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+// frontend/src/components/Reviews/Reviews.jsx
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import api from '@utils/api';
 import './Reviews.css';
 
 const Reviews = () => {
-  const reviews = [
-    {
-      name: "Sarah Johnson",
-      role: "Special Ed Teacher",
-      avatar: "https://i.pinimg.com/736x/71/5e/2b/715e2b633187ddc5d112d222eb61e78d.jpg",
-      text: "The assistive technology transforms how we evaluate and implement solutions in the classroom.",
-      stars: "★★★★★",
-    },
-    {
-      name: "Michael Chen",
-      role: "Technology Coordinator",
-      avatar: "https://i.pinimg.com/474x/ca/cf/05/cacf056d3112f30f8bac8d390a1ecb10.jpg",
-      text: "Comprehensive evaluation tools that make decision-making easier for our district.",
-      stars: "★★★★★",
-    },
-    {
-      name: "Emma Rodriguez",
-      role: "School Principal",
-      avatar: "https://i.pinimg.com/474x/c1/76/65/c17665ac17cb0f62ecf04084940cfef7.jpg",
-      text: "EduAbility has helped us create a more inclusive learning environment for our students.",
-      stars: "★★★★★",
-    },
-  ];
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const autoScrollInterval = useRef(null);
-  const AUTO_SCROLL_DELAY = 5000; // 5 seconds
-
-  // Auto-scroll logic
   useEffect(() => {
-    autoScrollInterval.current = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % reviews.length);
-    }, AUTO_SCROLL_DELAY);
+    const fetchReviews = async () => {
+      try {
+        const response = await api.get('/reviews');
+        setReviews(response.data.slice(0, 3)); // Limit to 3 recent reviews
+      } catch (err) {
+        setError('Failed to load reviews. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReviews();
+  }, []);
 
-    return () => clearInterval(autoScrollInterval.current);
-  }, [reviews.length]);
-
-  // Pause auto-scroll on hover
-  const handleMouseEnter = () => {
-    clearInterval(autoScrollInterval.current);
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+      },
+    },
   };
 
-  const handleMouseLeave = () => {
-    autoScrollInterval.current = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % reviews.length);
-    }, AUTO_SCROLL_DELAY);
-  };
-
-  // Navigation handlers
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? reviews.length - 1 : prevIndex - 1
-    );
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % reviews.length);
-  };
-
-  const handleDotClick = (index) => {
-    setCurrentIndex(index);
-  };
-
-  // Keyboard navigation
-  const handleKeyDown = (e) => {
-    if (e.key === 'ArrowLeft') {
-      handlePrev();
-    } else if (e.key === 'ArrowRight') {
-      handleNext();
-    }
+  const itemVariants = {
+    hidden: { y: 50, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 100, damping: 20 },
+    },
   };
 
   return (
-    <section className="reviews-section">
-      <div className="reviews-content">
-        <h2>Recent Technology Reviews</h2>
-        <div
-          className="reviews-carousel-wrapper"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
-          role="region"
-          aria-label="Reviews carousel"
+    <section className="reviews-section" aria-label="Recent Technology Reviews">
+      <h2 className="reviews-title">Recent Technology Reviews</h2>
+      {error && <p className="error-message" role="alert">{error}</p>}
+      {loading ? (
+        <p className="loading-message" role="alert">Loading reviews with grit...</p>
+      ) : (
+        <motion.div
+          className="reviews-container"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          style={{ padding: '0 1rem' }} // Inline padding to control internal spacing
         >
-          <button
-            className="carousel-arrow left-arrow"
-            onClick={handlePrev}
-            aria-label="Previous review"
-          >
-            <ChevronLeft />
-          </button>
-          <div className="reviews-carousel">
-            <div
-              className="reviews-grid"
-              style={{
-                transform: `translateX(-${currentIndex * 100}%)`,
-                transition: 'transform 0.5s ease-in-out',
-              }}
-            >
-              {reviews.map((review, index) => (
-                <div
-                  key={index}
-                  className="review-card"
-                  role="group"
-                  aria-label={`Review by ${review.name}`}
-                >
-                  <div className="review-header">
-                    <img
-                      src={review.avatar}
-                      alt={`${review.name}'s avatar`}
-                      className="review-avatar"
-                    />
-                    <div>
-                      <h4>{review.name}</h4>
-                      <p className="review-role">{review.role}</p>
-                      <div className="review-stars">{review.stars}</div>
-                    </div>
+          <AnimatePresence>
+            {reviews.map((review) => (
+              <motion.div
+                key={review._id}
+                className="review-card"
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+                whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="review-header">
+                  <div
+                    className="review-avatar"
+                    aria-hidden="true"
+                    style={{ background: 'linear-gradient(135deg, #6b21a8, #9333ea)' }} // Matching Figma purple gradient
+                  />
+                  <div>
+                    <h3 className="review-author">
+                      {review.userId?.email?.split('@')[0] || 'Anonymous'}
+                    </h3>
+                    <p className="review-role">Special Education Teacher</p>
                   </div>
-                  <p className="review-text">{`“${review.text}”`}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-          <button
-            className="carousel-arrow right-arrow"
-            onClick={handleNext}
-            aria-label="Next review"
-          >
-            <ChevronRight />
-          </button>
-        </div>
-        <div className="reviews-dots">
-          {reviews.map((_, index) => (
-            <span
-              key={index}
-              className={`dot ${currentIndex === index ? 'active' : ''}`}
-              onClick={() => handleDotClick(index)}
-              role="button"
-              tabIndex={0}
-              onKeyPress={(e) => e.key === 'Enter' && handleDotClick(index)}
-              aria-label={`Go to review ${index + 1}`}
-            ></span>
-          ))}
-        </div>
-      </div>
+                <div className="review-content">
+                  <p className="review-text">
+                    "{review.comment}" <span className="review-rating">{'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)} {review.rating}/5</span>
+                  </p>
+                  <p className="review-impact">
+                    This platform has transformed how I evaluate and implement assistive technology in my classroom!
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      )}
     </section>
   );
 };

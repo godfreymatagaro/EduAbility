@@ -113,18 +113,8 @@ const FeedbackForm = () => {
           </p>
 
           <div className="rating-section" role="group" aria-label="Technology Selection">
-            <label htmlFor="technology-search" className="rating-label">Search or Select Technology:</label>
-            <input
-              type="text"
-              id="technology-search"
-              name="technology-search"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              placeholder="Search technologies..."
-              className="feedback-textarea"
-              aria-controls="technology-list"
-              disabled={loading}
-            />
+            <label htmlFor="technology-search" className="rating-label">Select Technology:</label>
+            
             <select
               id="technology-select"
               name="technologyId"

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Moon, Sun, Menu, X } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import logo from '../../assets/images/logo.png';
 import useDarkMode from '../../hooks/useDarkMode';
 import './Navbar.css';
@@ -8,15 +9,42 @@ import './Navbar.css';
 const Navbar = () => {
   const [isDark, setIsDark] = useDarkMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [username, setUsername] = useState(null);
   const mobileMenuRef = useRef(null);
   const firstFocusableRef = useRef(null);
   const lastFocusableRef = useRef(null);
   const menuButtonRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleMobileLinkClick = () => {
     setIsMobileMenuOpen(false);
     menuButtonRef.current?.focus();
   };
+
+  useEffect(() => {
+    const checkUserSession = () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+          const currentTime = Math.floor(Date.now() / 1000);
+          if (tokenPayload.exp < currentTime) {
+            localStorage.removeItem('token');
+            setUsername(null);
+            toast.error('Session expired. Please log in again.');
+          } else {
+            setUsername(tokenPayload.username || 'User');
+          }
+        } catch (err) {
+          localStorage.removeItem('token');
+          setUsername(null);
+          toast.error('Invalid token. Please log in again.');
+        }
+      }
+    };
+
+    checkUserSession();
+  }, []);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -44,6 +72,13 @@ const Navbar = () => {
     console.log('Navbar: isDark=', isDark, 'HTML class=', document.documentElement.className);
   }, [isDark]);
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUsername(null);
+    toast.success('Logged out successfully!');
+    navigate('/login');
+  };
+
   return (
     <>
       <nav className="navbar" aria-label="Main navigation">
@@ -65,9 +100,18 @@ const Navbar = () => {
               <NavLink to="/feedback" className={({ isActive }) => (isActive ? 'active' : '')}>
                 Feedback
               </NavLink>
-              <NavLink to="/login" className="navbar-login-button">
-                Log in
-              </NavLink>
+              {username ? (
+                <>
+                  <span className="navbar-username">{username}</span>
+                  <button onClick={handleLogout} className="navbar-logout-button">
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <NavLink to="/login" className="navbar-login-button">
+                  Log in
+                </NavLink>
+              )}
             </div>
             <div className="navbar-controls">
               <button
@@ -127,14 +171,23 @@ const Navbar = () => {
         <NavLink to="/feedback" onClick={handleMobileLinkClick}>
           Feedback
         </NavLink>
-        <NavLink
-          to="/login"
-          onClick={handleMobileLinkClick}
-          ref={lastFocusableRef}
-          className="navbar-mobile-login-button"
-        >
-          Log in
-        </NavLink>
+        {username ? (
+          <>
+            <span className="navbar-mobile-username">{username}</span>
+            <button onClick={handleLogout} className="navbar-mobile-logout-button" ref={lastFocusableRef}>
+              Logout
+            </button>
+          </>
+        ) : (
+          <NavLink
+            to="/login"
+            onClick={handleMobileLinkClick}
+            ref={lastFocusableRef}
+            className="navbar-mobile-login-button"
+          >
+            Log in
+          </NavLink>
+        )}
       </div>
     </>
   );

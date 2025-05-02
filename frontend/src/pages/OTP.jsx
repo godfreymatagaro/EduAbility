@@ -18,13 +18,14 @@ const OTP = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-  }, [navigate]);
+  // Remove the token check useEffect since OTP is pre-token
+  // useEffect(() => {
+  //   const token = localStorage.getItem('token');
+  //   if (!token) {
+  //     navigate('/login');
+  //     return;
+  //   }
+  // }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -63,7 +63,7 @@ const Reviews = () => {
       <h2 className="reviews-title">Recent Technology Reviews</h2>
       {error && <p className="error-message" role="alert">{error}</p>}
       {loading ? (
-        <p className="loading-message" role="alert">Loading reviews with grit...</p>
+        <p className="loading-message" role="alert">Loading reviews...</p>
       ) : (
         <motion.div
           className="reviews-container"

@@ -2,6 +2,7 @@
 .feedback-section {
     background-color: #fafbfc;
     padding: 2rem 1rem;
+   
   }
   
   :where(.dark) .feedback-section {
@@ -32,6 +33,7 @@
   
   .feedback-form-container {
     max-width: 600px;
+ 
     margin: 0 auto;
     background-color: #ffffff;
     padding: 1.5rem;

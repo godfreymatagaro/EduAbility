@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Dash.css';
 
 const API_URL = import.meta.env.MODE === "production"
@@ -15,19 +16,46 @@ const Dash = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const checkSession = () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+        const role = tokenPayload.role;
+
+        if (role !== 'admin') {
+          navigate('/login');
+        } else {
+          setAuthLoading(false);
+        }
+      } catch (err) {
+        navigate('/login');
+      }
+    };
+
+    checkSession();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (authLoading) return;
+
     const fetchStats = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Note: Since there's no specific endpoint in the curl, we'll assume these are fetched from the technologies endpoint
         const response = await fetch(`${finalAPI_URL}/api/technologies`);
         if (!response.ok) {
           throw new Error(`Failed to fetch stats: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
-        // Mock calculation for stats (adjust based on actual API response)
         setStats({
           totalVisitors: 127, // Replace with actual data if available
           totalTechnologies: data.length,
@@ -41,25 +69,27 @@ const Dash = () => {
     };
 
     fetchStats();
-  }, []);
+  }, [authLoading]);
+
+  if (authLoading) return null;
 
   return (
     <section className="dashboard-section">
       <div className="dashboard-container">
         <h1 className="dashboard-title">DASHBOARD</h1>
         <div className="stats-wrapper">
-          <div className="stat-card">
+          <Link to="/admin-dash" className="stat-card">
             <h2>Total Visitors</h2>
             <p className="stat-number">{stats.totalVisitors}</p>
-          </div>
-          <div className="stat-card">
+          </Link>
+          <Link to="/admin-dash" className="stat-card">
             <h2>Total Technologies</h2>
             <p className="stat-number">{stats.totalTechnologies}</p>
-          </div>
-          <div className="stat-card">
+          </Link>
+          <Link to="/admin-dash" className="stat-card">
             <h2>Total Reviews</h2>
             <p className="stat-number">{stats.totalReviews}</p>
-          </div>
+          </Link>
         </div>
         {loading && <p className="loading-message">Loading...</p>}
         {error && <p className="error-message">Error: {error}</p>}

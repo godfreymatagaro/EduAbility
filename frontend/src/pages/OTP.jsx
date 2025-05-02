@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import './Auth.css';
@@ -18,6 +18,14 @@ const OTP = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+  }, [navigate]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -35,7 +43,7 @@ const OTP = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, userId }),
       });
 
       const data = await response.json();
@@ -45,8 +53,17 @@ const OTP = () => {
       }
 
       localStorage.setItem('token', data.token);
+
+      // Decode token to check role
+      const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
+      const role = tokenPayload.role;
+
+      if (role === 'admin') {
+        navigate('/dashboard');
+      } else {
+        navigate('/forbidden');
+      }
       toast.success('Login successful!');
-      navigate('/compare');
     } catch (err) {
       toast.error(err.message || 'An unexpected error occurred');
     } finally {

@@ -42,27 +42,32 @@ const AdminDash = () => {
     tech_img_link: '',
   });
   const [technologies, setTechnologies] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchTechnologies = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${finalAPI_URL}/api/technologies`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch technologies: ${response.status}`);
-        }
-        const data = await response.json();
-        setTechnologies(data);
+        const [techResponse, reviewResponse] = await Promise.all([
+          fetch(`${finalAPI_URL}/api/technologies`),
+          fetch(`${finalAPI_URL}/api/reviews`),
+        ]);
+        if (!techResponse.ok) throw new Error(`Failed to fetch technologies: ${techResponse.status}`);
+        if (!reviewResponse.ok) throw new Error(`Failed to fetch reviews: ${reviewResponse.status}`);
+        const techData = await techResponse.json();
+        const reviewData = await reviewResponse.json();
+        setTechnologies(techData);
+        setReviews(reviewData);
       } catch (err) {
-        toast.error(`Error fetching technologies: ${err.message}`);
+        toast.error(`Error fetching data: ${err.message}`);
       } finally {
         setLoading(false);
       }
     };
-    fetchTechnologies();
+    fetchData();
   }, []);
 
   const handleInputChange = (e) => {
@@ -123,11 +128,12 @@ const AdminDash = () => {
     if (!validateForm()) return;
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`${finalAPI_URL}/api/technologies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNzU1N2U4Yi0wMmYzLTQyYmQtYTkwNi1jZmU2NDk5NzdkMGYiLCJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDU5OTcyMDIsImV4cCI6MTc0NjA4MzYwMn0.hdUehWi1Z2U2GvZ9-IMulLOdOU6OLCUeQJ64FVmY_-0',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
@@ -175,12 +181,15 @@ const AdminDash = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDeleteTechnology = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this technology?')) return;
+
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`${finalAPI_URL}/api/technologies/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNzU1N2U4Yi0wMmYzLTQyYmQtYTkwNi1jZmU2NDk5NzdkMGYiLCJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDU5OTcyMDIsImV4cCI6MTc0NjA4MzYwMn0.hdUehWi1Z2U2GvZ9-IMulLOdOU6OLCUeQJ64FVmY_-0',
+          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -197,11 +206,40 @@ const AdminDash = () => {
     }
   };
 
+  const handleDeleteReview = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this review?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${finalAPI_URL}/api/reviews/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || `Failed to delete review: ${response.status}`);
+      }
+
+      setReviews((prev) => prev.filter((review) => review._id !== id));
+      toast.success('Review deleted successfully!');
+    } catch (err) {
+      toast.error(err.message || 'An unexpected error occurred');
+    }
+  };
+
   const filteredTechnologies = technologies.filter((tech) => {
     const matchesSearch = tech.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = filterCategory ? tech.category === filterCategory : true;
     return matchesSearch && matchesCategory;
   });
+
+  const filteredReviews = reviews.filter((review) =>
+    review.comment.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <section className="admin-dash-section">
@@ -659,7 +697,7 @@ const AdminDash = () => {
                       <td>
                         <button
                           className="delete-button"
-                          onClick={() => handleDelete(tech._id)}
+                          onClick={() => handleDeleteTechnology(tech._id)}
                           aria-label={`Delete ${tech.name}`}
                         >
                           <Trash2 className="delete-icon" />
@@ -676,7 +714,49 @@ const AdminDash = () => {
         {activeTab === 'manage-reviews' && (
           <div className="manage-reviews-section">
             <h2>Manage Reviews</h2>
-            <p>Review management functionality coming soon...</p>
+            <div className="table-header">
+              <div className="search-bar">
+                <Search className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search reviews..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+            {loading ? (
+              <p className="loading-message">Loading...</p>
+            ) : (
+              <table className="tech-table">
+                <thead>
+                  <tr>
+                    <th>Technology</th>
+                    <th>Rating</th>
+                    <th>Comment</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredReviews.map((review) => (
+                    <tr key={review._id}>
+                      <td>{technologies.find(tech => tech._id === review.technologyId)?.name || 'N/A'}</td>
+                      <td>{review.rating}</td>
+                      <td>{review.comment}</td>
+                      <td>
+                        <button
+                          className="delete-button"
+                          onClick={() => handleDeleteReview(review._id)}
+                          aria-label={`Delete review for ${review.comment}`}
+                        >
+                          <Trash2 className="delete-icon" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
       </div>

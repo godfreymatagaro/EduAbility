@@ -131,12 +131,12 @@
 }
 
 .search-clear:hover,
-.voice-button:hover {
+.voice-button:hover:not(:disabled) {
   background-color: #e2e8f0;
 }
 
 :where(.dark) .search-clear:hover,
-:where(.dark) .voice-button:hover {
+:where(.dark) .voice-button:hover:not(:disabled) {
   background-color: #4a5568;
 }
 
@@ -161,6 +161,34 @@
 
 .voice-button.listening svg {
   color: #ffffff;
+}
+
+.voice-button.speaking {
+  background-color: #d97706; /* Amber for paused state */
+  cursor: not-allowed;
+}
+
+:where(.dark) .voice-button.speaking {
+  background-color: #f59e0b;
+}
+
+.voice-button.speaking svg {
+  color: #ffffff;
+}
+
+.speech-status {
+  font-size: 1rem;
+  color: #1a202c;
+  padding: 0.5rem;
+  text-align: center;
+  margin-top: 0.5rem;
+  background-color: #e2e8f0;
+  border-radius: 0.5rem;
+}
+
+:where(.dark) .speech-status {
+  color: #e2e8f0;
+  background-color: #4a5568;
 }
 
 .search-modal {
@@ -390,6 +418,11 @@
     max-width: 100%;
   }
 
+  .speech-status {
+    font-size: 0.875rem;
+    padding: 0.25rem;
+  }
+
   .search-cards {
     flex-direction: column;
     align-items: center;
@@ -452,6 +485,11 @@
   .search-history-item {
     font-size: 0.875rem;
     padding: 0.5rem 0.75rem;
+  }
+
+  .speech-status {
+    font-size: 0.75rem;
+    padding: 0.25rem;
   }
 
   .search-card {

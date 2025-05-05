@@ -2,7 +2,33 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ChevronLeft, Star, X, Search, Award, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Radar, Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+} from 'chart.js';
 import './TechComparison.css';
+
+// Register Chart.js components
+ChartJS.register(
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale
+);
 
 // Determine the API URL based on the environment
 const API_URL =
@@ -22,6 +48,7 @@ const TechComparison = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sortCriterion, setSortCriterion] = useState('');
+  const [viewMode, setViewMode] = useState('table'); // table, radar, bar
   const [userPreferences, setUserPreferences] = useState({
     category: '',
     maxBudget: 1000,
@@ -195,6 +222,12 @@ const TechComparison = () => {
   // Sort criteria if a sort option is selected
   const techCriteria = sortCriterion
     ? [...techCriteriaBase].sort((a, b) => {
+        if (sortCriterion === 'heuristicScore') {
+          const scores = selectedTechs.map(tech => tech.heuristicScore || 0);
+          const avgA = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+          const avgB = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+          return avgB - avgA;
+        }
         const avgA = a.ratings.every(r => r) ? a.ratings.reduce((sum, r) => sum + r, 0) / a.ratings.length : 0;
         const avgB = b.ratings.every(r => r) ? b.ratings.reduce((sum, r) => sum + r, 0) / b.ratings.length : 0;
         return avgB - avgA;
@@ -232,6 +265,72 @@ const TechComparison = () => {
   const ratingComparison = averageRating !== 'N/A'
     ? (((averageRating - categoryAverage) / categoryAverage) * 100).toFixed(0)
     : 0;
+
+  // Chart Data for Radar Chart
+  const radarData = {
+    labels: ['Ease of Use', 'Features', 'Value for Money', 'Customer Support'],
+    datasets: selectedTechs.map((tech, index) => ({
+      label: tech.name,
+      data: [
+        parseFloat(tech.coreVitals?.easeOfUse || 0),
+        parseFloat(tech.coreVitals?.featuresRating || 0),
+        parseFloat(tech.coreVitals?.valueForMoney || 0),
+        parseFloat(tech.coreVitals?.customerSupport || 0),
+      ],
+      backgroundColor: `rgba(${index * 50 + 50}, ${index * 100 + 50}, ${index * 150 + 50}, 0.2)`,
+      borderColor: `rgba(${index * 50 + 50}, ${index * 100 + 50}, ${index * 150 + 50}, 1)`,
+      borderWidth: 1,
+    })),
+  };
+
+  const radarOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      r: {
+        min: 0,
+        max: 5,
+        ticks: { stepSize: 1 },
+      },
+    },
+    plugins: {
+      legend: { position: 'top' },
+      tooltip: { enabled: true },
+    },
+  };
+
+  // Chart Data for Bar Chart
+  const barData = {
+    labels: selectedTechs.map(tech => tech.name),
+    datasets: [
+      {
+        label: 'Heuristic Score',
+        data: selectedTechs.map(tech => tech.heuristicScore || 0),
+        backgroundColor: selectedTechs.map((_, index) => `rgba(${index * 50 + 50}, ${index * 100 + 50}, ${index * 150 + 50}, 0.6)`),
+        borderColor: selectedTechs.map((_, index) => `rgba(${index * 50 + 50}, ${index * 100 + 50}, ${index * 150 + 50}, 1)`),
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        title: { display: true, text: 'Score' },
+      },
+      x: {
+        title: { display: true, text: 'Technology' },
+      },
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: true },
+    },
+  };
 
   // Add Toast Notification
   const addToast = (message) => {
@@ -516,127 +615,150 @@ const TechComparison = () => {
           </motion.div>
         )}
 
-        {/* Detailed Comparison Table */}
+        {/* Visual Comparison Section */}
         {selectedTechs.length > 0 && (
           <motion.div
-            className="detailed-comparison"
+            className="visual-comparison"
             initial="hidden"
             animate="visible"
             variants={sectionVariants}
           >
-            <h2 id="detailed-comparison-heading">Detailed Comparison</h2>
-            <div className="sort-controls">
-              <label htmlFor="sort-criteria">Sort by:</label>
+            <h2 id="visual-comparison-heading">Visual Comparison</h2>
+            <div className="view-controls">
+              <label htmlFor="view-mode">View as:</label>
               <select
-                id="sort-criteria"
-                value={sortCriterion}
-                onChange={(e) => setSortCriterion(e.target.value)}
-                aria-label="Sort comparison criteria"
+                id="view-mode"
+                value={viewMode}
+                onChange={(e) => setViewMode(e.target.value)}
+                aria-label="Select visualization mode"
               >
-                <option value="">None</option>
-                {techCriteriaBase.map((criteria) => (
-                  <option key={criteria.criterion} value={criteria.criterion}>
-                    {criteria.criterion} (Highest)
-                  </option>
-                ))}
-                <option value="heuristicScore">Heuristic Score (Highest)</option>
+                <option value="table">Table</option>
+                <option value="radar">Radar Chart</option>
+                <option value="bar">Bar Chart</option>
               </select>
             </div>
-            <div className="table-wrapper">
-              <table className="comparison-table detailed-table" aria-labelledby="detailed-comparison-heading">
-                <thead>
-                  <tr>
-                    <th scope="col">Criteria</th>
-                    {selectedTechs.map((tech) => (
-                      <th key={tech._id} scope="col">
-                        {tech.name}
-                        {bestFitTech?._id === tech._id && (
-                          <span className="best-fit-badge">
-                            <Trophy className="badge-icon" aria-hidden="true" />
-                            Best Fit
-                          </span>
-                        )}
-                      </th>
-                    ))}
-                    <th scope="col">Average</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {techCriteria.map((criteria, index) => (
-                    <tr key={index}>
-                      <td>{criteria.criterion}</td>
-                      {criteria.ratings.map((rating, i) => (
-                        <td key={i}>
-                          {rating || 'N/A'} {rating ? <Star className="star-icon" aria-hidden="true" /> : null}
-                        </td>
+            {viewMode === 'table' && (
+              <>
+                {/* Detailed Comparison Table */}
+                <div className="detailed-comparison">
+                  <div className="sort-controls">
+                    <label htmlFor="sort-criteria">Sort by:</label>
+                    <select
+                      id="sort-criteria"
+                      value={sortCriterion}
+                      onChange={(e) => setSortCriterion(e.target.value)}
+                      aria-label="Sort comparison criteria"
+                    >
+                      <option value="">None</option>
+                      {techCriteriaBase.map((criteria) => (
+                        <option key={criteria.criterion} value={criteria.criterion}>
+                          {criteria.criterion} (Highest)
+                        </option>
                       ))}
-                      <td>
-                        {criteria.ratings.every((r) => r)
-                          ? (criteria.ratings.reduce((a, b) => a + b, 0) / criteria.ratings.length).toFixed(1)
-                          : 'N/A'}{' '}
-                        {criteria.ratings.every((r) => r) ? <Star className="star-icon" aria-hidden="true" /> : null}
-                      </td>
-                    </tr>
-                  ))}
-                  <tr>
-                    <td>Heuristic Score</td>
-                    {selectedTechs.map((tech, i) => (
-                      <td key={i}>
-                        {tech.heuristicScore?.toFixed(1) || 'N/A'}
-                      </td>
-                    ))}
-                    <td>{averageScore}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-        )}
+                      <option value="heuristicScore">Heuristic Score (Highest)</option>
+                    </select>
+                  </div>
+                  <div className="table-wrapper">
+                    <table className="comparison-table detailed-table" aria-labelledby="detailed-comparison-heading">
+                      <thead>
+                        <tr>
+                          <th scope="col">Criteria</th>
+                          {selectedTechs.map((tech) => (
+                            <th key={tech._id} scope="col">
+                              {tech.name}
+                              {bestFitTech?._id === tech._id && (
+                                <span className="best-fit-badge">
+                                  <Trophy className="badge-icon" aria-hidden="true" />
+                                  Best Fit
+                                </span>
+                              )}
+                            </th>
+                          ))}
+                          <th scope="col">Average</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {techCriteria.map((criteria, index) => (
+                          <tr key={index}>
+                            <td>{criteria.criterion}</td>
+                            {criteria.ratings.map((rating, i) => (
+                              <td key={i}>
+                                {rating || 'N/A'} {rating ? <Star className="star-icon" aria-hidden="true" /> : null}
+                              </td>
+                            ))}
+                            <td>
+                              {criteria.ratings.every((r) => r)
+                                ? (criteria.ratings.reduce((a, b) => a + b, 0) / criteria.ratings.length).toFixed(1)
+                                : 'N/A'}{' '}
+                              {criteria.ratings.every((r) => r) ? <Star className="star-icon" aria-hidden="true" /> : null}
+                            </td>
+                          </tr>
+                        ))}
+                        <tr>
+                          <td>Heuristic Score</td>
+                          {selectedTechs.map((tech, i) => (
+                            <td key={i}>
+                              {tech.heuristicScore?.toFixed(1) || 'N/A'}
+                            </td>
+                          ))}
+                          <td>{averageScore}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
-        {/* Feature Comparison Table */}
-        {selectedTechs.length > 0 && (
-          <motion.div
-            className="feature-comparison"
-            initial="hidden"
-            animate="visible"
-            variants={sectionVariants}
-          >
-            <h2 id="feature-comparison-heading">Feature Comparison</h2>
-            <div className="table-wrapper">
-              <table className="comparison-table feature-table" aria-labelledby="feature-comparison-heading">
-                <thead>
-                  <tr>
-                    <th scope="col">Feature</th>
-                    {selectedTechs.map((tech) => (
-                      <th key={tech._id} scope="col">
-                        {tech.name}
-                        {bestFitTech?._id === tech._id && (
-                          <span className="best-fit-badge">
-                            <Trophy className="badge-icon" aria-hidden="true" />
-                            Best Fit
-                          </span>
-                        )}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {featureComparison.map((feature, index) => (
-                    <tr key={index}>
-                      <td>{feature.feature}</td>
-                      {feature.available.map((avail, i) => (
-                        <td key={i}>
-                          <span
-                            className={`dot ${avail ? 'available' : 'unavailable'}`}
-                            aria-label={avail ? `${feature.feature} available` : `${feature.feature} unavailable`}
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                {/* Feature Comparison Table */}
+                <div className="feature-comparison">
+                  <h2 id="feature-comparison-heading">Feature Comparison</h2>
+                  <div className="table-wrapper">
+                    <table className="comparison-table feature-table" aria-labelledby="feature-comparison-heading">
+                      <thead>
+                        <tr>
+                          <th scope="col">Feature</th>
+                          {selectedTechs.map((tech) => (
+                            <th key={tech._id} scope="col">
+                              {tech.name}
+                              {bestFitTech?._id === tech._id && (
+                                <span className="best-fit-badge">
+                                  <Trophy className="badge-icon" aria-hidden="true" />
+                                  Best Fit
+                                </span>
+                              )}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {featureComparison.map((feature, index) => (
+                          <tr key={index}>
+                            <td>{feature.feature}</td>
+                            {feature.available.map((avail, i) => (
+                              <td key={i}>
+                                <span
+                                  className={`dot ${avail ? 'available' : 'unavailable'}`}
+                                  aria-label={avail ? `${feature.feature} available` : `${feature.feature} unavailable`}
+                                />
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
+            {viewMode === 'radar' && (
+              <div className="chart-container" role="figure" aria-label="Radar chart comparing core vitals">
+                <Radar data={radarData} options={radarOptions} />
+              </div>
+            )}
+            {viewMode === 'bar' && (
+              <div className="chart-container" role="figure" aria-label="Bar chart comparing heuristic scores">
+                <Bar data={barData} options={barOptions} />
+              </div>
+            )}
           </motion.div>
         )}
 

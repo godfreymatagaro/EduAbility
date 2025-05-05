@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import Button from '../common/Button';
 
-const Login = () => {
+const LoginForm = () => {
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,4 +45,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginForm;

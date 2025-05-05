@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ChevronLeft, Star, X, Search, Award } from 'lucide-react';
+import { ChevronLeft, Star, X, Search, Award, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './TechComparison.css';
 
@@ -22,12 +22,66 @@ const TechComparison = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sortCriterion, setSortCriterion] = useState('');
+  const [userPreferences, setUserPreferences] = useState({
+    category: '',
+    maxBudget: 1000,
+    priorityFeatures: [],
+  });
   const addMoreButtonRef = useRef(null);
   const modalRef = useRef(null);
   const firstFocusableElementRef = useRef(null);
   const lastFocusableElementRef = useRef(null);
 
-  // Fetch technologies and initialize selectedTechs from localStorage (simulated Redis cache)
+  // Heuristic scoring function
+  const calculateHeuristicScore = (tech, preferences) => {
+    let score = 0;
+
+    // CoreVitals scoring (40% of total score)
+    const coreVitals = tech.coreVitals || {};
+    const vitalWeights = {
+      easeOfUse: 0.4,
+      featuresRating: 0.3,
+      valueForMoney: 0.2,
+      customerSupport: 0.1,
+    };
+    let vitalScore = 0;
+    let vitalCount = 0;
+    Object.keys(vitalWeights).forEach((key) => {
+      const rating = parseFloat(coreVitals[key]) || 0;
+      if (rating > 0) {
+        vitalScore += rating * vitalWeights[key];
+        vitalCount++;
+      }
+    });
+    score += vitalCount > 0 ? (vitalScore / vitalCount) * 40 : 0;
+
+    // Feature availability scoring (30% of total score)
+    const featureComparison = tech.featureComparison || {};
+    const priorityFeatures = preferences.priorityFeatures || [];
+    let featureScore = 0;
+    const features = ['security', 'integration', 'support', 'userManagement', 'api', 'webhooks', 'community'];
+    features.forEach((feature) => {
+      if (featureComparison[feature]) {
+        featureScore += priorityFeatures.includes(feature) ? 2 : 1;
+      }
+    });
+    score += (featureScore / (features.length * 2)) * 30;
+
+    // Cost alignment scoring (20% of total score)
+    const cost = tech.cost === 'free' ? 0 : parseFloat(tech.price || 0);
+    const maxBudget = preferences.maxBudget || 1000;
+    const costScore = cost <= maxBudget ? 1 : Math.max(0, 1 - (cost - maxBudget) / maxBudget);
+    score += costScore * 20;
+
+    // Category relevance scoring (10% of total score)
+    const categoryMatch = preferences.category && tech.category?.toLowerCase() === preferences.category.toLowerCase();
+    score += categoryMatch ? 10 : 5;
+
+    // Normalize to 0-100
+    return Math.min(100, Math.max(0, score));
+  };
+
+  // Fetch technologies and initialize states
   useEffect(() => {
     const fetchTechnologies = async () => {
       setLoading(true);
@@ -45,11 +99,19 @@ const TechComparison = () => {
         const techs = Array.isArray(data) ? data : [];
         setTechnologies(techs);
 
-        // Load selected technologies from localStorage (simulated Redis cache)
+        // Load selected technologies from localStorage
         const cachedTechs = JSON.parse(localStorage.getItem('comparisonTechs')) || [];
         setSelectedTechs(cachedTechs);
 
-        // Update available technologies (exclude selected ones)
+        // Load user preferences from localStorage
+        const cachedPreferences = JSON.parse(localStorage.getItem('comparisonPreferences')) || {
+          category: '',
+          maxBudget: 1000,
+          priorityFeatures: [],
+        };
+        setUserPreferences(cachedPreferences);
+
+        // Update available technologies
         const available = techs.filter((tech) => !cachedTechs.some(t => t._id === tech._id));
         setAvailableTechs(available);
       } catch (err) {
@@ -65,7 +127,7 @@ const TechComparison = () => {
     fetchTechnologies();
   }, []);
 
-  // Fetch search results using /api/technology/search
+  // Handle search with heuristic filtering
   const handleSearch = async () => {
     if (searchQuery.trim()) {
       setLoading(true);
@@ -79,10 +141,17 @@ const TechComparison = () => {
         if (!contentType || !contentType.includes('application/json')) {
           throw new Error('Response is not JSON');
         }
-        const data = await response.json();
-        const searchResults = Array.isArray(data) ? data : [];
+        let data = await response.json();
+        data = Array.isArray(data) ? data : [];
+
+        // Apply heuristic scoring to search results
+        data = data.map(tech => ({
+          ...tech,
+          heuristicScore: calculateHeuristicScore(tech, userPreferences),
+        })).sort((a, b) => b.heuristicScore - a.heuristicScore);
+
         // Filter out already selected technologies
-        const filteredResults = searchResults.filter(
+        const filteredResults = data.filter(
           tech => !selectedTechs.some(t => t._id === tech._id)
         );
         setAvailableTechs(filteredResults);
@@ -93,20 +162,34 @@ const TechComparison = () => {
         setLoading(false);
       }
     } else {
-      // Reset to all available techs if search query is empty
-      const available = technologies.filter(
+      // Reset to all available techs with heuristic scores
+      const available = technologies.map(tech => ({
+        ...tech,
+        heuristicScore: calculateHeuristicScore(tech, userPreferences),
+      })).filter(
         tech => !selectedTechs.some(t => t._id === tech._id)
-      );
+      ).sort((a, b) => b.heuristicScore - a.heuristicScore);
       setAvailableTechs(available);
     }
   };
 
+  // Update user preferences and persist to localStorage
+  const updatePreferences = (newPreferences) => {
+    setUserPreferences(newPreferences);
+    localStorage.setItem('comparisonPreferences', JSON.stringify(newPreferences));
+    // Recalculate scores for available techs
+    setAvailableTechs(availableTechs.map(tech => ({
+      ...tech,
+      heuristicScore: calculateHeuristicScore(tech, newPreferences),
+    })).sort((a, b) => b.heuristicScore - a.heuristicScore));
+  };
+
   // Criteria for comparison based on coreVitals
   const techCriteriaBase = [
-    { criterion: 'Ease of Use', ratings: selectedTechs.map((tech) => tech.coreVitals?.easeOfUse || 0) },
-    { criterion: 'Features', ratings: selectedTechs.map((tech) => tech.coreVitals?.featuresRating || 0) },
-    { criterion: 'Value for Money', ratings: selectedTechs.map((tech) => tech.coreVitals?.valueForMoney || 0) },
-    { criterion: 'Customer Support', ratings: selectedTechs.map((tech) => tech.coreVitals?.customerSupport || 0) },
+    { criterion: 'Ease of Use', ratings: selectedTechs.map((tech) => parseFloat(tech.coreVitals?.easeOfUse || 0)) },
+    { criterion: 'Features', ratings: selectedTechs.map((tech) => parseFloat(tech.coreVitals?.featuresRating || 0)) },
+    { criterion: 'Value for Money', ratings: selectedTechs.map((tech) => parseFloat(tech.coreVitals?.valueForMoney || 0)) },
+    { criterion: 'Customer Support', ratings: selectedTechs.map((tech) => parseFloat(tech.coreVitals?.customerSupport || 0)) },
   ];
 
   // Sort criteria if a sort option is selected
@@ -114,7 +197,7 @@ const TechComparison = () => {
     ? [...techCriteriaBase].sort((a, b) => {
         const avgA = a.ratings.every(r => r) ? a.ratings.reduce((sum, r) => sum + r, 0) / a.ratings.length : 0;
         const avgB = b.ratings.every(r => r) ? b.ratings.reduce((sum, r) => sum + r, 0) / b.ratings.length : 0;
-        return avgB - avgA; // Sort descending by average
+        return avgB - avgA;
       })
     : techCriteriaBase;
 
@@ -131,16 +214,21 @@ const TechComparison = () => {
 
   // Calculate Summary Metrics
   const averageRating = selectedTechs.length > 0
-    ? (selectedTechs.reduce((sum, tech) => sum + (tech.coreVitals?.featuresRating || 0), 0) / selectedTechs.length).toFixed(1)
+    ? (selectedTechs.reduce((sum, tech) => sum + (parseFloat(tech.coreVitals?.featuresRating) || 0), 0) / selectedTechs.length).toFixed(1)
     : 'N/A';
   const priceRange = selectedTechs.length > 0
-    ? selectedTechs.map(tech => tech.cost || '$0').sort((a, b) => parseFloat(a.replace('$', '')) - parseFloat(b.replace('$', ''))).join(' - ')
+    ? selectedTechs.map(tech => tech.cost === 'free' ? '$0' : `$${tech.price || 0}`)
+        .sort((a, b) => parseFloat(a.replace('$', '')) - parseFloat(b.replace('$', '')))
+        .join(' - ')
     : '$0';
   const totalReviews = selectedTechs.length > 0
     ? selectedTechs.reduce((sum, tech) => sum + (tech.reviews?.length || 0), 0)
     : 0;
+  const averageScore = selectedTechs.length > 0
+    ? (selectedTechs.reduce((sum, tech) => sum + calculateHeuristicScore(tech, userPreferences), 0) / selectedTechs.length).toFixed(1)
+    : 'N/A';
 
-  const categoryAverage = 4.0; // Assume category average for comparison (can be fetched from API if available)
+  const categoryAverage = 4.0;
   const ratingComparison = averageRating !== 'N/A'
     ? (((averageRating - categoryAverage) / categoryAverage) * 100).toFixed(0)
     : 0;
@@ -160,14 +248,18 @@ const TechComparison = () => {
       setBadges((prev) => [...prev, 'explorer']);
       addToast('You’ve earned the Explorer Badge! 🏆');
     }
-  }, [selectedTechs, badges]);
+    if (averageScore >= 80 && selectedTechs.length >= 3 && !badges.includes('expert')) {
+      setBadges((prev) => [...prev, 'expert']);
+      addToast('You’ve earned the Expert Badge for high-scoring selections! 🏅');
+    }
+  }, [selectedTechs, averageScore, badges]);
 
   const handleAddTech = (tech) => {
     if (selectedTechs.length >= 5) {
       addToast('Maximum 5 technologies can be compared!');
       return;
     }
-    const updatedTechs = [...selectedTechs, tech];
+    const updatedTechs = [...selectedTechs, { ...tech, heuristicScore: calculateHeuristicScore(tech, userPreferences) }];
     setSelectedTechs(updatedTechs);
     localStorage.setItem('comparisonTechs', JSON.stringify(updatedTechs));
     setAvailableTechs(availableTechs.filter((t) => t._id !== tech._id));
@@ -181,7 +273,7 @@ const TechComparison = () => {
     const updatedTechs = selectedTechs.filter((tech) => tech._id !== id);
     setSelectedTechs(updatedTechs);
     localStorage.setItem('comparisonTechs', JSON.stringify(updatedTechs));
-    setAvailableTechs([...availableTechs, removedTech]);
+    setAvailableTechs([...availableTechs, { ...removedTech, heuristicScore: calculateHeuristicScore(removedTech, userPreferences) }]);
     addToast('Technology removed!');
   };
 
@@ -225,7 +317,7 @@ const TechComparison = () => {
     }
   };
 
-  // Framer Motion variants for modal
+  // Framer Motion variants
   const modalVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.3 } },
@@ -238,7 +330,6 @@ const TechComparison = () => {
     exit: { opacity: 0, scale: 0.9, transition: { duration: 0.3 } },
   };
 
-  // Framer Motion variants for other sections
   const sectionVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
@@ -257,6 +348,14 @@ const TechComparison = () => {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="error-message">Error: {error}</p>;
+
+  // Find the best-fit technology
+  const bestFitTech = selectedTechs.length > 0
+    ? selectedTechs.reduce((best, tech) => {
+        const score = calculateHeuristicScore(tech, userPreferences);
+        return score > (best.heuristicScore || 0) ? { ...tech, heuristicScore: score } : best;
+      }, {})
+    : null;
 
   return (
     <section className="tech-comparison-section" aria-label="Technology Comparison Section">
@@ -289,7 +388,7 @@ const TechComparison = () => {
           variants={sectionVariants}
         >
           <h1 id="comparison-title">Technology Comparison</h1>
-          <p>Compare features, pricing, and ratings across different technologies</p>
+          <p>Compare features, pricing, and ratings with AI-driven insights</p>
           <a href="/technologies" className="back-link" aria-label="Back to Technologies">
             <ChevronLeft className="back-icon" aria-hidden="true" />
             Back to Technologies
@@ -316,10 +415,16 @@ const TechComparison = () => {
                   exit={{ scale: 0.9, opacity: 0 }}
                   transition={{ duration: 0.3 }}
                   tabIndex={0}
-                  aria-label={`Selected technology: ${tech.name}`}
+                  aria-label={`Selected technology: ${tech.name}, Score: ${tech.heuristicScore?.toFixed(1) || 'N/A'}`}
                   onKeyDown={(e) => e.key === 'Enter' && handleRemoveTech(tech._id)}
                 >
                   <span>{tech.name}</span>
+                  {bestFitTech?._id === tech._id && (
+                    <span className="best-fit-badge">
+                      <Trophy className="badge-icon" aria-hidden="true" />
+                      Best Fit
+                    </span>
+                  )}
                   <button
                     className="remove-tech"
                     onClick={() => handleRemoveTech(tech._id)}
@@ -374,6 +479,11 @@ const TechComparison = () => {
                   <p>{totalReviews.toLocaleString()}</p>
                   <span>Across all platforms</span>
                 </div>
+                <div className="summary-item">
+                  <h3>Average Score</h3>
+                  <p>{averageScore}</p>
+                  <span>AI-driven heuristic score</span>
+                </div>
               </div>
               <div className="progress-section">
                 <p>You’ve compared {selectedTechs.length} out of 5 technologies!</p>
@@ -391,6 +501,12 @@ const TechComparison = () => {
                       <div className="badge" tabIndex={0} aria-label="Explorer Badge">
                         <Award className="badge-icon" aria-hidden="true" />
                         <span>Explorer</span>
+                      </div>
+                    )}
+                    {badges.includes('expert') && (
+                      <div className="badge" tabIndex={0} aria-label="Expert Badge">
+                        <Trophy className="badge-icon" aria-hidden="true" />
+                        <span>Expert</span>
                       </div>
                     )}
                   </div>
@@ -423,6 +539,7 @@ const TechComparison = () => {
                     {criteria.criterion} (Highest)
                   </option>
                 ))}
+                <option value="heuristicScore">Heuristic Score (Highest)</option>
               </select>
             </div>
             <div className="table-wrapper">
@@ -431,7 +548,15 @@ const TechComparison = () => {
                   <tr>
                     <th scope="col">Criteria</th>
                     {selectedTechs.map((tech) => (
-                      <th key={tech._id} scope="col">{tech.name}</th>
+                      <th key={tech._id} scope="col">
+                        {tech.name}
+                        {bestFitTech?._id === tech._id && (
+                          <span className="best-fit-badge">
+                            <Trophy className="badge-icon" aria-hidden="true" />
+                            Best Fit
+                          </span>
+                        )}
+                      </th>
                     ))}
                     <th scope="col">Average</th>
                   </tr>
@@ -453,6 +578,15 @@ const TechComparison = () => {
                       </td>
                     </tr>
                   ))}
+                  <tr>
+                    <td>Heuristic Score</td>
+                    {selectedTechs.map((tech, i) => (
+                      <td key={i}>
+                        {tech.heuristicScore?.toFixed(1) || 'N/A'}
+                      </td>
+                    ))}
+                    <td>{averageScore}</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -474,7 +608,15 @@ const TechComparison = () => {
                   <tr>
                     <th scope="col">Feature</th>
                     {selectedTechs.map((tech) => (
-                      <th key={tech._id} scope="col">{tech.name}</th>
+                      <th key={tech._id} scope="col">
+                        {tech.name}
+                        {bestFitTech?._id === tech._id && (
+                          <span className="best-fit-badge">
+                            <Trophy className="badge-icon" aria-hidden="true" />
+                            Best Fit
+                          </span>
+                        )}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -533,6 +675,54 @@ const TechComparison = () => {
                     aria-label="Search technologies to add"
                   />
                 </div>
+                <div className="preferences-section">
+                  <h4>Preferences</h4>
+                  <div className="preference-group">
+                    <label htmlFor="category-select">Disability Category:</label>
+                    <select
+                      id="category-select"
+                      value={userPreferences.category}
+                      onChange={(e) => updatePreferences({ ...userPreferences, category: e.target.value })}
+                      aria-label="Select disability category"
+                    >
+                      <option value="">Any</option>
+                      <option value="visual">Visual</option>
+                      <option value="auditory">Auditory</option>
+                      <option value="physical">Physical</option>
+                      <option value="cognitive">Cognitive</option>
+                    </select>
+                  </div>
+                  <div className="preference-group">
+                    <label htmlFor="budget-input">Max Budget ($):</label>
+                    <input
+                      id="budget-input"
+                      type="number"
+                      value={userPreferences.maxBudget}
+                      onChange={(e) => updatePreferences({ ...userPreferences, maxBudget: parseFloat(e.target.value) || 1000 })}
+                      min="0"
+                      aria-label="Maximum budget in dollars"
+                    />
+                  </div>
+                  <div className="preference-group">
+                    <h5>Priority Features:</h5>
+                    {['security', 'integration', 'support', 'userManagement', 'api', 'webhooks', 'community'].map((feature) => (
+                      <label key={feature}>
+                        <input
+                          type="checkbox"
+                          checked={userPreferences.priorityFeatures.includes(feature)}
+                          onChange={(e) => {
+                            const updatedFeatures = e.target.checked
+                              ? [...userPreferences.priorityFeatures, feature]
+                              : userPreferences.priorityFeatures.filter(f => f !== feature);
+                            updatePreferences({ ...userPreferences, priorityFeatures: updatedFeatures });
+                          }}
+                          aria-label={`Prioritize ${feature}`}
+                        />
+                        {feature.charAt(0).toUpperCase() + feature.slice(1)}
+                      </label>
+                    ))}
+                  </div>
+                </div>
                 <div className="tech-options" role="listbox" aria-label="Available Technologies">
                   {availableTechs.length === 0 && !loading && !error && (
                     <p>No available technologies to add.</p>
@@ -559,7 +749,7 @@ const TechComparison = () => {
                         <h4>{tech.name}</h4>
                         <p>
                           {tech.coreVitals?.featuresRating || 'N/A'} <Star className="star-icon" aria-hidden="true" /> •{' '}
-                          {tech.category || 'N/A'}
+                          {tech.category || 'N/A'} • Score: {tech.heuristicScore?.toFixed(1) || 'N/A'}
                         </p>
                       </div>
                       <button
@@ -605,4 +795,3 @@ const TechComparison = () => {
 };
 
 export default TechComparison;
-// fixed bug

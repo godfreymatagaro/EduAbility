@@ -1,4 +1,3 @@
-/* src/components/TechComparison.css */
 .tech-comparison-section {
     background-color: #fafbfc;
     padding: 2rem 1rem;
@@ -224,6 +223,28 @@
     outline-color: #27a145;
 }
 
+/* Best Fit Badge */
+.best-fit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: #22c55e;
+    color: #ffffff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+}
+
+:where(.dark) .best-fit-badge {
+    background-color: #4ade80;
+}
+
+.best-fit-badge .badge-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+}
+
 /* Summary Section */
 .summary-section {
     margin-bottom: 2rem;
@@ -261,7 +282,7 @@
 
 .summary-item {
     flex: 1;
-    min-width: 150px;
+    min-width: 120px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -299,13 +320,6 @@
 
 :where(.dark) .summary-item span {
     color: #e5e7eb;
-}
-
-.rating {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    color: #f59e0b;
 }
 
 .star-icon {
@@ -442,6 +456,7 @@
     position: sticky;
     top: 0;
     z-index: 1;
+    vertical-align: middle;
 }
 
 :where(.dark) .comparison-table th {
@@ -636,6 +651,82 @@
 
 :where(.dark) .search-bar input:focus {
     outline-color: #27a145;
+}
+
+/* Preferences Section */
+.preferences-section {
+    margin-bottom: 1rem;
+}
+
+.preferences-section h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #000000;
+    margin-bottom: 0.5rem;
+}
+
+:where(.dark) .preferences-section h4 {
+    color: #ffffff;
+}
+
+.preferences-section h5 {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #000000;
+    margin-bottom: 0.25rem;
+}
+
+:where(.dark) .preferences-section h5 {
+    color: #ffffff;
+}
+
+.preference-group {
+    margin-bottom: 0.5rem;
+}
+
+.preference-group label {
+    font-size: 0.875rem;
+    color: #374151;
+    margin-right: 0.5rem;
+}
+
+:where(.dark) .preference-group label {
+    color: #e5e7eb;
+}
+
+.preference-group select,
+.preference-group input[type="number"] {
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    color: #000000;
+    width: 100%;
+    max-width: 200px;
+}
+
+:where(.dark) .preference-group select,
+:where(.dark) .preference-group input[type="number"] {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #ffffff;
+}
+
+.preference-group select:focus,
+.preference-group input[type="number"]:focus {
+    outline: 3px solid #006bb8;
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+}
+
+:where(.dark) .preference-group select:focus,
+:where(.dark) .preference-group input[type="number"]:focus {
+    outline-color: #27a145;
+}
+
+.preference-group input[type="checkbox"] {
+    margin-right: 0.25rem;
 }
 
 .tech-options {
@@ -952,6 +1043,8 @@
     }
 
     .summary-item h3 {
+       
+
         font-size: 0.675rem;
     }
 
@@ -1011,5 +1104,10 @@
     .add-selected-button {
         padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
+    }
+
+    .preference-group select,
+    .preference-group input[type="number"] {
+        max-width: 150px;
     }
 }

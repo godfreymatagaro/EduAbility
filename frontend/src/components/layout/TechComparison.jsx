@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ChevronLeft, Star, X, Search, Award, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Radar, Bar } from 'react-chartjs-2';
+import { Radar, Bar, Pie, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   RadialLinearScale,
@@ -14,6 +14,7 @@ import {
   BarElement,
   CategoryScale,
   LinearScale,
+  ArcElement,
 } from 'chart.js';
 import './TechComparison.css';
 
@@ -27,7 +28,8 @@ ChartJS.register(
   Legend,
   BarElement,
   CategoryScale,
-  LinearScale
+  LinearScale,
+  ArcElement
 );
 
 // Determine the API URL based on the environment
@@ -48,7 +50,7 @@ const TechComparison = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sortCriterion, setSortCriterion] = useState('');
-  const [viewMode, setViewMode] = useState('table'); // table, radar, bar
+  const [viewMode, setViewMode] = useState('table'); // table, radar, bar, pie, line
   const [userPreferences, setUserPreferences] = useState({
     category: '',
     maxBudget: 1000,
@@ -266,8 +268,8 @@ const TechComparison = () => {
     ? (((averageRating - categoryAverage) / categoryAverage) * 100).toFixed(0)
     : 0;
 
-  // Predefined colors for radar chart
-  const radarColors = [
+  // Predefined colors for charts
+  const chartColors = [
     { background: 'rgba(54, 162, 235, 0.2)', border: 'rgba(54, 162, 235, 1)' }, // Blue
     { background: 'rgba(255, 99, 132, 0.2)', border: 'rgba(255, 99, 132, 1)' }, // Red
     { background: 'rgba(75, 192, 192, 0.2)', border: 'rgba(75, 192, 192, 1)' }, // Teal
@@ -286,8 +288,8 @@ const TechComparison = () => {
         parseFloat(tech.coreVitals?.valueForMoney || 0),
         parseFloat(tech.coreVitals?.customerSupport || 0),
       ],
-      backgroundColor: radarColors[index % radarColors.length].background,
-      borderColor: radarColors[index % radarColors.length].border,
+      backgroundColor: chartColors[index % chartColors.length].background,
+      borderColor: chartColors[index % chartColors.length].border,
       borderWidth: 1,
     })),
   };
@@ -315,15 +317,12 @@ const TechComparison = () => {
       {
         label: 'Heuristic Score',
         data: selectedTechs.map(tech => calculateHeuristicScore(tech, userPreferences) || 0),
-        backgroundColor: radarColors.map(color => color.background.replace('0.2', '0.6')),
-        borderColor: radarColors.map(color => color.border),
+        backgroundColor: chartColors.map(color => color.background.replace('0.2', '0.6')),
+        borderColor: chartColors.map(color => color.border),
         borderWidth: 1,
       },
     ],
   };
-
-  // Debug log for barData (remove in production)
-  console.log('barData:', barData);
 
   const barOptions = {
     responsive: true,
@@ -340,6 +339,74 @@ const TechComparison = () => {
     },
     plugins: {
       legend: { display: false },
+      tooltip: { enabled: true },
+    },
+  };
+
+  // Chart Data for Pie Chart
+  const pieData = {
+    labels: selectedTechs.map(tech => tech.name),
+    datasets: [
+      {
+        label: 'Heuristic Score',
+        data: selectedTechs.map(tech => calculateHeuristicScore(tech, userPreferences) || 0),
+        backgroundColor: chartColors.map(color => color.background.replace('0.2', '0.6')),
+        borderColor: chartColors.map(color => color.border),
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' },
+      tooltip: {
+        enabled: true,
+        callbacks: {
+          label: (context) => `${context.label}: ${context.parsed.toFixed(1)}`,
+        },
+      },
+    },
+  };
+
+  // Chart Data for Line Graph
+  const lineData = {
+    labels: ['Ease of Use', 'Features', 'Value for Money', 'Customer Support'],
+    datasets: selectedTechs.map((tech, index) => ({
+      label: tech.name,
+      data: [
+        parseFloat(tech.coreVitals?.easeOfUse || 0),
+        parseFloat(tech.coreVitals?.featuresRating || 0),
+        parseFloat(tech.coreVitals?.valueForMoney || 0),
+        parseFloat(tech.coreVitals?.customerSupport || 0),
+      ],
+      fill: false,
+      backgroundColor: chartColors[index % chartColors.length].border,
+      borderColor: chartColors[index % chartColors.length].border,
+      borderWidth: 2,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    })),
+  };
+
+  const lineOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 5,
+        title: { display: true, text: 'Rating' },
+        ticks: { stepSize: 1 },
+      },
+      x: {
+        title: { display: true, text: 'Criteria' },
+      },
+    },
+    plugins: {
+      legend: { position: 'top' },
       tooltip: { enabled: true },
     },
   };
@@ -542,7 +609,7 @@ const TechComparison = () => {
                     onKeyDown={(e) => e.key === 'Enter' && handleRemoveTech(tech._id)}
                     aria-label={`Remove ${tech.name} from comparison`}
                   >
-                    <X-hide="true" />
+                    <X className="remove-icon" aria-hidden="true" />
                   </button>
                 </motion.div>
               ))}
@@ -647,6 +714,8 @@ const TechComparison = () => {
                 <option value="table">Table</option>
                 <option value="radar">Radar Chart</option>
                 <option value="bar">Bar Chart</option>
+                <option value="pie">Pie Chart</option>
+                <option value="line">Line Graph</option>
               </select>
             </div>
             {viewMode === 'table' && (
@@ -769,6 +838,16 @@ const TechComparison = () => {
             {viewMode === 'bar' && (
               <div className="chart-container" role="figure" aria-label="Bar chart comparing heuristic scores">
                 <Bar data={barData} options={barOptions} />
+              </div>
+            )}
+            {viewMode === 'pie' && (
+              <div className="chart-container" role="figure" aria-label="Pie chart showing heuristic score distribution">
+                <Pie data={pieData} options={pieOptions} />
+              </div>
+            )}
+            {viewMode === 'line' && (
+              <div className="chart-container" role="figure" aria-label="Line graph comparing core vitals">
+                <Line data={lineData} options={lineOptions} />
               </div>
             )}
           </motion.div>

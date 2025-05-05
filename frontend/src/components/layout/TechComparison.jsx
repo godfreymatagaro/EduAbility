@@ -266,6 +266,15 @@ const TechComparison = () => {
     ? (((averageRating - categoryAverage) / categoryAverage) * 100).toFixed(0)
     : 0;
 
+  // Predefined colors for radar chart
+  const radarColors = [
+    { background: 'rgba(54, 162, 235, 0.2)', border: 'rgba(54, 162, 235, 1)' }, // Blue
+    { background: 'rgba(255, 99, 132, 0.2)', border: 'rgba(255, 99, 132, 1)' }, // Red
+    { background: 'rgba(75, 192, 192, 0.2)', border: 'rgba(75, 192, 192, 1)' }, // Teal
+    { background: 'rgba(153, 102, 255, 0.2)', border: 'rgba(153, 102, 255, 1)' }, // Purple
+    { background: 'rgba(255, 159, 64, 0.2)', border: 'rgba(255, 159, 64, 1)' }, // Orange
+  ];
+
   // Chart Data for Radar Chart
   const radarData = {
     labels: ['Ease of Use', 'Features', 'Value for Money', 'Customer Support'],
@@ -277,8 +286,8 @@ const TechComparison = () => {
         parseFloat(tech.coreVitals?.valueForMoney || 0),
         parseFloat(tech.coreVitals?.customerSupport || 0),
       ],
-      backgroundColor: `rgba(${index * 50 + 50}, ${index * 100 + 50}, ${index * 150 + 50}, 0.2)`,
-      borderColor: `rgba(${index * 50 + 50}, ${index * 100 + 50}, ${index * 150 + 50}, 1)`,
+      backgroundColor: radarColors[index % radarColors.length].background,
+      borderColor: radarColors[index % radarColors.length].border,
       borderWidth: 1,
     })),
   };
@@ -305,13 +314,16 @@ const TechComparison = () => {
     datasets: [
       {
         label: 'Heuristic Score',
-        data: selectedTechs.map(tech => tech.heuristicScore || 0),
-        backgroundColor: selectedTechs.map((_, index) => `rgba(${index * 50 + 50}, ${index * 100 + 50}, ${index * 150 + 50}, 0.6)`),
-        borderColor: selectedTechs.map((_, index) => `rgba(${index * 50 + 50}, ${index * 100 + 50}, ${index * 150 + 50}, 1)`),
+        data: selectedTechs.map(tech => calculateHeuristicScore(tech, userPreferences) || 0),
+        backgroundColor: radarColors.map(color => color.background.replace('0.2', '0.6')),
+        borderColor: radarColors.map(color => color.border),
         borderWidth: 1,
       },
     ],
   };
+
+  // Debug log for barData (remove in production)
+  console.log('barData:', barData);
 
   const barOptions = {
     responsive: true,
@@ -530,7 +542,7 @@ const TechComparison = () => {
                     onKeyDown={(e) => e.key === 'Enter' && handleRemoveTech(tech._id)}
                     aria-label={`Remove ${tech.name} from comparison`}
                   >
-                    <X className="remove-icon" aria-hidden="true" />
+                    <X-hide="true" />
                   </button>
                 </motion.div>
               ))}

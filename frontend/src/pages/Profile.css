@@ -1,8 +1,12 @@
 .profile-section {
-  background-color: #f5f7fa;
-  padding: 50px 20px;
+  background-color: #f9fafb; /* Light background for default */
+  padding: 2rem 1rem;
   min-height: 100vh;
-  text-align: left;
+  text-align: start;
+}
+
+:where(.dark) .profile-section {
+  background-color: #111827; /* Dark mode background */
 }
 
 .profile-container {
@@ -11,15 +15,19 @@
 }
 
 .profile-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: #1a202c;
-  margin-bottom: 30px;
-  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827; /* Dark text for light mode */
+  margin-bottom: 2rem;
+  text-align: start;
+}
+
+:where(.dark) .profile-title {
+  color: #ffffff; /* White for dark mode */
 }
 
 .profile-completion {
-  margin-bottom: 30px;
+  margin-bottom: 2rem;
   text-align: center;
 }
 
@@ -27,30 +35,47 @@
   width: 100%;
   max-width: 400px;
   height: 10px;
-  background-color: #e2e8f0;
+  background-color: #e5e7eb; /* Light gray for bar */
   border-radius: 5px;
   overflow: hidden;
-  margin: 0 auto 10px;
+  margin: 0 auto 0.5rem;
+}
+
+:where(.dark) .completion-bar {
+  background-color: #4b5563; /* Dark gray for bar */
 }
 
 .completion-progress {
   height: 100%;
-  background-color: #48bb78;
+  background-color: #2563eb; /* Blue for progress */
   transition: width 0.5s ease-in-out;
 }
 
+:where(.dark) .completion-progress {
+  background-color: #4a90e2; /* Lighter blue for dark mode */
+}
+
 .completion-text {
-  font-size: 16px;
-  color: #4a5568;
+  font-size: 1rem;
+  color: #4b5563; /* Medium gray for text */
   font-weight: 500;
 }
 
+:where(.dark) .completion-text {
+  color: #d1d5db; /* Light gray for dark mode */
+}
+
 .profile-card {
-  background-color: #ffffff;
-  border-radius: 16px;
-  padding: 40px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff; /* White background for card */
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow */
   animation: fadeIn 0.5s ease-in;
+}
+
+:where(.dark) .profile-card {
+  background-color: #1f2937; /* Dark background for card */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Darker shadow */
 }
 
 @keyframes fadeIn {
@@ -60,7 +85,7 @@
 
 .profile-avatar {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 2rem;
 }
 
 .avatar-image {
@@ -68,8 +93,12 @@
   height: 160px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #e2e8f0;
+  border: 4px solid #e5e7eb; /* Light gray border */
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+:where(.dark) .avatar-image {
+  border-color: #4b5563; /* Dark gray border */
 }
 
 .avatar-image:hover {
@@ -77,19 +106,29 @@
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
+:where(.dark) .avatar-image:hover {
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+}
+
 .avatar-placeholder {
   width: 160px;
   height: 160px;
   border-radius: 50%;
-  background-color: #edf2f7;
+  background-color: #e5e7eb; /* Light gray background */
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #718096;
-  font-size: 18px;
+  color: #4b5563; /* Medium gray text */
+  font-size: 1rem;
   font-weight: 500;
   margin: 0 auto;
-  border: 4px solid #e2e8f0;
+  border: 4px solid #e5e7eb; /* Light gray border */
+}
+
+:where(.dark) .avatar-placeholder {
+  background-color: #4b5563; /* Dark gray background */
+  color: #d1d5db; /* Light gray text */
+  border-color: #4b5563; /* Dark gray border */
 }
 
 .avatar-input {
@@ -98,53 +137,73 @@
 
 .avatar-upload-button {
   display: inline-block;
-  background-color: #4299e1;
+  background-color: #2563eb; /* Blue button */
   color: #ffffff;
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
   cursor: pointer;
-  margin-top: 20px;
-  font-size: 16px;
+  margin-top: 1rem;
+  font-size: 1rem;
   font-weight: 500;
   transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+:where(.dark) .avatar-upload-button {
+  background-color: #4a90e2; /* Lighter blue for dark mode */
 }
 
 .avatar-upload-button:hover {
-  background-color: #3182ce;
+  background-color: #1d4ed8; /* Darker blue on hover */
   transform: translateY(-2px);
 }
 
+:where(.dark) .avatar-upload-button:hover {
+  background-color: #93c5fd; /* Light blue on hover */
+}
+
 .avatar-submit-button {
-  background-color: #48bb78;
+  background-color: #2563eb; /* Blue button */
   color: #ffffff;
-  padding: 12px 24px;
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   cursor: pointer;
-  margin-left: 20px;
-  font-size: 16px;
+  margin-left: 1rem;
+  font-size: 1rem;
   font-weight: 500;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
+:where(.dark) .avatar-submit-button {
+  background-color: #4a90e2; /* Lighter blue for dark mode */
+}
+
 .avatar-submit-button:hover {
-  background-color: #38a169;
+  background-color: #1d4ed8; /* Darker blue on hover */
   transform: translateY(-2px);
 }
 
+:where(.dark) .avatar-submit-button:hover {
+  background-color: #93c5fd; /* Light blue on hover */
+}
+
 .profile-stats {
-  margin-bottom: 40px;
-  padding: 20px;
-  background-color: #f7fafc;
-  border-radius: 12px;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #f9fafb; /* Light gray background */
+  border-radius: 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1rem;
+}
+
+:where(.dark) .profile-stats {
+  background-color: #374151; /* Dark gray background */
 }
 
 .stat-item {
   display: flex;
-  gap: 20px;
+  gap: 1rem;
   animation: slideIn 0.5s ease-in forwards;
 }
 
@@ -154,167 +213,246 @@
 }
 
 .stat-label {
-  font-size: 16px;
-  font-weight: 600;
-  color: #4a5568;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827; /* Dark gray for labels */
   min-width: 120px;
 }
 
+:where(.dark) .stat-label {
+  color: #d1d5db; /* Light gray for dark mode */
+}
+
 .stat-value {
-  font-size: 18px;
-  color: #1a202c;
+  font-size: 1rem;
+  color: #111827; /* Dark text */
   font-weight: 500;
 }
 
+:where(.dark) .stat-value {
+  color: #d1d5db; /* Light gray for dark mode */
+}
+
 .profile-form {
-  padding: 20px;
-  background-color: #f7fafc;
-  border-radius: 12px;
+  padding: 1rem;
+  background-color: #ffffff; /* White background */
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+:where(.dark) .profile-form {
+  background-color: #1f2937; /* Dark background */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 25px;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a202c;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827; /* Dark gray for labels */
+}
+
+:where(.dark) .form-group label {
+  color: #d1d5db; /* Light gray for dark mode */
 }
 
 .form-group input,
 .form-group select {
-  padding: 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background-color: #ffffff;
-  color: #1a202c;
-  font-size: 16px;
-  font-family: Arial, sans-serif;
-  transition: border-color  AscendedBlockquote>0.3s ease, box-shadow 0.3s ease;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb; /* Light gray border */
+  border-radius: 0.5rem;
+  background-color: #f9fafb; /* Very light gray background */
+  color: #111827; /* Dark text */
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+}
+
+:where(.dark) .form-group input,
+:where(.dark) .form-group select {
+  background-color: #374151; /* Dark gray background */
+  border-color: #4b5563; /* Dark gray border */
+  color: #d1d5db; /* Light gray text */
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #4299e1;
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+  border-color: #2563eb; /* Blue border on focus */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+:where(.dark) .form-group input:focus,
+:where(.dark) .form-group select:focus {
+  border-color: #93c5fd; /* Light blue border on focus */
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
 }
 
 .form-group select:disabled {
-  background-color: #edf2f7;
+  background-color: #e5e7eb; /* Light gray for disabled */
   cursor: not-allowed;
+}
+
+:where(.dark) .form-group select:disabled {
+  background-color: #4b5563; /* Dark gray for disabled */
 }
 
 .form-actions {
   display: flex;
-  gap: 20px;
+  gap: 1rem;
   justify-content: center;
 }
 
 .submit-button,
 .cancel-button,
 .edit-button {
-  background-color: #4299e1;
+  background-color: #2563eb; /* Blue button */
   border: none;
-  border-radius: 8px;
-  padding: 14px 28px;
-  font-size: 16px;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #ffffff;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
+:where(.dark) .submit-button,
+:where(.dark) .cancel-button,
+:where(.dark) .edit-button {
+  background-color: #4a90e2; /* Lighter blue for dark mode */
+}
+
 .submit-button:hover,
 .cancel-button:hover,
 .edit-button:hover {
-  background-color: #3182ce;
+  background-color: #1d4ed8; /* Darker blue on hover */
   transform: translateY(-2px);
 }
 
+:where(.dark) .submit-button:hover,
+:where(.dark) .cancel-button:hover,
+:where(.dark) .edit-button:hover {
+  background-color: #93c5fd; /* Light blue on hover */
+}
+
 .cancel-button {
-  background-color: #718096;
+  background-color: #6b7280; /* Gray for cancel */
+}
+
+:where(.dark) .cancel-button {
+  background-color: #4b5563; /* Darker gray for dark mode */
 }
 
 .cancel-button:hover {
-  background-color: #5a6476;
+  background-color: #4b5563; /* Darker gray on hover */
+}
+
+:where(.dark) .cancel-button:hover {
+  background-color: #6b7280; /* Lighter gray on hover */
 }
 
 .profile-details {
-  padding: 20px;
-  background-color: #f7fafc;
-  border-radius: 12px;
+  padding: 1rem;
+  background-color: #f9fafb; /* Light gray background */
+  border-radius: 0.5rem;
+}
+
+:where(.dark) .profile-details {
+  background-color: #374151; /* Dark gray background */
 }
 
 .profile-field {
   display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 1rem;
+  margin-bottom: 1rem;
   animation: slideIn 0.5s ease-in forwards;
 }
 
 .profile-social {
   display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 1rem;
+  margin-bottom: 1rem;
   animation: slideIn 0.5s ease-in forwards;
 }
 
 .social-links {
   display: flex;
-  gap: 20px;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
 .social-link {
-  color: #4299e1;
-  font-size: 16px;
+  color: #2563eb; /* Blue for links */
+  font-size: 1rem;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
+:where(.dark) .social-link {
+  color: #93c5fd; /* Light blue for dark mode */
+}
+
 .social-link:hover {
-  color: #3182ce;
+  color: #1d4ed8; /* Darker blue on hover */
   text-decoration: underline;
 }
 
+:where(.dark) .social-link:hover {
+  color: #4a90e2; /* Lighter blue on hover */
+}
+
 .profile-label {
-  font-size: 16px;
-  font-weight: 600;
-  color: #4a5568;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827; /* Dark gray for labels */
   min-width: 120px;
 }
 
+:where(.dark) .profile-label {
+  color: #d1d5db; /* Light gray for dark mode */
+}
+
 .profile-value {
-  font-size: 18px;
-  color: #1a202c;
+  font-size: 1rem;
+  color: #111827; /* Dark text */
   font-weight: 500;
+}
+
+:where(.dark) .profile-value {
+  color: #d1d5db; /* Light gray for dark mode */
 }
 
 .profile-loading,
 .profile-error {
-  color: #718096;
+  color: #4b5563; /* Medium gray for text */
   text-align: center;
-  font-size: 18px;
-  margin-top: 50px;
+  font-size: 1rem;
+  margin-top: 2rem;
+}
+
+:where(.dark) .profile-loading,
+:where(.dark) .profile-error {
+  color: #d1d5db; /* Light gray for dark mode */
 }
 
 @media (max-width: 480px) {
   .profile-section {
-    padding: 30px 10px;
+    padding: 1rem 0.5rem;
   }
 
   .profile-title {
-    font-size: 24px;
+    font-size: 1.25rem;
   }
 
   .profile-card {
-    padding: 20px;
+    padding: 1rem;
   }
 
   .avatar-image,
@@ -329,29 +467,29 @@
   .avatar-upload-button,
   .avatar-submit-button {
     width: 100%;
-    padding: 12px;
-    font-size: 14px;
+    padding: 0.5rem;
+    font-size: 0.875rem;
   }
 
   .form-actions {
     flex-direction: column;
-    gap: 15px;
+    gap: 0.5rem;
   }
 
   .profile-stats,
   .profile-form,
   .profile-details {
-    padding: 15px;
+    padding: 0.5rem;
   }
 
   .stat-label,
   .profile-label {
     min-width: 100px;
-    font-size: 14px;
+    font-size: 0.75rem;
   }
 
   .stat-value,
   .profile-value {
-    font-size: 16px;
+    font-size: 0.875rem;
   }
 }

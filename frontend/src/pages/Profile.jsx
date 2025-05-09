@@ -171,9 +171,9 @@ const Profile = () => {
   if (error) return <div className="profile-error">{error}</div>;
 
   return (
-    <section className="profile-section">
+    <section className="profile-section dark">
       <div className="profile-container">
-        <h1 className="profile-title">Your Profile</h1>
+        <h1 className="profile-title">Profile</h1>
         
         <div className="profile-completion">
           <div className="completion-bar">

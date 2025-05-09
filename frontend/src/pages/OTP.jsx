@@ -62,7 +62,7 @@ const OTP = () => {
       if (role === 'admin') {
         navigate('/dashboard');
       } else {
-        navigate('/feedback');
+        navigate('/profile');
       }
       toast.success('Login successful!');
     } catch (err) {

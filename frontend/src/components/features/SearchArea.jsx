@@ -616,7 +616,7 @@ const SearchArea = () => {
                         {loading && <p>Loading...</p>}
                         {error && (
                           <p className="error-message" aria-live="assertive">
-                            Error: ${error}. Please try again.
+                            Error: {error}. Please try again.
                           </p>
                         )}
                         {!loading && !error && combinedResults.length === 0 && <p>No results found.</p>}
@@ -634,7 +634,7 @@ const SearchArea = () => {
                           >
                             <span>{result.source === 'database' ? result.name : result.title}</span>
                             {result.source === 'database' ? (
-                              <span className="result-category">(${result.category})</span>
+                              <span className="result-category">({result.category})</span>
                             ) : null}
                           </div>
                         ))}
@@ -656,7 +656,7 @@ const SearchArea = () => {
                           aria-selected={false}
                           ref={index === searchHistory.length - 1 ? lastFocusableRef : null}
                         >
-                          ${term}
+                          {term}
                         </div>
                       ))}
                     </div>

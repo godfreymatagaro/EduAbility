@@ -102,6 +102,81 @@
     outline-color: #4c8bf5;
 }
 
+/* Desktop Profile Link for Admins */
+.navbar-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1a202c;
+    text-decoration: none;
+    padding: 0.5rem;
+    transition: color 0.2s ease, outline 0.2s ease;
+}
+
+:where(.dark) .navbar-profile-link {
+    color: #e2e8f0;
+}
+
+.navbar-profile-link:hover {
+    color: #0052cc;
+}
+
+:where(.dark) .navbar-profile-link:hover {
+    color: #4c8bf5;
+}
+
+.navbar-profile-link:focus {
+    outline: 3px solid #0052cc;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+:where(.dark) .navbar-profile-link:focus {
+    outline-color: #4c8bf5;
+}
+
+.navbar-profile-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #1a202c;
+}
+
+:where(.dark) .navbar-profile-photo {
+    border-color: #e2e8f0;
+}
+
+/* Desktop Username Link for Regular Users */
+.navbar-username-link {
+    color: #1a202c;
+    text-decoration: none;
+    padding: 0.5rem;
+    transition: color 0.2s ease, outline 0.2s ease;
+}
+
+:where(.dark) .navbar-username-link {
+    color: #e2e8f0;
+}
+
+.navbar-username-link:hover {
+    color: #0052cc;
+}
+
+:where(.dark) .navbar-username-link:hover {
+    color: #4c8bf5;
+}
+
+.navbar-username-link:focus {
+    outline: 3px solid #0052cc;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+:where(.dark) .navbar-username-link:focus {
+    outline-color: #4c8bf5;
+}
+
 /* Desktop Log in button */
 .navbar-login-button {
     background-color: #2563eb;
@@ -320,6 +395,87 @@
     outline-color: #4c8bf5;
 }
 
+/* Mobile Profile Link for Admins */
+.navbar-mobile-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #1a202c;
+    text-decoration: none;
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 1.5rem 0;
+    padding: 0.75rem;
+    transition: color 0.2s ease, outline 0.2s ease;
+}
+
+:where(.dark) .navbar-mobile-profile-link {
+    color: #e2e8f0;
+}
+
+.navbar-mobile-profile-link:hover {
+    color: #0052cc;
+}
+
+:where(.dark) .navbar-mobile-profile-link:hover {
+    color: #4c8bf5;
+}
+
+.navbar-mobile-profile-link:focus {
+    outline: 3px solid #0052cc;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+:where(.dark) .navbar-mobile-profile-link:focus {
+    outline-color: #4c8bf5;
+}
+
+.navbar-mobile-profile-photo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #1a202c;
+}
+
+:where(.dark) .navbar-mobile-profile-photo {
+    border-color: #e2e8f0;
+}
+
+/* Mobile Username Link for Regular Users */
+.navbar-mobile-username-link {
+    color: #1a202c;
+    text-decoration: none;
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 1.5rem 0;
+    padding: 0.75rem;
+    transition: color 0.2s ease, outline 0.2s ease;
+}
+
+:where(.dark) .navbar-mobile-username-link {
+    color: #e2e8f0;
+}
+
+.navbar-mobile-username-link:hover {
+    color: #0052cc;
+}
+
+:where(.dark) .navbar-mobile-username-link:hover {
+    color: #4c8bf5;
+}
+
+.navbar-mobile-username-link:focus {
+    outline: 3px solid #0052cc;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+:where(.dark) .navbar-mobile-username-link:focus {
+    outline-color: #4c8bf5;
+}
+
 /* Mobile Username and Logout */
 .navbar-mobile-username {
     color: #1a202c;
@@ -468,6 +624,21 @@
         padding: 0.5rem;
     }
 
+    .navbar-mobile-profile-link {
+        font-size: 1.5rem;
+        padding: 0.5rem;
+    }
+
+    .navbar-mobile-profile-photo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .navbar-mobile-username-link {
+        font-size: 1.5rem;
+        padding: 0.5rem;
+    }
+
     .navbar-mobile-login-button {
         padding: 0.5rem 1rem;
     }
@@ -512,6 +683,21 @@
     }
 
     .navbar-mobile-menu a {
+        font-size: 1.25rem;
+        margin: 1rem 0;
+    }
+
+    .navbar-mobile-profile-link {
+        font-size: 1.25rem;
+        margin: 1rem 0;
+    }
+
+    .navbar-mobile-profile-photo {
+        width: 32px;
+        height: 32px;
+    }
+
+    .navbar-mobile-username-link {
         font-size: 1.25rem;
         margin: 1rem 0;
     }

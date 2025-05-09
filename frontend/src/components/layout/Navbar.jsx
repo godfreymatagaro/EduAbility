@@ -10,6 +10,7 @@ const Navbar = () => {
   const [isDark, setIsDark] = useDarkMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [username, setUsername] = useState(null);
+  const [userType, setUserType] = useState(null);
   const mobileMenuRef = useRef(null);
   const firstFocusableRef = useRef(null);
   const lastFocusableRef = useRef(null);
@@ -31,13 +32,16 @@ const Navbar = () => {
           if (tokenPayload.exp < currentTime) {
             localStorage.removeItem('token');
             setUsername(null);
+            setUserType(null);
             toast.error('Session expired. Please log in again.');
           } else {
             setUsername(tokenPayload.username || 'User');
+            setUserType(tokenPayload.userType || null);
           }
         } catch (err) {
           localStorage.removeItem('token');
           setUsername(null);
+          setUserType(null);
           toast.error('Invalid token. Please log in again.');
         }
       }
@@ -75,6 +79,7 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     setUsername(null);
+    setUserType(null);
     toast.success('Logged out successfully!');
     navigate('/login');
   };
@@ -102,7 +107,21 @@ const Navbar = () => {
               </NavLink>
               {username ? (
                 <>
-                  <span className="navbar-username">{username}</span>
+                  {userType === 'admin' && (
+                    <NavLink to="/dashboard" className="navbar-profile-link">
+                      <img
+                        src="https://via.placeholder.com/40"
+                        alt={`${username}'s profile photo`}
+                        className="navbar-profile-photo"
+                      />
+                      <span className="navbar-username">{username}</span>
+                    </NavLink>
+                  )}
+                  {userType !== 'admin' && (
+                    <NavLink to="/profile" className="navbar-username-link">
+                      <span className="navbar-username">{username}</span>
+                    </NavLink>
+                  )}
                   <button onClick={handleLogout} className="navbar-logout-button">
                     Logout
                   </button>
@@ -173,7 +192,21 @@ const Navbar = () => {
         </NavLink>
         {username ? (
           <>
-            <span className="navbar-mobile-username">{username}</span>
+            {userType === 'admin' && (
+              <NavLink to="/dashboard" onClick={handleMobileLinkClick} className="navbar-mobile-profile-link">
+                <img
+                  src="https://via.placeholder.com/40"
+                  alt={`${username}'s profile photo`}
+                  className="navbar-mobile-profile-photo"
+                />
+                <span className="navbar-mobile-username">{username}</span>
+              </NavLink>
+            )}
+            {userType !== 'admin' && (
+              <NavLink to="/profile" onClick={handleMobileLinkClick} className="navbar-mobile-username-link">
+                <span className="navbar-mobile-username">{username}</span>
+              </NavLink>
+            )}
             <button onClick={handleLogout} className="navbar-mobile-logout-button" ref={lastFocusableRef}>
               Logout
             </button>

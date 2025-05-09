@@ -1,0 +1,220 @@
+.profile-section {
+  background-color: #f9fafb;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+  text-align: start;
+}
+
+:where(.dark) .profile-section {
+  background-color: #111827;
+}
+
+.profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.profile-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  text-align: start;
+}
+
+:where(.dark) .profile-title {
+  color: #ffffff;
+}
+
+.profile-form {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+:where(.dark) .profile-form {
+  background-color: #1f2937;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  text-align: start;
+}
+
+:where(.dark) .form-group label {
+  color: #d1d5db;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  color: #111827;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+}
+
+:where(.dark) .form-group input,
+:where(.dark) .form-group select {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #d1d5db;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+:where(.dark) .form-group input:focus,
+:where(.dark) .form-group select:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.submit-button,
+.cancel-button,
+.edit-button {
+  background-color: #2563eb;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+:where(.dark) .submit-button,
+:where(.dark) .cancel-button,
+:where(.dark) .edit-button {
+  background-color: #4a90e2;
+}
+
+.submit-button:hover,
+.cancel-button:hover,
+.edit-button:hover {
+  background-color: #1d4ed8;
+}
+
+:where(.dark) .submit-button:hover,
+:where(.dark) .cancel-button:hover,
+:where(.dark) .edit-button:hover {
+  background-color: #93c5fd;
+}
+
+.cancel-button {
+  background-color: #6b7280;
+}
+
+:where(.dark) .cancel-button {
+  background-color: #4b5563;
+}
+
+.cancel-button:hover {
+  background-color: #4b5563;
+}
+
+:where(.dark) .cancel-button:hover {
+  background-color: #6b7280;
+}
+
+.profile-details {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+:where(.dark) .profile-details {
+  background-color: #1f2937;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.profile-field {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+  min-width: 80px;
+}
+
+:where(.dark) .profile-label {
+  color: #d1d5db;
+}
+
+.profile-value {
+  font-size: 1rem;
+  color: #111827;
+}
+
+:where(.dark) .profile-value {
+  color: #d1d5db;
+}
+
+.profile-loading,
+.profile-error {
+  color: #4b5563;
+  text-align: center;
+  font-size: 1rem;
+}
+
+:where(.dark) .profile-loading,
+:where(.dark) .profile-error {
+  color: #d1d5db;
+}
+
+@media (max-width: 480px) {
+  .profile-section {
+    padding: 1rem 0.5rem;
+  }
+
+  .profile-title {
+    font-size: 1.25rem;
+  }
+
+  .profile-form,
+  .profile-details {
+    padding: 1rem;
+  }
+
+  .submit-button,
+  .cancel-button,
+  .edit-button {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

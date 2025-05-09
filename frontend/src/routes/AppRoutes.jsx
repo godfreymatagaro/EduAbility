@@ -9,6 +9,7 @@ import Admin from '../pages/Admin';
 import Login from '../pages/Login';
 import OTP from '../pages/OTP';
 import Register from '../pages/Register';
+import Profile from '../pages/Profile';
 
 const AppRoutes = () => {
   return (
@@ -23,6 +24,7 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/otp/:userId" element={<OTP />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/profile" element={<Profile />} />
     </Routes>
   );
 };

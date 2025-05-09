@@ -162,13 +162,17 @@ const SearchArea = () => {
       .slice(0, 10);
   };
 
-  // Heuristic scoring for external results (Tavily) with bias toward disability-focused tools
+  // Heuristic scoring for external results (Tavily) with improved bias toward disability-focused tools
   const scoreExternalResults = (query, results) => {
     const normalizedQuery = query.toLowerCase();
     const queryTokens = normalizedQuery.split(/\s+/);
     const disabilityKeywords = [
       'disability', 'accessibility', 'assistive', 'blind', 'deaf', 'mobility',
-      'visual impairment', 'hearing impairment', 'screen reader', 'voice recognition'
+      'visual impairment', 'hearing impairment', 'screen reader', 'voice recognition',
+      'aira', 'envision glasses', 'proloquo2go', 'jaws', 'nvda', 'dragon naturallyspeaking',
+      'orcam myeye', 'sunu band', 'irisvision', 'esight', 'narrator', 'voiceover',
+      'talkback', 'braille display', 'zoomtext', 'glassouse', 'xander glasses', 'angelsense watch',
+      'tobiidynavox', 'bookshare', 'perkins brailler', 'nueyes', 'kalogon orbiter', 'be my eyes'
     ];
 
     return results.map(item => {
@@ -184,12 +188,16 @@ const SearchArea = () => {
       if (titleTokens.some(word => queryTokens.includes(word))) score += 0.2;
       if (contentTokens.some(word => queryTokens.includes(word))) score += 0.15;
 
-      // Bonus for disability-related keywords
+      // Enhanced bonus for disability-related keywords and specific tools
       const disabilityMatchesInTitle = disabilityKeywords.filter(keyword => title.includes(keyword)).length;
       const disabilityMatchesInContent = disabilityKeywords.filter(keyword => content.includes(keyword)).length;
-      score += (disabilityMatchesInTitle * 0.2) + (disabilityMatchesInContent * 0.1);
+      score += (disabilityMatchesInTitle * 0.25) + (disabilityMatchesInContent * 0.15);
 
-      return { ...item, score, source: 'external' };
+      // Boost for mentions of any assistive technology
+      const techMatches = disabilityKeywords.slice(10).filter(tech => title.includes(tech) || content.includes(tech));
+      score += techMatches.length * 0.3;
+
+      return { ...item, score, source: 'external', url: item.url };
     })
     .filter(item => item.score > 0)
     .sort((a, b) => b.score - a.score)
@@ -258,9 +266,11 @@ const SearchArea = () => {
         return;
       }
 
-      // Refine the query to focus on assistive technologies for disabilities
-      const refinedQuery = `${searchTerm} assistive technology for disabilities OR disability software OR accessibility tools`;
+      // Shortened query to fit within 400-character limit while maintaining relevance
+      const refinedQuery = `${searchTerm} assistive technology OR accessibility tools OR screen reader OR braille OR speech-to-text`;
       console.log('Fetching external results from Tavily for refined query:', refinedQuery);
+      console.log('Query length:', refinedQuery.length);
+
       try {
         const requestBody = {
           api_key: TAVILY_API_KEY,
@@ -606,7 +616,7 @@ const SearchArea = () => {
                         {loading && <p>Loading...</p>}
                         {error && (
                           <p className="error-message" aria-live="assertive">
-                            Error: {error}. Please try again.
+                            Error: ${error}. Please try again.
                           </p>
                         )}
                         {!loading && !error && combinedResults.length === 0 && <p>No results found.</p>}
@@ -620,13 +630,12 @@ const SearchArea = () => {
                             role="option"
                             aria-selected={false}
                             ref={index === combinedResults.length - 1 && !searchHistory.length ? lastFocusableRef : null}
+                            href={result.source === 'external' ? result.url : null}
                           >
                             <span>{result.source === 'database' ? result.name : result.title}</span>
                             {result.source === 'database' ? (
-                              <span className="result-category">({result.category})</span>
-                            ) : (
-                              <span className="result-source">[External]</span>
-                            )}
+                              <span className="result-category">(${result.category})</span>
+                            ) : null}
                           </div>
                         ))}
                       </div>
@@ -647,7 +656,7 @@ const SearchArea = () => {
                           aria-selected={false}
                           ref={index === searchHistory.length - 1 ? lastFocusableRef : null}
                         >
-                          {term}
+                          ${term}
                         </div>
                       ))}
                     </div>

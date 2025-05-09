@@ -510,3 +510,19 @@
     margin-bottom: 1rem;
   }
 }
+.result-source {
+  display: none; /* Hide the [External] label */
+}
+
+.search-result-item {
+  position: relative;
+}
+
+.search-result-item[href]:after {
+  content: ' 🌐'; /* Bright green globe emoji for external links */
+  color: #00ff00;
+  font-size: 1rem;
+  margin-left: 0.5rem;
+  position: absolute;
+  right: 0;
+}

@@ -10,6 +10,10 @@ const API_URL =
     ? import.meta.env.VITE_API_PROD_BACKEND_URL
     : import.meta.env.VITE_API_DEV_BACKEND_URL;
 
+// Tavily Search API URL and Key
+const TAVILY_API_URL = 'https://api.tavily.com/search';
+const TAVILY_API_KEY = import.meta.env.VITE_TAVILY_API_KEY;
+
 // Error Boundary Component
 class ErrorBoundary extends Component {
   state = { error: null };
@@ -31,6 +35,7 @@ class ErrorBoundary extends Component {
 const SearchArea = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [liveResults, setLiveResults] = useState([]);
+  const [externalResults, setExternalResults] = useState([]);
   const [searchHistory, setSearchHistory] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,6 +43,7 @@ const SearchArea = () => {
   const [speechStatus, setSpeechStatus] = useState('');
   const [listening, setListening] = useState(false);
   const [voices, setVoices] = useState([]);
+  const [darkMode, setDarkMode] = useState(true); // Toggle via app theme context
   const recognitionRef = useRef(null);
   const searchInputRef = useRef(null);
   const modalRef = useRef(null);
@@ -125,7 +131,7 @@ const SearchArea = () => {
     console.log('Search history loaded:', storedHistory);
   }, []);
 
-  // Heuristic search function
+  // Heuristic search function for database results
   const heuristicSearch = (query, dataset) => {
     if (!query.trim()) return [];
 
@@ -149,18 +155,53 @@ const SearchArea = () => {
         const tags = [item.category.toLowerCase(), ...keyFeatures];
         const tagMatches = tags.filter(tag => queryTokens.some(token => tag.includes(token)));
         score += tagMatches.length * 0.05;
-        return { ...item, score };
+        return { ...item, score, source: 'database' };
       })
       .filter(item => item.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
   };
 
+  // Heuristic scoring for external results (Tavily) with bias toward disability-focused tools
+  const scoreExternalResults = (query, results) => {
+    const normalizedQuery = query.toLowerCase();
+    const queryTokens = normalizedQuery.split(/\s+/);
+    const disabilityKeywords = [
+      'disability', 'accessibility', 'assistive', 'blind', 'deaf', 'mobility',
+      'visual impairment', 'hearing impairment', 'screen reader', 'voice recognition'
+    ];
+
+    return results.map(item => {
+      let score = 0;
+      const title = item.title.toLowerCase();
+      const content = item.content.toLowerCase();
+
+      // Base scoring
+      if (title.includes(normalizedQuery)) score += 0.4;
+      if (content.includes(normalizedQuery)) score += 0.3;
+      const titleTokens = title.split(/\s+/);
+      const contentTokens = content.split(/\s+/);
+      if (titleTokens.some(word => queryTokens.includes(word))) score += 0.2;
+      if (contentTokens.some(word => queryTokens.includes(word))) score += 0.15;
+
+      // Bonus for disability-related keywords
+      const disabilityMatchesInTitle = disabilityKeywords.filter(keyword => title.includes(keyword)).length;
+      const disabilityMatchesInContent = disabilityKeywords.filter(keyword => content.includes(keyword)).length;
+      score += (disabilityMatchesInTitle * 0.2) + (disabilityMatchesInContent * 0.1);
+
+      return { ...item, score, source: 'external' };
+    })
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+  };
+
   // Fetch real-time search results
   useEffect(() => {
-    const fetchResults = async () => {
+    const fetchDatabaseResults = async () => {
       if (!searchTerm.trim()) {
         setLiveResults([]);
+        setExternalResults([]);
         setLoading(false);
         console.log('Empty search term, cleared results');
         return;
@@ -168,25 +209,30 @@ const SearchArea = () => {
 
       setLoading(true);
       setError(null);
-      console.log('Fetching results for:', searchTerm, 'API_URL:', API_URL);
+      console.log('Fetching database results for:', searchTerm, 'API_URL:', API_URL);
       try {
         const response = await fetch(`${API_URL}/api/technologies/search?q=${encodeURIComponent(searchTerm)}`);
-        console.log('API response status:', response.status);
+        console.log('Database API response status:', response.status);
         if (!response.ok) {
-          throw new Error(`Failed to fetch results: ${response.status} ${response.statusText}`);
+          throw new Error(`Failed to fetch database results: ${response.status} ${response.statusText}`);
         }
         let data = await response.json();
-        console.log('Raw API data:', data);
+        console.log('Raw database API data:', data);
         data = Array.isArray(data) ? data : [];
         const scoredResults = heuristicSearch(searchTerm, data);
         setLiveResults(scoredResults);
-        console.log('Scored results:', scoredResults);
+        console.log('Scored database results:', scoredResults);
+
+        // Always fetch external results
+        console.log('Fetching external results');
+        await fetchExternalResults();
+
         if (voices.length > 0) {
           const voice = voices.find(v => v.lang === 'en-US') || voices[0];
           const utterance = new SpeechSynthesisUtterance(
             scoredResults.length > 0
-              ? `Found ${scoredResults.length} results. Top result: ${scoredResults[0].name}`
-              : 'No results found.'
+              ? `Found ${scoredResults.length} database results. Top result: ${scoredResults[0].name}`
+              : 'No database results found. Checking external sources.'
           );
           utterance.voice = voice;
           window.speechSynthesis.speak(utterance);
@@ -196,15 +242,81 @@ const SearchArea = () => {
       } catch (err) {
         setError(err.message);
         setLiveResults([]);
-        setSpeechStatus(`Search error: ${err.message}`);
-        console.error('Fetch error:', err);
+        setSpeechStatus(`Database search error: ${err.message}`);
+        console.error('Database fetch error:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchResults();
+    const fetchExternalResults = async () => {
+      console.log('Tavily API Key:', TAVILY_API_KEY);
+      if (!TAVILY_API_KEY) {
+        console.warn('Tavily API key not set. Skipping external search.');
+        setExternalResults([]);
+        setSpeechStatus('Tavily API key not set. Skipping external search.');
+        return;
+      }
+
+      // Refine the query to focus on assistive technologies for disabilities
+      const refinedQuery = `${searchTerm} assistive technology for disabilities OR disability software OR accessibility tools`;
+      console.log('Fetching external results from Tavily for refined query:', refinedQuery);
+      try {
+        const requestBody = {
+          api_key: TAVILY_API_KEY,
+          query: refinedQuery,
+          search_depth: 'basic',
+          include_answer: false,
+          include_images: false,
+          max_results: 5,
+        };
+        console.log('Tavily request body:', requestBody);
+
+        const response = await fetch(TAVILY_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        console.log('Tavily API response status:', response.status);
+        console.log('Tavily API response headers:', [...response.headers.entries()]);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to fetch external results: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log('Raw Tavily API data:', data);
+        const results = data.results || [];
+        const scoredExternal = scoreExternalResults(searchTerm, results);
+        setExternalResults(scoredExternal);
+        console.log('Scored external results:', scoredExternal);
+
+        if (voices.length > 0 && scoredExternal.length > 0) {
+          const voice = voices.find(v => v.lang === 'en-US') || voices[0];
+          const utterance = new SpeechSynthesisUtterance(
+            `Found ${scoredExternal.length} external results. Top external result: ${scoredExternal[0].title}`
+          );
+          utterance.voice = voice;
+          window.speechSynthesis.speak(utterance);
+        }
+      } catch (err) {
+        console.error('Tavily fetch error:', err);
+        setExternalResults([]);
+        setSpeechStatus(`External search error: ${err.message}`);
+      }
+    };
+
+    fetchDatabaseResults();
   }, [searchTerm, voices]);
+
+  // Combine results for display
+  const combinedResults = [...liveResults, ...externalResults]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
 
   // Handle click outside to close modal
   useEffect(() => {
@@ -256,6 +368,7 @@ const SearchArea = () => {
   const handleClear = () => {
     setSearchTerm('');
     setLiveResults([]);
+    setExternalResults([]);
     setIsModalOpen(false);
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -350,7 +463,7 @@ const SearchArea = () => {
         setSpeechStatus('No voices available for selection confirmation.');
       }
       console.log('Selected history item:', item);
-    } else {
+    } else if (item.source === 'database') {
       setSearchTerm(item.name);
       const updatedHistory = [item.name, ...searchHistory.filter(term => term !== item.name)].slice(0, 5);
       setSearchHistory(updatedHistory);
@@ -365,7 +478,24 @@ const SearchArea = () => {
       } else {
         setSpeechStatus('No voices available for navigation confirmation.');
       }
-      console.log('Selected result:', item.name);
+      console.log('Selected database result:', item.name);
+    } else {
+      // External result: Open in new tab
+      window.open(item.url, '_blank', 'noopener,noreferrer');
+      const updatedHistory = [item.title, ...searchHistory.filter(term => term !== item.title)].slice(0, 5);
+      setSearchTerm(item.title);
+      setSearchHistory(updatedHistory);
+      localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+      setIsModalOpen(false);
+      if (voices.length > 0) {
+        const voice = voices.find(v => v.lang === 'en-US') || voices[0];
+        const utterance = new SpeechSynthesisUtterance(`Opening external result: ${item.title}`);
+        utterance.voice = voice;
+        window.speechSynthesis.speak(utterance);
+      } else {
+        setSpeechStatus('No voices available for external navigation confirmation.');
+      }
+      console.log('Selected external result:', item.title);
     }
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -399,7 +529,7 @@ const SearchArea = () => {
 
   return (
     <ErrorBoundary>
-      <section className="search-section">
+      <section className={`search-section ${darkMode ? 'dark' : ''}`}>
         <div className="search-container">
           <motion.div className="search-bar-wrapper" initial="hidden" animate="visible" variants={searchBarVariants}>
             <div className="search-bar" role="search">
@@ -472,27 +602,31 @@ const SearchArea = () => {
                   <div className="search-modal-content" aria-live="polite">
                     {searchTerm && (
                       <div className="search-results-section">
-                        <h3>Results</h3>
+                        <h3>Search Results</h3>
                         {loading && <p>Loading...</p>}
                         {error && (
                           <p className="error-message" aria-live="assertive">
                             Error: {error}. Please try again.
                           </p>
                         )}
-                        {!loading && !error && liveResults.length === 0 && <p>No results found.</p>}
-                        {liveResults.map((result, index) => (
+                        {!loading && !error && combinedResults.length === 0 && <p>No results found.</p>}
+                        {combinedResults.map((result, index) => (
                           <div
-                            key={result._id}
+                            key={result._id || result.url}
                             className="search-result-item"
                             onClick={() => handleSelectItem(result)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSelectItem(result)}
                             tabIndex={0}
                             role="option"
                             aria-selected={false}
-                            ref={index === liveResults.length - 1 && !searchHistory.length ? lastFocusableRef : null}
+                            ref={index === combinedResults.length - 1 && !searchHistory.length ? lastFocusableRef : null}
                           >
-                            <span>{result.name}</span>
-                            <span className="result-category">({result.category})</span>
+                            <span>{result.source === 'database' ? result.name : result.title}</span>
+                            {result.source === 'database' ? (
+                              <span className="result-category">({result.category})</span>
+                            ) : (
+                              <span className="result-source">[External]</span>
+                            )}
                           </div>
                         ))}
                       </div>

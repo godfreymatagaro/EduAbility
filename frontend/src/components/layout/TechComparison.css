@@ -1226,3 +1226,51 @@
         height: 250px;
     }
 }
+
+/* Add to TechComparison.css */
+
+/* Header Links Container */
+.header-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Resources Link */
+.resources-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3182ce;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease, outline 0.2s ease;
+}
+
+:where(.dark) .resources-link {
+  color: #63b3ed;
+}
+
+.resources-link:hover {
+  color: #0052cc;
+  text-decoration: underline;
+}
+
+:where(.dark) .resources-link:hover {
+  color: #4c8bf5;
+}
+
+.resources-link:focus {
+  outline: 3px solid #0052cc;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+:where(.dark) .resources-link:focus {
+  outline-color: #4c8bf5;
+}
+
+.resources-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ChevronLeft, Star, X, Search, Award, Trophy } from 'lucide-react';
+import { ChevronLeft, Star, X, Search, Award, Trophy, Book } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Radar, Bar, Pie, Line } from 'react-chartjs-2';
 import {
@@ -567,10 +567,16 @@ const TechComparison = () => {
         >
           <h1 id="comparison-title">Technology Comparison</h1>
           <p>Compare features, pricing, and ratings with AI-driven insights</p>
-          <a href="/technologies" className="back-link" aria-label="Back to Technologies">
-            <ChevronLeft className="back-icon" aria-hidden="true" />
-            Back to Technologies
-          </a>
+          <div className="header-links">
+            <a href="/technologies" className="back-link" aria-label="Back to Technologies">
+              <ChevronLeft className="back-icon" aria-hidden="true" />
+              Back to Technologies
+            </a>
+            <a href="/resources" className="resources-link" aria-label="Go to Resources">
+              <Book className="resources-icon" aria-hidden="true" />
+              Resources
+            </a>
+          </div>
         </motion.div>
 
         {/* Selected Technologies */}

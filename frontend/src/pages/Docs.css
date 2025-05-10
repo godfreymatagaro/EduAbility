@@ -132,26 +132,3 @@ html, body {
 :where(.dark) .content-container pre {
   background-color: #2d3748;
 }
-
-/* Footer styles */
-footer {
-  width: 100%;
-  background-color: #f7fafc;
-  padding: 1rem 0;
-  text-align: center;
-  border-top: 2px solid #1a202c;
-}
-
-:where(.dark) footer {
-  background-color: #2d3748;
-  border-top-color: #e2e8f0;
-}
-
-footer p {
-  margin: 0;
-  color: #1a202c;
-}
-
-:where(.dark) footer p {
-  color: #e2e8f0;
-}

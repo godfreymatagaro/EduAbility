@@ -26,11 +26,11 @@ const Footer = () => {
         </div>
         <div className="footer-column">
           <h4>Support</h4>
-          {/* <ul>
-            <li><a href="/help">Help Center</a></li>
-            <li><a href="/contact">Contact Us</a></li>
-            <li><a href="/faq">FAQ</a></li>
-          </ul> */}
+          <ul>
+            
+            <li><a href="/feedback">Contact Us</a></li>
+            
+          </ul>
         </div>
         <div className="footer-column">
           <h4>Connect</h4>

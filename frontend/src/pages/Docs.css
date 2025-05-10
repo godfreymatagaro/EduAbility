@@ -1,6 +1,6 @@
 .platform-guide, .api-reference, .assistive-tech-docs {
   padding: 2rem;
-  max-width: 800px;
+  max-width: 100%;
   margin: 0 auto;
   background-color: #ffffff;
   border-bottom: 2px solid #1a202c;

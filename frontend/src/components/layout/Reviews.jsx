@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Twitter, Linkedin, Github } from 'lucide-react';
-import api from '@utils/api';
 import './Reviews.css';
+
+// Environment-based API URL (same as SearchArea and OTP)
+const API_URL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_API_PROD_BACKEND_URL
+    : import.meta.env.VITE_API_DEV_BACKEND_URL;
 
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -15,9 +20,18 @@ const Reviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await api.get('/reviews');
-        console.log('Reviews API response:', response.data); // Debug API response
-        setReviews(response.data); // Fetch all reviews
+        const response = await fetch(`${API_URL}/reviews`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch reviews: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        console.log('Reviews API response:', data); // Debug API response
+        setReviews(data); // Fetch all reviews
       } catch (err) {
         setError('Failed to load reviews. Please try again.');
         console.error('Reviews fetch error:', err);

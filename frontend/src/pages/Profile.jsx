@@ -46,7 +46,7 @@ const Profile = () => {
     const fetchUserProfile = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${finalAPI_URL}/api/auth/profile`, {
+        const response = await fetch(`${finalAPI_URL}/auth/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -101,7 +101,7 @@ const Profile = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${finalAPI_URL}/api/auth/avatar`, {
+      const response = await fetch(`${finalAPI_URL}/auth/avatar`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
@@ -124,7 +124,7 @@ const Profile = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${finalAPI_URL}/api/auth/profile`, {
+      const response = await fetch(`${finalAPI_URL}/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

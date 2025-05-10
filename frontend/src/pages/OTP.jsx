@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import './Auth.css';
 
-const API_URL = import.meta.env.MODE === "production"
-  ? import.meta.env.VITE_API_PROD_BACKEND_URL
-  : import.meta.env.VITE_API_DEV_BACKEND_URL;
-
-const finalAPI_URL = API_URL || (import.meta.env.MODE === "production" ? "https://eduability.onrender.com" : "http://localhost:3000");
+// Environment-based API URL (same as SearchArea)
+const API_URL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_API_PROD_BACKEND_URL
+    : import.meta.env.VITE_API_DEV_BACKEND_URL;
 
 const OTP = () => {
   const { userId } = useParams();
@@ -17,15 +17,6 @@ const OTP = () => {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  // Remove the token check useEffect since OTP is pre-token
-  // useEffect(() => {
-  //   const token = localStorage.getItem('token');
-  //   if (!token) {
-  //     navigate('/login');
-  //     return;
-  //   }
-  // }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -39,7 +30,7 @@ const OTP = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch(`${finalAPI_URL}api/auth/verify-otp`, {
+      const response = await fetch(`${API_URL}/auth/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

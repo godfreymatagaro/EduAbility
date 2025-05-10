@@ -1,8 +1,12 @@
-// frontend/src/components/FeedbackForm/FeedbackForm.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '@utils/api'; // Adjusted with alias from vite.config.js
 import './FeedbackForm.css';
+
+// Environment-based API URL (same as SearchArea, OTP, and Reviews)
+const API_URL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_API_PROD_BACKEND_URL
+    : import.meta.env.VITE_API_DEV_BACKEND_URL;
 
 const FeedbackForm = () => {
   const navigate = useNavigate();
@@ -23,14 +27,25 @@ const FeedbackForm = () => {
   useEffect(() => {
     const fetchTechnologies = async () => {
       try {
-        const response = await api.get('/technologies');
-        setTechnologies(response.data);
+        const response = await fetch(`${API_URL}/api/technologies`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` }), // Include token if available
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch technologies: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        setTechnologies(data);
       } catch (err) {
         setError('Failed to load technologies. Please try again.');
+        console.error('Technologies fetch error:', err);
       }
     };
     fetchTechnologies();
-  }, []);
+  }, [token]); // Add token to dependency array if auth is required
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,18 +90,23 @@ const FeedbackForm = () => {
 
     try {
       const tags = formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
-      const response = await api.post(
-        '/reviews',
-        {
+      const response = await fetch(`${API_URL}/api/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Include token for authentication
+        },
+        body: JSON.stringify({
           technologyId: formData.technologyId,
           rating: parseInt(formData.rating),
           comment: formData.comment,
           tags,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to submit review: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
 
       setSuccess('Review submitted successfully!');
       setFormData({ technologyId: '', rating: '', comment: '', tags: '' });

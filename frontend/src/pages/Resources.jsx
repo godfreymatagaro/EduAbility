@@ -67,17 +67,17 @@ const Resources = () => {
             <li>
               <a href="https://www.youtube.com/watch?v=3yD2uDajUFc" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Getting Started with Edu-Ability
-              </a> - Introduction to the platform with accessibility focus (realistic placeholder).
+              </a> - Introduction to the platform with accessibility focus .
             </li>
             <li>
               <a href="https://www.youtube.com/watch?v=8mXaxV9cHqg" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Assistive Tech Setup Guide
-              </a> - How to set up NVDA and VoiceOver (real assistive tech tutorial).
+              </a> - How to set up NVDA and VoiceOver .
             </li>
             <li>
-              <a href="https://www.youtube.com/watch?v=9bZkp7q19f0" target="_blank" rel="noopener noreferrer" className="resource-link">
+              <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Advanced Accessibility Features
-              </a> - Deep dive into assistive technology integration (real tutorial).
+              </a> - Deep dive into assistive technology integration.
             </li>
           </ul>
         </motion.div>

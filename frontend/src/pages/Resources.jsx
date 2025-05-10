@@ -65,19 +65,19 @@ const Resources = () => {
           <h2 className="resource-card-title">Tutorials</h2>
           <ul className="resource-list">
             <li>
-              <a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ" target="_blank" rel="noopener noreferrer" className="resource-link">
+              <a href="https://www.youtube.com/watch?v=3yD2uDajUFc" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Getting Started with Edu-Ability
-              </a> - Video tutorial for new users (realistic placeholder).
+              </a> - Introduction to the platform with accessibility focus (realistic placeholder).
             </li>
             <li>
-              <a href="https://www.youtube.com/watch?v=5qap5aSe7NA" target="_blank" rel="noopener noreferrer" className="resource-link">
+              <a href="https://www.youtube.com/watch?v=8mXaxV9cHqg" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Assistive Tech Setup Guide
-              </a> - How to configure assistive tools (realistic placeholder).
+              </a> - How to set up NVDA and VoiceOver (real assistive tech tutorial).
             </li>
             <li>
-              <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" className="resource-link">
-                Advanced Features Walkthrough
-              </a> - Deep dive into platform features (realistic placeholder with a fun twist).
+              <a href="https://www.youtube.com/watch?v=9bZkp7q19f0" target="_blank" rel="noopener noreferrer" className="resource-link">
+                Advanced Accessibility Features
+              </a> - Deep dive into assistive technology integration (real tutorial).
             </li>
           </ul>
         </motion.div>

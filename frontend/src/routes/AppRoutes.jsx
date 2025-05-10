@@ -11,6 +11,7 @@ import OTP from '../pages/OTP';
 import Register from '../pages/Register';
 import Profile from '../pages/Profile';
 import About from '../pages/About';
+import Resources from '../pages/Resources';
 
 const AppRoutes = () => {
   return (
@@ -27,6 +28,7 @@ const AppRoutes = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/about" element={<About />} />
+      <Route path="/resources" element={<Resources />} />
     </Routes>
   );
 };

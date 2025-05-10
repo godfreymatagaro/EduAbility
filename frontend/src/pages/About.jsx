@@ -24,8 +24,8 @@ const About = () => {
 
       <section className="about-contact" aria-labelledby="contact-heading">
         <h2 id="contact-heading">Contact Us</h2>
-        <p>Email: support@edu-ability.com</p>
-        <p>Phone: +1-800-555-1234</p>
+        <p>Email: vaishnaviratnalu@gmail.com</p>
+        <p>Phone: +44 7774 936061</p>
         <Button onClick={() => window.location.href = 'mailto:support@edu-ability.com'} label="Send Email" />
       </section>
     </div>

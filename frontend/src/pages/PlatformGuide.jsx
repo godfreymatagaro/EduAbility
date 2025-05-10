@@ -1,5 +1,6 @@
 import React from 'react';
 import './Docs.css';
+import Footer from '../components/layout/Footer';
 
 const PlatformGuide = () => {
   return (
@@ -89,10 +90,11 @@ const PlatformGuide = () => {
       <h2>7. Contact Support</h2>
       <p>For further assistance, reach out to our support team:</p>
       <ul>
-        <li><strong>Email:</strong> support@edu-ability.com</li>
-        <li><strong>Phone:</strong> +1-800-555-1234 (available 9 AM - 5 PM EST, Monday to Friday)</li>
-        <li><strong>Live Chat:</strong> Access live chat from the dashboard for immediate help.</li>
+        <li><strong>Email:</strong> vaishnaviratnalu@gmail.com</li>
+        <li><strong>Phone:</strong>  +44 7774 936061 (available 9 AM - 5 PM EST, Monday to Friday)</li>
+
       </ul>
+      <Footer />
     </div>
   );
 };

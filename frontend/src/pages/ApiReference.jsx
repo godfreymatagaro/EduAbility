@@ -1,5 +1,6 @@
 import React from 'react';
 import './Docs.css';
+import Footer from '../components/layout/Footer';
 
 const ApiReference = () => {
   return (
@@ -235,6 +236,7 @@ Accept: application/json`}
         <li><strong>Email:</strong> api-support@edu-ability.com</li>
         <li><strong>Documentation Updates:</strong> Check this page regularly for updates to endpoints and features.</li>
       </ul>
+      <Footer />
     </div>
   );
 };

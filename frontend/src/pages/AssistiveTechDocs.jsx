@@ -1,5 +1,6 @@
 import React from 'react';
 import './Docs.css';
+import Footer from '../components/layout/Footer';
 
 const AssistiveTechDocs = () => {
   return (
@@ -140,6 +141,7 @@ const AssistiveTechDocs = () => {
         <li><strong>Phone:</strong> +1-800-555-1234 (9 AM - 5 PM EST, Monday to Friday)</li>
         <li><strong>Feedback Form:</strong> Submit feedback directly via the platform.</li>
       </ul>
+      <Footer />
     </div>
   );
 };

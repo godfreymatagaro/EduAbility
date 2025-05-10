@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Book, Video, Users, FileText, Globe } from 'lucide-react';
 import './Resources.css';
+import Footer from '../components/layout/Footer';
 
 // Animation variants for smooth transitions
 const containerVariants = {
@@ -156,6 +157,7 @@ const Resources = () => {
           </ul>
         </motion.div>
       </motion.div>
+      <Footer />
     </section>
   );
 };

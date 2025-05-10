@@ -20,7 +20,7 @@ const Reviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await fetch(`${API_URL}api/reviews`, {
+        const response = await fetch(`${API_URL}/api/reviews`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

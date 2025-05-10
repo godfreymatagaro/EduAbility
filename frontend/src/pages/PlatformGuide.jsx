@@ -84,9 +84,9 @@ const PlatformGuide = () => {
           <h2>6. Troubleshooting</h2>
           <p>Encounter an issue? Try these steps:</p>
           <ul>
-            <li><strong>Login Problems:</strong> Ensure your email and password are correct. Use the "Forgot Password" link if needed.</li>
+            <li><strong>Login Problems:</strong> Ensure your email and password are correct. No need fo Password recovery as the Authentication process is swift throught OTP sent to your email" link if needed.</li>
             <li><strong>Page Not Loading:</strong> Refresh the page or check your internet connection. Contact support if the issue persists.</li>
-            <li><strong>Accessibility Issues:</strong> Report any accessibility concerns via the feedback form or email support@edu-ability.com.</li>
+            <li><strong>Accessibility Issues:</strong> Report any accessibility concerns via the feedback form or email vaishnaviratnalu@gmail.com.</li>
           </ul>
 
           <h2>7. Contact Support</h2>

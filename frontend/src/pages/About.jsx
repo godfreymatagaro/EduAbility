@@ -13,14 +13,14 @@ const About = () => {
         <Button onClick={() => alert('Learn more about our mission!')} label="Learn More" />
       </section>
 
-      <section className="about-team" aria-labelledby="team-heading">
+      {/* <section className="about-team" aria-labelledby="team-heading">
         <h2 id="team-heading">Our Team</h2>
         <ul>
           <li>Jane Doe - Lead Developer</li>
           <li>John Smith - Accessibility Specialist</li>
           <li>Emily Brown - UX Designer</li>
         </ul>
-      </section>
+      </section> */}
 
       <section className="about-contact" aria-labelledby="contact-heading">
         <h2 id="contact-heading">Contact Us</h2>

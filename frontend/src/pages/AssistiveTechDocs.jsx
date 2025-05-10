@@ -1,5 +1,5 @@
 import React from 'react';
-import './AssistiveTechDocs.css';
+import './Docs.css';
 
 const AssistiveTechDocs = () => {
   return (

@@ -157,8 +157,9 @@ const Resources = () => {
           </ul>
         </motion.div>
       </motion.div>
-      <Footer />
+      
     </section>
+    
   );
 };
 

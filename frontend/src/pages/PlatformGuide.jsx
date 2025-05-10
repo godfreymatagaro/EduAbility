@@ -16,17 +16,12 @@ const PlatformGuide = () => {
           <h2>2. Getting Started</h2>
           <h3>2.1 Account Creation and Login</h3>
           <ul>
-            <li><strong>Sign Up:</strong> Navigate to the homepage and click "Sign Up." Provide your email, create a password, and select your disability category (optional) to personalize your experience.</li>
-            <li><strong>Login:</strong> Use your email and password to log in. If you forget your password, use the "Forgot Password" link to reset it via email.</li>
+            <li><strong>Sign Up:</strong> Navigate to the homepage and click "Log In." </li>
+            <li><strong>Login:</strong> Use your email and password to log in.</li>
             <li><strong>Accessibility Tip:</strong> The login form is fully compatible with screen readers like NVDA and VoiceOver. Use the Tab key to navigate fields and Enter to submit.</li>
           </ul>
 
-          <h3>2.2 Exploring the Dashboard</h3>
-          <ul>
-            <li><strong>Overview:</strong> Upon logging in, you'll land on the dashboard, which displays featured technologies, recent reviews, and quick links to resources.</li>
-            <li><strong>Navigation:</strong> Use the sidebar to access sections like "Technologies," "Feedback," and "Resources." Keyboard users can press Tab to cycle through links.</li>
-            <li><strong>Personalization:</strong> Customize your dashboard by setting preferences for technology categories (e.g., visual, auditory) in your profile settings.</li>
-          </ul>
+         
 
           <h3>2.3 Submitting Feedback</h3>
           <ul>

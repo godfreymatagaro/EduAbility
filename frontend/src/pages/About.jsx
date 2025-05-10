@@ -1,13 +1,10 @@
 import React from 'react';
-import { useDarkMode } from '../hooks/useDarkMode';
-import Button from '../components/Button';
+import Button from '../components/common/Button';
 import './About.css';
 
 const About = () => {
-  const [isDarkMode] = useDarkMode();
-
   return (
-    <div className={`about-container ${isDarkMode ? 'dark-mode' : 'light-mode'}`} role="main" aria-label="About EduAbility Page">
+    <div className="about-container" role="main" aria-label="About EduAbility Page">
       <section className="about-mission" aria-labelledby="mission-heading">
         <h1 id="mission-heading">Our Mission</h1>
         <p>

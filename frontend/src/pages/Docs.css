@@ -1,59 +1,157 @@
-.platform-guide, .api-reference, .assistive-tech-docs {
+/* Reset default margins and ensure full-screen sections */
+html, body {
+  margin: 0;
   padding: 0;
-  max-width: 100%;
-  margin: 0 auto;
-  background-color: #ffffff;
-  border-bottom: 2px solid #1a202c;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  height: 100%;
   font-family: 'Inter', Helvetica, Arial, sans-serif;
 }
 
-:where(.dark) .platform-guide, :where(.dark) .api-reference, :where(.dark) .assistive-tech-docs {
+/* Wrapper for the entire page to ensure full height */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Main content area */
+.platform-guide, .api-reference, .assistive-tech-docs {
+  flex: 1; /* Ensures the main content takes up remaining space */
+  background-color: #ffffff; /* Light mode background */
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Dark mode for main content */
+:where(.dark) .platform-guide, 
+:where(.dark) .api-reference, 
+:where(.dark) .assistive-tech-docs {
   background-color: #1a202c;
-  border-bottom-color: #e2e8f0;
+}
+
+/* Container for centered content */
+.content-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: #1a202c;
+}
+
+/* Dark mode for content text */
+:where(.dark) .content-container {
   color: #e2e8f0;
 }
 
-.platform-guide h1, .api-reference h1, .assistive-tech-docs h1 {
-  font-size: 2rem;
+/* Headings */
+.content-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
   color: #1a202c;
+}
+
+:where(.dark) .content-container h1 {
+  color: #e2e8f0;
+}
+
+.content-container h2 {
+  font-size: 1.75rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #1a202c;
+}
+
+:where(.dark) .content-container h2 {
+  color: #e2e8f0;
+}
+
+.content-container h3 {
+  font-size: 1.25rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #1a202c;
+}
+
+:where(.dark) .content-container h3 {
+  color: #e2e8f0;
+}
+
+/* Paragraphs */
+.content-container p {
+  line-height: 1.6;
   margin-bottom: 1rem;
 }
 
-:where(.dark) .platform-guide h1, :where(.dark) .api-reference h1, :where(.dark) .assistive-tech-docs h1 {
-  color: #e2e8f0;
-}
-
-.platform-guide h2, .api-reference h2, .assistive-tech-docs h2 {
-  font-size: 1.5rem;
-  color: #1a202c;
-  margin-top: 1.5rem;
-}
-
-:where(.dark) .platform-guide h2, :where(.dark) .api-reference h2, :where(.dark) .assistive-tech-docs h2 {
-  color: #e2e8f0;
-}
-
-.platform-guide ul, .api-reference ul, .assistive-tech-docs ul {
-  list-style-type: disc;
+/* Lists */
+.content-container ul, 
+.content-container ol {
   padding-left: 2rem;
   margin: 1rem 0;
+  line-height: 1.6;
 }
 
-.platform-guide a, .api-reference a, .assistive-tech-docs a {
+.content-container ul {
+  list-style-type: disc;
+}
+
+.content-container ol {
+  list-style-type: decimal;
+}
+
+/* Nested lists */
+.content-container ul ul, 
+.content-container ol ul {
+  margin: 0.5rem 0;
+}
+
+/* Links */
+.content-container a {
   color: #3182ce;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
-:where(.dark) .platform-guide a, :where(.dark) .api-reference a, :where(.dark) .assistive-tech-docs a {
+:where(.dark) .content-container a {
   color: #63b3ed;
 }
 
-.platform-guide a:hover, .api-reference a:hover, .assistive-tech-docs a:hover {
+.content-container a:hover {
   color: #0052cc;
 }
 
-:where(.dark) .platform-guide a:hover, :where(.dark) .api-reference a:hover, :where(.dark) .assistive-tech-docs a:hover {
+:where(.dark) .content-container a:hover {
   color: #4c8bf5;
+}
+
+/* Code blocks */
+.content-container pre {
+  background-color: #f7fafc;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+:where(.dark) .content-container pre {
+  background-color: #2d3748;
+}
+
+/* Footer styles */
+footer {
+  width: 100%;
+  background-color: #f7fafc;
+  padding: 1rem 0;
+  text-align: center;
+  border-top: 2px solid #1a202c;
+}
+
+:where(.dark) footer {
+  background-color: #2d3748;
+  border-top-color: #e2e8f0;
+}
+
+footer p {
+  margin: 0;
+  color: #1a202c;
+}
+
+:where(.dark) footer p {
+  color: #e2e8f0;
 }

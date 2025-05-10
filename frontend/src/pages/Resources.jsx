@@ -66,17 +66,17 @@ const Resources = () => {
           <h2 className="resource-card-title">Tutorials</h2>
           <ul className="resource-list">
             <li>
-              <a href="https://www.youtube.com/watch?v=3yD2uDajUFc" target="_blank" rel="noopener noreferrer" className="resource-link">
+              <a href="https://youtu.be/SYP1HjJaeWY?si=_ujLXyCsTjBZOr48" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Getting Started with Edu-Ability
               </a> - Introduction to the platform with accessibility focus .
             </li>
             <li>
-              <a href="https://www.youtube.com/watch?v=8mXaxV9cHqg" target="_blank" rel="noopener noreferrer" className="resource-link">
+              <a href="https://youtu.be/h09RaEsRn6Q?si=hpRXVhf9K_6ojGpE" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Assistive Tech Setup Guide
               </a> - How to set up NVDA and VoiceOver .
             </li>
             <li>
-              <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" className="resource-link">
+              <a href="https://youtu.be/J3mi_g_DJhI?si=_Cl0Tl4s8XLDQXRe" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Advanced Accessibility Features
               </a> - Deep dive into assistive technology integration.
             </li>

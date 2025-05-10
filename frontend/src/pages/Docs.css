@@ -1,0 +1,59 @@
+.platform-guide, .api-reference, .assistive-tech-docs {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border-bottom: 2px solid #1a202c;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  font-family: 'Inter', Helvetica, Arial, sans-serif;
+}
+
+:where(.dark) .platform-guide, :where(.dark) .api-reference, :where(.dark) .assistive-tech-docs {
+  background-color: #1a202c;
+  border-bottom-color: #e2e8f0;
+  color: #e2e8f0;
+}
+
+.platform-guide h1, .api-reference h1, .assistive-tech-docs h1 {
+  font-size: 2rem;
+  color: #1a202c;
+  margin-bottom: 1rem;
+}
+
+:where(.dark) .platform-guide h1, :where(.dark) .api-reference h1, :where(.dark) .assistive-tech-docs h1 {
+  color: #e2e8f0;
+}
+
+.platform-guide h2, .api-reference h2, .assistive-tech-docs h2 {
+  font-size: 1.5rem;
+  color: #1a202c;
+  margin-top: 1.5rem;
+}
+
+:where(.dark) .platform-guide h2, :where(.dark) .api-reference h2, :where(.dark) .assistive-tech-docs h2 {
+  color: #e2e8f0;
+}
+
+.platform-guide ul, .api-reference ul, .assistive-tech-docs ul {
+  list-style-type: disc;
+  padding-left: 2rem;
+  margin: 1rem 0;
+}
+
+.platform-guide a, .api-reference a, .assistive-tech-docs a {
+  color: #3182ce;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+:where(.dark) .platform-guide a, :where(.dark) .api-reference a, :where(.dark) .assistive-tech-docs a {
+  color: #63b3ed;
+}
+
+.platform-guide a:hover, .api-reference a:hover, .assistive-tech-docs a:hover {
+  color: #0052cc;
+}
+
+:where(.dark) .platform-guide a:hover, :where(.dark) .api-reference a:hover, :where(.dark) .assistive-tech-docs a:hover {
+  color: #4c8bf5;
+}

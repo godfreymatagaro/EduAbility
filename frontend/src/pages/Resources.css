@@ -1,25 +1,39 @@
+/* Utility for screen reader-only content */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* Resources styles */
 .resources-section {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  border-bottom: 2px solid #1a202c;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  font-family: 'Inter', Helvetica, Arial, sans-serif;
 }
 
-.resources-section.dark {
+:where(.dark) .resources-section {
   background-color: #1a202c;
-  color: #e2e8f0;
+  border-bottom-color: #e2e8f0;
 }
 
 .resources-title {
   font-size: 2.5rem;
   text-align: center;
   margin-bottom: 1rem;
-  color: #2d3748;
+  color: #1a202c;
 }
 
-.resources-section.dark .resources-title {
+:where(.dark) .resources-title {
   color: #e2e8f0;
 }
 
@@ -30,7 +44,7 @@
   margin-bottom: 2rem;
 }
 
-.resources-section.dark .resources-subtitle {
+:where(.dark) .resources-subtitle {
   color: #a0aec0;
 }
 
@@ -41,14 +55,14 @@
 }
 
 .resource-card {
-  background: white;
+  background: #ffffff;
   padding: 1.5rem;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
 }
 
-.resources-section.dark .resource-card {
+:where(.dark) .resource-card {
   background: #2d3748;
   border-color: #4a5568;
 }
@@ -58,17 +72,17 @@
   color: #4a5568;
 }
 
-.resources-section.dark .resource-icon {
+:where(.dark) .resource-icon {
   color: #a0aec0;
 }
 
 .resource-card-title {
   font-size: 1.5rem;
   margin-bottom: 1rem;
-  color: #2d3748;
+  color: #1a202c;
 }
 
-.resources-section.dark .resource-card-title {
+:where(.dark) .resource-card-title {
   color: #e2e8f0;
 }
 
@@ -83,20 +97,30 @@
   font-size: 1rem;
   display: block;
   margin: 0.5rem 0;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease, outline 0.2s ease;
 }
 
-.resource-link:hover {
-  color: #2b6cb0;
-  text-decoration: underline;
-}
-
-.resources-section.dark .resource-link {
+:where(.dark) .resource-link {
   color: #63b3ed;
 }
 
-.resources-section.dark .resource-link:hover {
-  color: #4299e1;
+.resource-link:hover {
+  color: #0052cc;
+  text-decoration: underline;
+}
+
+:where(.dark) .resource-link:hover {
+  color: #4c8bf5;
+}
+
+.resource-link:focus {
+  outline: 3px solid #0052cc;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+:where(.dark) .resource-link:focus {
+  outline-color: #4c8bf5;
 }
 
 @media (max-width: 768px) {

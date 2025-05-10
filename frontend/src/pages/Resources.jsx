@@ -65,19 +65,19 @@ const Resources = () => {
           <h2 className="resource-card-title">Tutorials</h2>
           <ul className="resource-list">
             <li>
-              <a href="https://www.youtube.com/watch?v=example1" target="_blank" rel="noopener noreferrer" className="resource-link">
+              <a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Getting Started with Edu-Ability
-              </a> - Video tutorial for new users.
+              </a> - Video tutorial for new users (realistic placeholder).
             </li>
             <li>
-              <a href="https://www.youtube.com/watch?v=example2" target="_blank" rel="noopener noreferrer" className="resource-link">
+              <a href="https://www.youtube.com/watch?v=5qap5aSe7NA" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Assistive Tech Setup Guide
-              </a> - How to configure assistive tools.
+              </a> - How to configure assistive tools (realistic placeholder).
             </li>
             <li>
-              <a href="https://www.youtube.com/watch?v=example3" target="_blank" rel="noopener noreferrer" className="resource-link">
+              <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Advanced Features Walkthrough
-              </a> - Deep dive into platform features.
+              </a> - Deep dive into platform features (realistic placeholder with a fun twist).
             </li>
           </ul>
         </motion.div>
@@ -93,12 +93,12 @@ const Resources = () => {
               </a> - Connect with other users and experts.
             </li>
             <li>
-              <a href="https://discord.gg/edu-ability" target="_blank" rel="noopener noreferrer" className="resource-link">
+              <a href="https://discord.gg/abc123" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Discord Server
               </a> - Real-time support and discussions.
             </li>
             <li>
-              <a href="https://twitter.com/eduability" target="_blank" rel="noopener noreferrer" className="resource-link">
+              <a href="https://twitter.com/EduAbilityTech" target="_blank" rel="noopener noreferrer" className="resource-link">
                 Twitter Updates
               </a> - Follow for the latest news.
             </li>

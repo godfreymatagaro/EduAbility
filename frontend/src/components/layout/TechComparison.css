@@ -681,9 +681,7 @@
     border-radius: 8px;
 }
 
-:where(. 🙂
-
-dark) .search-bar input:focus {
+:where(dark) .search-bar input:focus {
     outline-color: #27a145;
 }
 

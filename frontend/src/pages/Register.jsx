@@ -14,7 +14,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'user',
+    role: 'user', // Default role, not visible in UI
     hasDisability: false,
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -43,10 +43,6 @@ const Register = () => {
     }
     if (!formData.password || formData.password.length < 6) {
       setNotification({ message: 'Password must be at least 6 characters', type: 'error' });
-      return;
-    }
-    if (!['user', 'admin'].includes(formData.role)) {
-      setNotification({ message: 'Invalid role selected', type: 'error' });
       return;
     }
 
@@ -99,10 +95,11 @@ const Register = () => {
         />
       )}
       <div className="auth-container">
-        <h1 id="register-title" className="auth-title">Create Your Account</h1>
+        <h1 id="register-title" className="auth-title">Sign Up</h1>
+        <p className="auth-description">Create an account to get started</p>
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="form-group">
-            <label htmlFor="email">Email Address *</label>
+            <label htmlFor="email">Email Address</label>
             <input
               type="email"
               id="email"
@@ -117,7 +114,7 @@ const Register = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password *</label>
+            <label htmlFor="password">Password</label>
             <div className="password-wrapper">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -130,29 +127,17 @@ const Register = () => {
                 aria-required="true"
                 aria-label="Password"
                 autoComplete="new-password"
+                className="password-input"
               />
               <button
                 type="button"
-                className="password-toggle inside-input"
+                className="password-toggle"
                 onClick={togglePasswordVisibility}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                {showPassword ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
               </button>
             </div>
-          </div>
-          <div className="form-group">
-            <label htmlFor="role">Role</label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleInputChange}
-              aria-label="Select user role"
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
           </div>
           <div className="form-group checkbox-group">
             <label htmlFor="hasDisability">
@@ -164,7 +149,7 @@ const Register = () => {
                 onChange={handleInputChange}
                 aria-label="Indicate if you have a disability"
               />
-              I have a disability and require accommodations
+              I require accessibility accommodations
             </label>
           </div>
           <button
@@ -173,11 +158,11 @@ const Register = () => {
             disabled={loading}
             aria-label="Register"
           >
-            {loading ? 'Registering...' : 'Register'}
+            {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
         <p className="auth-link">
-          Already have an account? <a href="/login">Login</a>
+          Already have an account? <a href="/login">Sign In</a>
         </p>
       </div>
     </section>

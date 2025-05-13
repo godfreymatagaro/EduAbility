@@ -15,7 +15,7 @@ import Resources from '../pages/Resources';
 import PlatformGuide from '../pages/PlatformGuide';
 import ApiReference from '../pages/ApiReference';
 import AssistiveTechDocs from '../pages/AssistiveTechDocs';
-
+import CompleteProfile from '../pages/CompleteProfile';
 
 const AppRoutes = () => {
   return (
@@ -33,6 +33,7 @@ const AppRoutes = () => {
       <Route path="/profile" element={<Profile />} />
       <Route path="/about" element={<About />} />
       <Route path="/resources" element={<Resources />} />
+      <Route path="/complete-profile" element={<CompleteProfile />} />
       <Route path="/docs/platform-guide" element={<PlatformGuide />} />
       <Route path="/docs/api-reference" element={<ApiReference />} />
       <Route path="/docs/assistive-tech" element={<AssistiveTechDocs />} />

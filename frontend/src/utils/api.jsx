@@ -8,7 +8,7 @@ const getBaseUrl = () => {
   const prodUrl = import.meta.env.VITE_API_PROD_BACKEND_URL; // https://eduability.onrender.com/
 
   // Use production or development URL, ensuring /api is appended
-  const baseUrl = isProduction ? `${prodUrl}` : `${devUrl}/api`;
+  const baseUrl = isProduction ? `${prodUrl}` : `${devUrl}`;
   return baseUrl;
 };
 

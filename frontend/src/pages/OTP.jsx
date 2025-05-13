@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import NotificationModal from './NotificationModal';
 import './Auth.css';
 
-// Environment-based API URL (same as SearchArea)
 const API_URL =
   import.meta.env.MODE === "production"
     ? import.meta.env.VITE_API_PROD_BACKEND_URL
@@ -11,23 +10,23 @@ const API_URL =
 
 const OTP = () => {
   const { userId } = useParams();
-  const [formData, setFormData] = useState({
-    email: '',
-    otp: '',
-  });
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setOtp(e.target.value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (otp.length !== 6 || !/^\d+$/.test(otp)) {
+      setNotification({ message: 'Please enter a valid 6-digit OTP', type: 'error' });
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch(`${API_URL}/auth/verify-otp`, {
@@ -35,7 +34,7 @@ const OTP = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData, userId }),
+        body: JSON.stringify({ userId, otp }),
       });
 
       const data = await response.json();
@@ -46,54 +45,58 @@ const OTP = () => {
 
       localStorage.setItem('token', data.token);
 
-      // Decode token to check role
       const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
-      const role = tokenPayload.role;
+      const { role, hasDisability, disabilityDetailsCompleted } = tokenPayload;
 
-      if (role === 'admin') {
-        navigate('/dashboard');
-      } else {
-        navigate('/profile');
-      }
-      toast.success('Login successful!');
+      setNotification({ message: 'Verification successful!', type: 'success' });
+
+      setTimeout(() => {
+        if (hasDisability && !disabilityDetailsCompleted) {
+          navigate('/complete-profile');
+        } else if (role === 'admin') {
+          navigate('/dashboard');
+        } else {
+          navigate('/profile');
+        }
+      }, 1000); // Delay to show notification
     } catch (err) {
-      toast.error(err.message || 'An unexpected error occurred');
+      setNotification({ message: err.message || 'An unexpected error occurred', type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
+  const closeNotification = () => {
+    setNotification(null);
+  };
+
   return (
-    <section className="auth-section">
+    <section className="auth-section" aria-labelledby="otp-title">
+      {notification && (
+        <NotificationModal
+          message={notification.message}
+          type={notification.type}
+          onClose={closeNotification}
+        />
+      )}
       <div className="auth-container">
-        <h1 className="auth-title">Verify OTP</h1>
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <h1 id="otp-title" className="auth-title">Verify Your Identity</h1>
+        <p className="auth-description">Enter the 6-digit OTP sent to your email to continue.</p>
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="form-group">
-            <label htmlFor="email">Email *</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Enter your email"
-              required
-              aria-required="true"
-              aria-label="Email address"
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="otp">OTP *</label>
+            <label htmlFor="otp">One-Time Password *</label>
             <input
               type="text"
               id="otp"
               name="otp"
-              value={formData.otp}
+              value={otp}
               onChange={handleInputChange}
-              placeholder="Enter the OTP"
+              placeholder="Enter 6-digit OTP"
               required
               aria-required="true"
               aria-label="One-time password"
+              maxLength="6"
+              autoComplete="one-time-code"
             />
           </div>
           <button
@@ -106,7 +109,7 @@ const OTP = () => {
           </button>
         </form>
         <p className="auth-link">
-          Back to <a href="/login">Login</a>
+          Didn’t receive an OTP? <a href="/login">Resend OTP</a>
         </p>
       </div>
     </section>

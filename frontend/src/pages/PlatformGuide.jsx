@@ -25,7 +25,7 @@ const PlatformGuide = () => {
 
           <h3>2.3 Submitting Feedback</h3>
           <ul>
-            <li><strong>Access the Form:</strong> Navigate to the "Feedback" section via the sidebar or dashboard quick link.</li>
+            <li><strong>Access the Form:</strong> Navigate to the "Feedback" section via the navbar quick link.</li>
             <li><strong>Fill Out Details:</strong> Select a technology, provide a rating (1-5), write a comment, and add optional tags (e.g., "accessibility, screen-reader").</li>
             <li><strong>Submission:</strong> Click "Submit Review" or press Enter on the button. You'll receive a confirmation message upon successful submission.</li>
           </ul>

@@ -83,10 +83,11 @@ const Login = () => {
         />
       )}
       <div className="auth-container">
-        <h1 id="login-title" className="auth-title">Welcome Back</h1>
+        <h1 id="login-title" className="auth-title">Sign In</h1>
+        <p className="auth-description">Welcome back! Sign in to your account</p>
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="form-group">
-            <label htmlFor="email">Email Address *</label>
+            <label htmlFor="email">Email Address</label>
             <input
               type="email"
               id="email"
@@ -101,7 +102,7 @@ const Login = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password *</label>
+            <label htmlFor="password">Password</label>
             <div className="password-wrapper">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -114,14 +115,15 @@ const Login = () => {
                 aria-required="true"
                 aria-label="Password"
                 autoComplete="current-password"
+                className="password-input"
               />
               <button
                 type="button"
-                className="password-toggle inside-input"
+                className="password-toggle"
                 onClick={togglePasswordVisibility}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                {showPassword ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
               </button>
             </div>
           </div>
@@ -131,11 +133,11 @@ const Login = () => {
             disabled={loading}
             aria-label="Login"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
         <p className="auth-link">
-          Don’t have an account? <a href="/register">Register</a>
+          Don’t have an account? <a href="/register">Sign Up</a>
         </p>
       </div>
     </section>

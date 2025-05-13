@@ -121,10 +121,10 @@ const Navbar = () => {
                     className="navbar-profile-link"
                   >
                     <img
-                      src={user.avatar ? `${finalAPI_URL}${user.avatar}` : 'https://via.placeholder.com/40'}
+                      src={user.avatar ? `${finalAPI_URL}${user.avatar}` : 'https://i.pinimg.com/736x/cd/4b/d9/cd4bd9b0ea2807611ba3a67c331bff0b.jpg'}
                       alt={`${truncateName(user.name)}'s profile photo`}
                       className="navbar-profile-photo"
-                      onError={(e) => (e.target.src = 'https://via.placeholder.com/40')}
+                      onError={(e) => (e.target.src = 'https://i.pinimg.com/736x/cd/4b/d9/cd4bd9b0ea2807611ba3a67c331bff0b.jpg')}
                     />
                     <span className="navbar-username">{truncateName(user.name)}</span>
                   </NavLink>
@@ -203,10 +203,10 @@ const Navbar = () => {
               className="navbar-mobile-profile-link"
             >
               <img
-                src={user.avatar ? `${finalAPI_URL}${user.avatar}` : 'https://via.placeholder.com/40'}
+                src={user.avatar ? `${finalAPI_URL}${user.avatar}` : 'https://i.pinimg.com/736x/cd/4b/d9/cd4bd9b0ea2807611ba3a67c331bff0b.jpg'}
                 alt={`${truncateName(user.name)}'s profile photo`}
                 className="navbar-mobile-profile-photo"
-                onError={(e) => (e.target.src = 'https://via.placeholder.com/40')}
+                onError={(e) => (e.target.src = 'https://i.pinimg.com/736x/cd/4b/d9/cd4bd9b0ea2807611ba3a67c331bff0b.jpg0')}
               />
               <span className="navbar-mobile-username">{truncateName(user.name)}</span>
             </NavLink>

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, BarChart2, Users, Shield, History, Mic, VolumeX } from 'lucide-react';
 import './SearchArea.css';
 
-// Environment-based API URL with fallback
+// Environment-based API URL with fallback-
 const API_URL =
   import.meta.env.MODE === "production"
     ? import.meta.env.VITE_API_PROD_BACKEND_URL

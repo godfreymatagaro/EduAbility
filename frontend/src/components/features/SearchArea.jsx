@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, BarChart2, Users, Shield, History, Mic } from 'lucide-react';
+import { Search, X, BarChart2, Users, Shield, History, Mic, VolumeX } from 'lucide-react';
 import './SearchArea.css';
 
 // Environment-based API URL
@@ -42,8 +42,9 @@ const SearchArea = () => {
   const [error, setError] = useState(null);
   const [speechStatus, setSpeechStatus] = useState('');
   const [listening, setListening] = useState(false);
+  const [isMuted, setIsMuted] = useState(false); // New state for mute
   const [voices, setVoices] = useState([]);
-  const [darkMode, setDarkMode] = useState(true); // Toggle via app theme context
+  const [darkMode, setDarkMode] = useState(true);
   const recognitionRef = useRef(null);
   const searchInputRef = useRef(null);
   const modalRef = useRef(null);
@@ -91,12 +92,12 @@ const SearchArea = () => {
       console.log('Transcript received:', transcript);
       setSearchTerm(transcript);
       setListening(false);
-      if (voices.length > 0) {
+      if (!isMuted && voices.length > 0) {
         const voice = voices.find(v => v.lang === 'en-US') || voices[0];
         const utterance = new SpeechSynthesisUtterance(`Searching for ${transcript}`);
         utterance.voice = voice;
         window.speechSynthesis.speak(utterance);
-      } else {
+      } else if (!isMuted) {
         setSpeechStatus('No voices available to confirm search.');
       }
     };
@@ -117,7 +118,7 @@ const SearchArea = () => {
         recognitionRef.current.stop();
       }
     };
-  }, [voices]);
+  }, [voices, isMuted]);
 
   // Auto-focus input on mount
   useEffect(() => {
@@ -162,7 +163,7 @@ const SearchArea = () => {
       .slice(0, 10);
   };
 
-  // Heuristic scoring for external results (Tavily) with improved bias toward disability-focused tools
+  // Heuristic scoring for external results
   const scoreExternalResults = (query, results) => {
     const normalizedQuery = query.toLowerCase();
     const queryTokens = normalizedQuery.split(/\s+/);
@@ -180,7 +181,6 @@ const SearchArea = () => {
       const title = item.title.toLowerCase();
       const content = item.content.toLowerCase();
 
-      // Base scoring
       if (title.includes(normalizedQuery)) score += 0.4;
       if (content.includes(normalizedQuery)) score += 0.3;
       const titleTokens = title.split(/\s+/);
@@ -188,12 +188,10 @@ const SearchArea = () => {
       if (titleTokens.some(word => queryTokens.includes(word))) score += 0.2;
       if (contentTokens.some(word => queryTokens.includes(word))) score += 0.15;
 
-      // Enhanced bonus for disability-related keywords and specific tools
       const disabilityMatchesInTitle = disabilityKeywords.filter(keyword => title.includes(keyword)).length;
       const disabilityMatchesInContent = disabilityKeywords.filter(keyword => content.includes(keyword)).length;
       score += (disabilityMatchesInTitle * 0.25) + (disabilityMatchesInContent * 0.15);
 
-      // Boost for mentions of any assistive technology
       const techMatches = disabilityKeywords.slice(10).filter(tech => title.includes(tech) || content.includes(tech));
       score += techMatches.length * 0.3;
 
@@ -231,11 +229,10 @@ const SearchArea = () => {
         setLiveResults(scoredResults);
         console.log('Scored database results:', scoredResults);
 
-        // Always fetch external results
         console.log('Fetching external results');
         await fetchExternalResults();
 
-        if (voices.length > 0) {
+        if (!isMuted && voices.length > 0) {
           const voice = voices.find(v => v.lang === 'en-US') || voices[0];
           const utterance = new SpeechSynthesisUtterance(
             scoredResults.length > 0
@@ -244,7 +241,7 @@ const SearchArea = () => {
           );
           utterance.voice = voice;
           window.speechSynthesis.speak(utterance);
-        } else {
+        } else if (!isMuted) {
           setSpeechStatus('No voices available to announce results.');
         }
       } catch (err) {
@@ -266,7 +263,6 @@ const SearchArea = () => {
         return;
       }
 
-      // Shortened query to fit within 400-character limit while maintaining relevance
       const refinedQuery = `${searchTerm} assistive technology OR accessibility tools OR screen reader OR braille OR speech-to-text`;
       console.log('Fetching external results from Tavily for refined query:', refinedQuery);
       console.log('Query length:', refinedQuery.length);
@@ -305,7 +301,7 @@ const SearchArea = () => {
         setExternalResults(scoredExternal);
         console.log('Scored external results:', scoredExternal);
 
-        if (voices.length > 0 && scoredExternal.length > 0) {
+        if (!isMuted && voices.length > 0 && scoredExternal.length > 0) {
           const voice = voices.find(v => v.lang === 'en-US') || voices[0];
           const utterance = new SpeechSynthesisUtterance(
             `Found ${scoredExternal.length} external results. Top external result: ${scoredExternal[0].title}`
@@ -321,7 +317,7 @@ const SearchArea = () => {
     };
 
     fetchDatabaseResults();
-  }, [searchTerm, voices]);
+  }, [searchTerm, voices, isMuted]);
 
   // Combine results for display
   const combinedResults = [...liveResults, ...externalResults]
@@ -384,20 +380,33 @@ const SearchArea = () => {
       recognitionRef.current.stop();
       setListening(false);
     }
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      setIsMuted(false);
+    }
     searchInputRef.current?.focus();
-    if (voices.length > 0) {
+    if (!isMuted && voices.length > 0) {
       const voice = voices.find(v => v.lang === 'en-US') || voices[0];
       const utterance = new SpeechSynthesisUtterance('Search cleared.');
       utterance.voice = voice;
       window.speechSynthesis.speak(utterance);
-    } else {
+    } else if (!isMuted) {
       setSpeechStatus('No voices available to confirm clear.');
     }
     console.log('Search cleared');
   };
 
-  // Toggle voice recognition
+  // Toggle voice recognition or mute speech
   const toggleVoiceRecognition = () => {
+    if (window.speechSynthesis.speaking) {
+      // Mute ongoing speech
+      window.speechSynthesis.cancel();
+      setIsMuted(true);
+      setSpeechStatus('Speech muted.');
+      console.log('Speech muted');
+      return;
+    }
+
     if (!recognitionRef.current) {
       setSpeechStatus('Speech recognition not supported in this browser.');
       console.log('Speech recognition not supported');
@@ -407,31 +416,28 @@ const SearchArea = () => {
     if (listening) {
       recognitionRef.current.stop();
       setListening(false);
-      if (voices.length > 0) {
+      if (!isMuted && voices.length > 0) {
         const voice = voices.find(v => v.lang === 'en-US') || voices[0];
         const utterance = new SpeechSynthesisUtterance('Voice input stopped.');
         utterance.voice = voice;
         window.speechSynthesis.speak(utterance);
-      } else {
+      } else if (!isMuted) {
         setSpeechStatus('No voices available to confirm stop.');
       }
       console.log('Voice input stopped');
-    } else if (!window.speechSynthesis.speaking) {
+    } else {
       recognitionRef.current.start();
       setListening(true);
       setIsModalOpen(true);
-      if (voices.length > 0) {
+      if (!isMuted && voices.length > 0) {
         const voice = voices.find(v => v.lang === 'en-US') || voices[0];
         const utterance = new SpeechSynthesisUtterance('Voice input started. Please speak your search query.');
         utterance.voice = voice;
         window.speechSynthesis.speak(utterance);
-      } else {
+      } else if (!isMuted) {
         setSpeechStatus('No voices available to confirm start.');
       }
       console.log('Voice input started');
-    } else {
-      setSpeechStatus('Please wait, system is currently speaking.');
-      console.log('Cannot start voice input, currently speaking');
     }
   };
 
@@ -443,13 +449,17 @@ const SearchArea = () => {
         recognitionRef.current.stop();
         setListening(false);
       }
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        setIsMuted(false);
+      }
       searchInputRef.current?.focus();
-      if (voices.length > 0) {
+      if (!isMuted && voices.length > 0) {
         const voice = voices.find(v => v.lang === 'en-US') || voices[0];
         const utterance = new SpeechSynthesisUtterance('Modal closed.');
         utterance.voice = voice;
         window.speechSynthesis.speak(utterance);
-      } else {
+      } else if (!isMuted) {
         setSpeechStatus('No voices available to confirm modal close.');
       }
       console.log('Modal closed via Escape');
@@ -464,12 +474,12 @@ const SearchArea = () => {
       setSearchHistory(updatedHistory);
       localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
       setIsModalOpen(false);
-      if (voices.length > 0) {
+      if (!isMuted && voices.length > 0) {
         const voice = voices.find(v => v.lang === 'en-US') || voices[0];
         const utterance = new SpeechSynthesisUtterance(`Selected recent search: ${item}`);
         utterance.voice = voice;
         window.speechSynthesis.speak(utterance);
-      } else {
+      } else if (!isMuted) {
         setSpeechStatus('No voices available for selection confirmation.');
       }
       console.log('Selected history item:', item);
@@ -480,29 +490,28 @@ const SearchArea = () => {
       localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
       setIsModalOpen(false);
       navigate(`/tech-details/${item._id}`);
-      if (voices.length > 0) {
+      if (!isMuted && voices.length > 0) {
         const voice = voices.find(v => v.lang === 'en-US') || voices[0];
         const utterance = new SpeechSynthesisUtterance(`Selected ${item.name}. Navigating to details.`);
         utterance.voice = voice;
         window.speechSynthesis.speak(utterance);
-      } else {
+      } else if (!isMuted) {
         setSpeechStatus('No voices available for navigation confirmation.');
       }
       console.log('Selected database result:', item.name);
     } else {
-      // External result: Open in new tab
       window.open(item.url, '_blank', 'noopener,noreferrer');
       const updatedHistory = [item.title, ...searchHistory.filter(term => term !== item.title)].slice(0, 5);
       setSearchTerm(item.title);
       setSearchHistory(updatedHistory);
       localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
       setIsModalOpen(false);
-      if (voices.length > 0) {
+      if (!isMuted && voices.length > 0) {
         const voice = voices.find(v => v.lang === 'en-US') || voices[0];
         const utterance = new SpeechSynthesisUtterance(`Opening external result: ${item.title}`);
         utterance.voice = voice;
         window.speechSynthesis.speak(utterance);
-      } else {
+      } else if (!isMuted) {
         setSpeechStatus('No voices available for external navigation confirmation.');
       }
       console.log('Selected external result:', item.title);
@@ -510,6 +519,10 @@ const SearchArea = () => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       setListening(false);
+    }
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      setIsMuted(false);
     }
     searchInputRef.current?.focus();
   };
@@ -569,7 +582,7 @@ const SearchArea = () => {
                 aria-controls="search-modal"
               />
               <span id="search-instructions" className="visually-hidden">
-                Type or use voice to search assistive technologies. Press Enter to submit. Use arrow keys to navigate results. Press microphone button to start voice input.
+                Type or use voice to search assistive technologies. Press Enter to submit. Use arrow keys to navigate results. Press microphone button to start voice input or mute speech.
               </span>
               <div className="search-buttons">
                 {searchTerm && (
@@ -579,12 +592,17 @@ const SearchArea = () => {
                 )}
                 <button
                   onClick={toggleVoiceRecognition}
-                  className={`voice-button ${listening ? 'listening' : ''} ${window.speechSynthesis.speaking ? 'speaking' : ''}`}
-                  aria-label={listening ? 'Stop voice input' : window.speechSynthesis.speaking ? 'Voice input paused while speaking' : 'Start voice input'}
-                  aria-pressed={listening}
-                  disabled={window.speechSynthesis.speaking}
+                  className={`voice-button ${listening ? 'listening' : ''} ${window.speechSynthesis.speaking ? 'speaking' : ''} ${isMuted ? 'muted' : ''}`}
+                  aria-label={
+                    isMuted ? 'Unmute speech' :
+                    listening ? 'Stop voice input' :
+                    window.speechSynthesis.speaking ? 'Mute speech' :
+                    'Start voice input'
+                  }
+                  aria-pressed={listening || isMuted}
+                  disabled={false} // Always enabled to allow muting
                 >
-                  <Mic />
+                  {isMuted ? <VolumeX /> : <Mic />}
                 </button>
               </div>
             </div>
@@ -666,9 +684,9 @@ const SearchArea = () => {
             </AnimatePresence>
           </motion.div>
 
-          <motion.div className="search-cards" initial="hidden" animate="visible" variants={cardContainerVariants}>
+          <motion.div className="search-area-cards" initial="hidden" animate="visible" variants={cardContainerVariants}>
             <motion.div
-              className="search-card"
+              className="search-area-card"
               variants={cardVariants}
               whileHover="hover"
               tabIndex={0}
@@ -679,7 +697,7 @@ const SearchArea = () => {
               <p>Make informed decisions with comprehensive analytics and evaluation metrics.</p>
             </motion.div>
             <motion.div
-              className="search-card"
+              className="search-area-card"
               variants={cardVariants}
               whileHover="hover"
               tabIndex={0}
@@ -690,7 +708,7 @@ const SearchArea = () => {
               <p>Join a network of educators committed to accessible education for all students.</p>
             </motion.div>
             <motion.div
-              className="search-card"
+              className="search-area-card"
               variants={cardVariants}
               whileHover="hover"
               tabIndex={0}

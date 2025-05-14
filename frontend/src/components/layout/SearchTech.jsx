@@ -491,18 +491,25 @@ const SearchTech = () => {
       }
       console.log('Voice input stopped');
     } else {
-      recognitionRef.current.start();
-      setListening(true);
       setIsSearchModalOpen(true);
       if (!isMuted && voices.length > 0) {
+        setSpeechStatus('Preparing to listen...');
         const voice = voices.find(v => v.lang === 'en-US') || voices[0];
         const utterance = new SpeechSynthesisUtterance('Voice input started. Please speak your search query.');
         utterance.voice = voice;
+        utterance.onend = () => {
+          recognitionRef.current.start();
+          setListening(true);
+          setSpeechStatus('Listening for your query...');
+          console.log('Speech recognition started');
+        };
         window.speechSynthesis.speak(utterance);
-      } else if (!isMuted) {
-        setSpeechStatus('No voices available to confirm start.');
+      } else {
+        recognitionRef.current.start();
+        setListening(true);
+        setSpeechStatus('Listening for your query...');
+        console.log('Speech recognition started (no voices available)');
       }
-      console.log('Voice input started');
     }
   };
 

@@ -153,7 +153,7 @@ const SearchArea = () => {
         score += (easeOfUse / 5) * 0.1;
         score += (featuresRating / 5) * 0.1;
         const tags = [item.category.toLowerCase(), ...keyFeatures];
-        const tagMatches = tags.filter(tag => queryTokens.some(token => tag.includes(token)));
+        const tagMatches = tags.filter(tag => queryTokens.some(tag => queryTokens.includes(token)));
         score += tagMatches.length * 0.05;
         return { ...item, score, source: 'database' };
       })
@@ -441,18 +441,25 @@ const SearchArea = () => {
       }
       console.log('Voice input stopped');
     } else {
-      recognitionRef.current.start();
-      setListening(true);
       setIsModalOpen(true);
       if (!isMuted && voices.length > 0) {
+        setSpeechStatus('Preparing to listen...');
         const voice = voices.find(v => v.lang === 'en-US') || voices[0];
         const utterance = new SpeechSynthesisUtterance('Voice input started. Please speak your search query.');
         utterance.voice = voice;
+        utterance.onend = () => {
+          recognitionRef.current.start();
+          setListening(true);
+          setSpeechStatus('Listening for your query...');
+          console.log('Speech recognition started');
+        };
         window.speechSynthesis.speak(utterance);
-      } else if (!isMuted) {
-        setSpeechStatus('No voices available to confirm start.');
+      } else {
+        recognitionRef.current.start();
+        setListening(true);
+        setSpeechStatus('Listening for your query...');
+        console.log('Speech recognition started (no voices available)');
       }
-      console.log('Voice input started');
     }
   };
 
@@ -677,7 +684,7 @@ const SearchArea = () => {
                       <h3>
                         <History className="history-icon" aria-hidden="true" /> Recent Searches
                       </h3>
-                      {searchHistory.length === 0 && <p>No recent searches.</p>}
+                      {searchHistory.length == 0 && <p>No recent searches.</p>}
                       {searchHistory.map((term, index) => (
                         <div
                           key={index}

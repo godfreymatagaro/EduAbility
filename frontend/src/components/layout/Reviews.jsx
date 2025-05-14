@@ -14,7 +14,6 @@ const Reviews = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [darkMode, setDarkMode] = useState(true); // Toggle via app theme context
   const REVIEWS_PER_SET = 3; // Number of reviews to display at once
 
   useEffect(() => {
@@ -76,7 +75,7 @@ const Reviews = () => {
   const currentReviews = reviews.slice(currentIndex, currentIndex + REVIEWS_PER_SET);
 
   return (
-    <section className={`reviews-section ${darkMode ? 'dark' : ''}`} aria-label="Recent Technology Reviews" role="region">
+    <section className="reviews-section" aria-label="Recent Technology Reviews" role="region">
       <h2 className="reviews-title">Recent Technology Reviews</h2>
       {error && <p className="error-message" role="alert">{error}</p>}
       {loading ? (

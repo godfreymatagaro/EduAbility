@@ -1,14 +1,17 @@
+
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, BarChart2, Users, Shield, History, Mic, VolumeX } from 'lucide-react';
 import './SearchArea.css';
 
-// Environment-based API URL
+// Environment-based API URL with fallback
 const API_URL =
   import.meta.env.MODE === "production"
     ? import.meta.env.VITE_API_PROD_BACKEND_URL
     : import.meta.env.VITE_API_DEV_BACKEND_URL;
+
+const finalAPI_URL = API_URL || (import.meta.env.MODE === "production" ? "https://eduability.onrender.com" : "http://localhost:3000");
 
 // Tavily Search API URL and Key
 const TAVILY_API_URL = 'https://api.tavily.com/search';
@@ -141,19 +144,19 @@ const SearchArea = () => {
     return dataset
       .map(item => {
         let score = 0;
-        if (item.name.toLowerCase().includes(normalizedQuery)) score += 0.4;
-        else if (item.name.toLowerCase().split(/\s+/).some(word => queryTokens.includes(word))) score += 0.2;
-        if (item.category.toLowerCase().includes(normalizedQuery)) score += 0.3;
-        const keyFeatures = item.keyFeatures.toLowerCase().split(', ');
+        if (item.name?.toLowerCase().includes(normalizedQuery)) score += 0.4;
+        else if (item.name?.toLowerCase().split(/\s+/).some(word => queryTokens.includes(word))) score += 0.2;
+        if (item.category?.toLowerCase().includes(normalizedQuery)) score += 0.3;
+        const keyFeatures = item.keyFeatures ? item.keyFeatures.toLowerCase().split(', ') : [];
         const featureMatches = keyFeatures.filter(feature => queryTokens.some(token => feature.includes(token)));
         score += featureMatches.length * 0.1;
-        if (item.description.toLowerCase().includes(normalizedQuery)) score += 0.15;
+        if (item.description?.toLowerCase().includes(normalizedQuery)) score += 0.15;
         const easeOfUse = parseFloat(item.coreVitals?.easeOfUse) || 0;
         const featuresRating = parseFloat(item.coreVitals?.featuresRating) || 0;
         score += (easeOfUse / 5) * 0.1;
         score += (featuresRating / 5) * 0.1;
-        const tags = [item.category.toLowerCase(), ...keyFeatures];
-        const tagMatches = tags.filter(tag => queryTokens.some(tag => queryTokens.includes(token)));
+        const tags = [item.category?.toLowerCase(), ...keyFeatures].filter(Boolean);
+        const tagMatches = tags.filter(tag => queryTokens.some(token => tag.includes(token)));
         score += tagMatches.length * 0.05;
         return { ...item, score, source: 'database' };
       })
@@ -214,9 +217,9 @@ const SearchArea = () => {
 
       setLoading(true);
       setError(null);
-      console.log('Fetching database results for:', searchTerm, 'API_URL:', API_URL);
+      console.log('Fetching database results for:', searchTerm, 'API_URL:', finalAPI_URL);
       try {
-        const response = await fetch(`${API_URL}/api/technologies/search?q=${encodeURIComponent(searchTerm)}`);
+        const response = await fetch(`${finalAPI_URL}/api/technologies/search?q=${encodeURIComponent(searchTerm)}`);
         console.log('Database API response status:', response.status);
         if (!response.ok) {
           throw new Error(`Failed to fetch database results: ${response.status} ${response.statusText}`);
@@ -684,7 +687,7 @@ const SearchArea = () => {
                       <h3>
                         <History className="history-icon" aria-hidden="true" /> Recent Searches
                       </h3>
-                      {searchHistory.length == 0 && <p>No recent searches.</p>}
+                      {searchHistory.length === 0 && <p>No recent searches.</p>}
                       {searchHistory.map((term, index) => (
                         <div
                           key={index}

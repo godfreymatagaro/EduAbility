@@ -56,7 +56,7 @@
   display: none;
   gap: 1.5rem;
   align-items: center;
-  font-size: 1rem; /* Increased for readability */
+  font-size: 1rem;
   font-weight: 500;
 }
 
@@ -69,7 +69,7 @@
 .navbar-links a {
   color: #1e293b;
   text-decoration: none;
-  padding: 0.75rem 0; /* Larger tap target */
+  padding: 0.75rem 0;
   position: relative;
   transition: color 0.2s ease, transform 0.2s ease;
 }
@@ -118,7 +118,7 @@
   color: #1e293b;
   text-decoration: none;
   font-weight: 500;
-  padding: 0.75rem; /* Larger tap target */
+  padding: 0.75rem;
   transition: color 0.2s ease, transform 0.2s ease;
 }
 
@@ -158,57 +158,62 @@
 }
 
 .navbar-username {
-  font-size: 1rem; /* Increased for readability */
+  font-size: 1rem;
   font-weight: 500;
 }
 
 .navbar-signup-button {
-  background-color: #1d4ed8;
+  background: linear-gradient(135deg, #1d4ed8 0%, #60a5fa 100%);
   color: #ffffff;
-  padding: 0.75rem 1.25rem; /* Larger tap target */
-  border-radius: 0.25rem;
+  width: 80px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
   text-decoration: none;
-  font-size: 1rem; /* Increased for readability */
-  font-weight: 500;
-  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  min-height: 44px; /* WCAG touch target */
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 :where(.dark) .navbar-signup-button {
-  background-color: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 0%, #93c5fd 100%);
 }
 
 .navbar-signup-button:hover {
-  background-color: #1e40af;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 :where(.dark) .navbar-signup-button:hover {
-  background-color: #93c5fd;
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
 }
 
 .navbar-signup-button:focus {
   outline: 2px solid #1d4ed8;
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.2);
+  box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.3);
 }
 
 :where(.dark) .navbar-signup-button:focus {
-  outline-color: #3b82f6;
+  outline-color: #60a5fa;
 }
 
 .navbar-logout-button {
   background-color: #dc2626;
   color: #ffffff;
-  padding: 0.75rem 1.25rem; /* Larger tap target */
+  padding: 0.75rem 1.25rem;
   border: none;
   border-radius: 0.25rem;
-  font-size: 1rem; /* Increased for readability */
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  min-height: 44px; /* WCAG touch target */
+  min-height: 44px;
 }
 
 :where(.dark) .navbar-logout-button {
@@ -244,15 +249,15 @@
 .navbar-theme-toggle-center,
 .navbar-menu-button {
   position: relative;
-  padding: 0.75rem; /* Larger tap target */
+  padding: 0.75rem;
   border-radius: 0.25rem;
   color: #1e293b;
   background: none;
   border: none;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-  min-width: 44px; /* WCAG touch target */
-  min-height: 44px; /* WCAG touch target */
+  min-width: 44px;
+  min-height: 44px;
 }
 
 :where(.dark) .navbar-theme-toggle,
@@ -291,7 +296,7 @@
 .navbar-theme-toggle svg,
 .navbar-theme-toggle-center svg,
 .navbar-menu-button svg {
-  width: 1.5rem; /* Larger icons */
+  width: 1.5rem;
   height: 1.5rem;
 }
 
@@ -357,10 +362,10 @@
 .navbar-mobile-menu a {
   color: #1e293b;
   text-decoration: none;
-  font-size: 1.75rem; /* Increased for readability */
+  font-size: 1.75rem;
   font-weight: 500;
   margin: 1.25rem 0;
-  padding: 0.75rem; /* Larger tap target */
+  padding: 0.75rem;
   transition: color 0.2s ease, transform 0.2s ease;
 }
 
@@ -406,10 +411,10 @@
   gap: 0.75rem;
   color: #1e293b;
   text-decoration: none;
-  font-size: 1.75rem; /* Increased for readability */
+  font-size: 1.75rem;
   font-weight: 500;
   margin: 1.25rem 0;
-  padding: 0.75rem; /* Larger tap target */
+  padding: 0.75rem;
   transition: color 0.2s ease, transform 0.2s ease;
 }
 
@@ -449,45 +454,50 @@
 }
 
 .navbar-mobile-username {
-  font-size: 1.75rem; /* Increased for readability */
+  font-size: 1.75rem;
   font-weight: 500;
 }
 
 .navbar-mobile-signup-button {
-  background-color: #1d4ed8;
+  background: linear-gradient(135deg, #1d4ed8 0%, #60a5fa 100%);
   color: #ffffff;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem;
+  width: 80px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
   text-decoration: none;
-  font-size: 1.5rem; /* Increased for readability */
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   margin: 1.25rem 0;
-  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  min-height: 48px; /* WCAG touch target */
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 :where(.dark) .navbar-mobile-signup-button {
-  background-color: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 0%, #93c5fd 100%);
 }
 
 .navbar-mobile-signup-button:hover {
-  background-color: #1e40af;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 :where(.dark) .navbar-mobile-signup-button:hover {
-  background-color: #93c5fd;
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
 }
 
 .navbar-mobile-signup-button:focus {
   outline: 2px solid #1d4ed8;
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.2);
+  box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.3);
 }
 
 :where(.dark) .navbar-mobile-signup-button:focus {
-  outline-color: #3b82f6;
+  outline-color: #60a5fa;
 }
 
 .navbar-mobile-logout-button {
@@ -496,12 +506,12 @@
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 0.25rem;
-  font-size: 1.5rem; /* Increased for readability */
+  font-size: 1.5rem;
   font-weight: 500;
   margin: 1.25rem 0;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  min-height: 48px; /* WCAG touch target */
+  min-height: 48px;
 }
 
 :where(.dark) .navbar-mobile-logout-button {
@@ -532,15 +542,15 @@
   position: fixed;
   top: 1rem;
   right: 1rem;
-  padding: 0.75rem; /* Larger tap target */
+  padding: 0.75rem;
   border-radius: 0.25rem;
   background: none;
   border: none;
   color: #1e293b;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-  min-width: 44px; /* WCAG touch target */
-  min-height: 44px; /* WCAG touch target */
+  min-width: 44px;
+  min-height: 44px;
 }
 
 :where(.dark) .navbar-mobile-menu-close {
@@ -567,7 +577,7 @@
 }
 
 .navbar-mobile-menu-close svg {
-  width: 1.75rem; /* Larger icon */
+  width: 1.75rem;
   height: 1.75rem;
 }
 
@@ -585,7 +595,7 @@
   }
 
   .navbar-theme-toggle-center {
-    display: none; /* Hide centered toggle on mobile */
+    display: none;
   }
 
   .navbar-menu-button {

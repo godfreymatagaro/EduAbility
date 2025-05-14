@@ -42,9 +42,8 @@ const SearchArea = () => {
   const [error, setError] = useState(null);
   const [speechStatus, setSpeechStatus] = useState('');
   const [listening, setListening] = useState(false);
-  const [isMuted, setIsMuted] = useState(false); // New state for mute
+  const [isMuted, setIsMuted] = useState(false);
   const [voices, setVoices] = useState([]);
-  const [darkMode, setDarkMode] = useState(true);
   const recognitionRef = useRef(null);
   const searchInputRef = useRef(null);
   const modalRef = useRef(null);
@@ -396,7 +395,7 @@ const SearchArea = () => {
     console.log('Search cleared');
   };
 
-  // Toggle voice recognition or mute speech
+  // Toggle voice recognition, mute, or unmute speech
   const toggleVoiceRecognition = () => {
     if (window.speechSynthesis.speaking) {
       // Mute ongoing speech
@@ -404,6 +403,22 @@ const SearchArea = () => {
       setIsMuted(true);
       setSpeechStatus('Speech muted.');
       console.log('Speech muted');
+      return;
+    }
+
+    if (isMuted && !listening) {
+      // Unmute speech
+      setIsMuted(false);
+      setSpeechStatus('Speech unmuted.');
+      console.log('Speech unmuted');
+      if (voices.length > 0) {
+        const voice = voices.find(v => v.lang === 'en-US') || voices[0];
+        const utterance = new SpeechSynthesisUtterance('Speech unmuted.');
+        utterance.voice = voice;
+        window.speechSynthesis.speak(utterance);
+      } else {
+        setSpeechStatus('No voices available to confirm unmute.');
+      }
       return;
     }
 
@@ -547,13 +562,13 @@ const SearchArea = () => {
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut', type: 'spring', stiffness: 100 } },
-    hover: { scale: 1.05, boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.15)', transition: { duration: 0.3, ease: 'easeOut' } },
+    hover: { scale: 1.02, transition: { duration: 0.3, ease: 'easeOut' } },
   };
 
   return (
     <ErrorBoundary>
-      <section className={`search-section ${darkMode ? 'dark' : ''}`}>
-        <div className="search-container">
+      <section className="search-area-section">
+        <div className="search-area-container">
           <motion.div className="search-bar-wrapper" initial="hidden" animate="visible" variants={searchBarVariants}>
             <div className="search-bar" role="search">
               <Search className="search-icon" aria-hidden="true" />
@@ -582,7 +597,7 @@ const SearchArea = () => {
                 aria-controls="search-modal"
               />
               <span id="search-instructions" className="visually-hidden">
-                Type or use voice to search assistive technologies. Press Enter to submit. Use arrow keys to navigate results. Press microphone button to start voice input or mute speech.
+                Type or use voice to search assistive technologies. Press Enter to submit or use arrow keys to navigate results. Press microphone button to start voice input, mute, or unmute speech.
               </span>
               <div className="search-buttons">
                 {searchTerm && (
@@ -600,7 +615,7 @@ const SearchArea = () => {
                     'Start voice input'
                   }
                   aria-pressed={listening || isMuted}
-                  disabled={false} // Always enabled to allow muting
+                  disabled={false}
                 >
                   {isMuted ? <VolumeX /> : <Mic />}
                 </button>
